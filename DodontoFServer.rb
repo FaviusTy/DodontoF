@@ -424,13 +424,13 @@ class DodontoFServer
     removed_ids = removed.collect { |i| i['imgId'] }
 
     real_savefile_name = @savedir_info.getTrueSaveFileName($record)
-    change_save_data(real_savefile_name) do |save_data|
+    change_save_data(real_savefile_name) do |_save_data|
       if @is_record_empty
-        clear_record(save_data)
+        clear_record(_save_data)
       else
-        write_record(save_data, 'removeCharacter', removed_ids)
-        write_record(save_data, 'addCharacter', added)
-        write_record(save_data, 'changeCharacter', changed)
+        write_record(_save_data, 'removeCharacter', removed_ids)
+        write_record(_save_data, 'addCharacter', added)
+        write_record(_save_data, 'changeCharacter', changed)
       end
     end
     logging("saveCharacterHistory end")

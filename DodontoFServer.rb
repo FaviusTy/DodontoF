@@ -257,7 +257,7 @@ class DodontoFServer
 
     #後の操作順序に依存せずRecord情報が取得できるよう、ここでRecordをキャッシュしておく。
     #こうしないとRecordを取得する順序でセーブデータと整合性が崩れる場合があるため
-    record_by_cache
+    record_caching
 
     save_data = record_by_cache()
     logging(save_data, "getRecordSaveDataFromCash saveData")
@@ -339,7 +339,7 @@ class DodontoFServer
   def last_record_index_by_cache
     record_index = 0
 
-    record = record_by_cache
+    record = record_caching
 
     last = record.last
     unless last.nil?
@@ -351,7 +351,7 @@ class DodontoFServer
     record_index
   end
 
-  def record_by_cache
+  def record_caching
     unless @record.nil?
       return @record
     end

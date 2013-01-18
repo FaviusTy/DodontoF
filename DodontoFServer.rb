@@ -1,5 +1,5 @@
 #!/usr/local/bin/ruby -Ku
-#--*-coding:utf-8-*--
+# encoding: utf-8
 $LOAD_PATH << File.dirname(__FILE__) + "/src_ruby"
 $LOAD_PATH << File.dirname(__FILE__) + "/src_bcdice"
 

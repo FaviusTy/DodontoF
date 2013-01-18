@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mx:Application
    xmlns:mx="http://www.adobe.com/2006/mxml"
+   xmlns:s="library://ns.adobe.com/flex/spark"
    xmlns:torgtaitai="*"
    pageTitle="どどんとふ"
    applicationComplete="setup()"
@@ -398,6 +399,9 @@
             if( ! CharacterWaitingRoomWindow.isOpened() ) {
                 popup(CharacterWaitingRoomWindow, true);
             }
+        } else if( menuName == "isRotateMarkerVisible" ) {
+            var isRotateMarkerVisible:Boolean = toggled;
+            Rotater.setGlobalVisible( isRotateMarkerVisible );
         } else if( menuName == "clearCards" ) {
             dodontoF_Main.clearCards();
         } else if( menuName == "isCardPickUpVisible" ) {

@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+
+<!--
+
+	ADOBE SYSTEMS INCORPORATED
+	Copyright 2005-2007 Adobe Systems Incorporated
+	All Rights Reserved.
+
+	NOTICE: Adobe permits you to use, modify, and distribute this file
+	in accordance with the terms of the license agreement accompanying it.
+
+-->
+
+<flex-config>
+    <!-- Specifies the minimum player version that will run the compiled SWF. -->
+    <!-- 9.0.124 is the April 2008 security release -->
+    <target-player>10.0.12</target-player>
+    
+   <compiler>
+     
+      <define>
+		  <name>TEST::isTest</name>
+		  <value>false</value>
+      </define>
+	  <define>
+		  <name>COMPILE::isGaeRuby</name>
+		  <value>false</value>
+	  </define>
+	  <define>
+		  <name>COMPILE::isGaeJava</name>
+		  <value>false</value>
+	  </define>
+	  <define>
+		  <name>COMPILE::isReplayer</name>
+		  <value>false</value>
+	  </define>
+	  <define>
+		  <name>COMPILE::isAir</name>
+		  <value>false</value>
+	  </define>
+	  <define>
+		  <name>COMPILE::isMySql</name>
+		  <value>false</value>
+	  </define>
+
+
+      <!-- List of path elements that form the roots of ActionScript class hierarchies. -->
+      <!-- not set -->
+      <!--
+      <source-path>
+         <path-element>string</path-element>
+      </source-path>
+      -->
+
+      <include-libraries>
+         <library>./corelib/bin/corelib.swc</library>
+      </include-libraries>
+
+      <!-- List of CSS or SWC files to apply as a theme. -->
+	  <theme>
+		  <filename>./themes/Halo/halo.swc</filename>
+	  </theme>
+
+   </compiler>
+
+</flex-config>

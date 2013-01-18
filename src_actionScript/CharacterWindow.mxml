@@ -15,7 +15,7 @@
            paddingTop="0" paddingBottom="0" 
            verticalGap="0" horizontalGap="0" 
            >
-    <mx:Button id="imageListExtendButon" label="画像切替設定" height="15" paddingLeft="2" paddingRight="2" fontWeight="nomal" click="extendImageList()" />
+    <mx:Button id="imageListExtendButon" label="画像切替設定" height="15" paddingLeft="2" paddingRight="2" fontWeight="normal" click="extendImageList()" />
     <mx:HBox id="imageListExtendSpace"
              paddingTop="0" paddingBottom="0" 
              width="0" height="0" enabled="false" visible="false">

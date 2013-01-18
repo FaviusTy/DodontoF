@@ -1121,6 +1121,7 @@ package {
             
             var bytes:ByteArray = Utils.getMessagePack(params);
             request.data = bytes;
+			request.contentType = "application/x-msgpack"; //2013-01-07 FIXED BY Favi:　messapge-packの利用に伴い、適切なContent-typeを指定　
             
             return request;
         }

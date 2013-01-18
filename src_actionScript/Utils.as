@@ -23,6 +23,7 @@ package {
     import mx.core.UIComponent;
     import mx.styles.CSSStyleDeclaration;
     import mx.styles.StyleManager;
+	import mx.styles.IStyleManager2;
     import mx.utils.URLUtil;
     import mx.controls.SWFLoader;
     import flash.system.Capabilities;
@@ -508,8 +509,8 @@ package {
         }
         
         static public function setToolTipStyle(fontSize:int, maxWidth:int):void {
-            var toolTipStyle:CSSStyleDeclaration = StyleManager.getStyleDeclaration("ToolTip");
-            //var toolTipStyle:CSSStyleDeclaration = StyleManager.getStyleManager(null).getStyleDeclaration("ToolTip");
+            //var toolTipStyle:CSSStyleDeclaration = StyleManager.getStyleDeclaration("ToolTip");
+            var toolTipStyle:CSSStyleDeclaration = StyleManager.getStyleManager(null).getStyleDeclaration("mx.controls.ToolTip");
             
             toolTipStyle.setStyle("fontSize", fontSize);
             /*

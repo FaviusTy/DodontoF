@@ -367,7 +367,7 @@ class DodontoFServer
     text_data = ""
     lockfile.lock do
       @last_update_times[type_name] = getSaveFileTimeStampMillSecond(file_name)
-      text_data = getSaveTextOnFileLocked(file_name)
+      text_data = extract_safed_file_text(file_name)
     end
 
     parse_json(text_data)
@@ -378,7 +378,7 @@ class DodontoFServer
 
     text_data = nil
     lockfile.lock do
-      text_data = getSaveTextOnFileLocked(savefile_name)
+      text_data = extract_safed_file_text(savefile_name)
     end
 
     save_data = parse_json(text_data)
@@ -392,7 +392,7 @@ class DodontoFServer
     lockfile = savefile_lock(savefile_name)
 
     lockfile.lock do
-      text_data = getSaveTextOnFileLocked(savefile_name)
+      text_data = extract_safed_file_text(savefile_name)
       save_data = parse_json(text_data)
 
       if character_data
@@ -648,7 +648,7 @@ class DodontoFServer
 
     if is_webif_msgpack(parsed_data)
       logging(data, "data is webif.")
-      parsed_data = parseWebIfMessageData(data)
+      parsed_data = reform_webif_data(data)
     end
 
     logging(parsed_data, "getMessagePackFromData End messagePack")
@@ -667,26 +667,26 @@ class DodontoFServer
     return false
   end
 
-  def self.parseWebIfMessageData(data)
+  def self.reform_webif_data(data)
     params = CGI.parse(data)
     logging(params, "params")
 
-    messagePack = {}
+    reformed_data = {}
     params.each do |key, value|
-      messagePack[key] = value.first
+      reformed_data[key] = value.first
     end
 
-    return messagePack
+    return reformed_data
   end
 
   #override
-  def getSaveTextOnFileLocked(fileName)
+  def extract_safed_file_text(savefile_name)
     empty = "{}"
 
-    return empty unless (exist?(fileName))
+    return empty unless (exist?(savefile_name))
 
     text = ''
-    open(fileName, 'r') do |file|
+    open(savefile_name, 'r') do |file|
       text = file.read
     end
 
@@ -695,130 +695,130 @@ class DodontoFServer
     text
   end
 
-  def analyzeCommand
-    commandName = request_data('cmd')
+  def analyze_command
+    current_command = request_data('cmd')
 
-    logging(commandName, "commandName")
+    logging(current_command, "commandName")
 
-    if commandName.nil? or commandName.empty?
-      return getResponseTextWhenNoCommandName
+    if current_command.nil? or current_command.empty?
+      return response_for_none_command
     end
 
-    hasReturn = "hasReturn"
-    hasNoReturn = "hasNoReturn"
+    has_return = "hasReturn"
+    no_return = "hasNoReturn"
 
     commands = [
-        ['refresh', hasReturn],
+        ['refresh', has_return],
 
-        ['getGraveyardCharacterData', hasReturn],
-        ['resurrectCharacter', hasReturn],
-        ['clearGraveyard', hasReturn],
-        ['getLoginInfo', hasReturn],
-        ['getPlayRoomStates', hasReturn],
-        ['getPlayRoomStatesByCount', hasReturn],
-        ['deleteImage', hasReturn],
-        ['uploadImageUrl', hasReturn],
-        ['save', hasReturn],
-        ['saveMap', hasReturn],
-        ['saveScenario', hasReturn],
-        ['load', hasReturn],
-        ['loadScenario', hasReturn],
-        ['getDiceBotInfos', hasReturn],
-        ['getBotTableInfos', hasReturn],
-        ['addBotTable', hasReturn],
-        ['changeBotTable', hasReturn],
-        ['removeBotTable', hasReturn],
-        ['requestReplayDataList', hasReturn],
-        ['uploadReplayData', hasReturn],
-        ['removeReplayData', hasReturn],
-        ['checkRoomStatus', hasReturn],
-        ['loginPassword', hasReturn],
-        ['uploadFile', hasReturn],
-        ['uploadImageData', hasReturn],
-        ['createPlayRoom', hasReturn],
-        ['changePlayRoom', hasReturn],
-        ['removePlayRoom', hasReturn],
-        ['removeOldPlayRoom', hasReturn],
-        ['getImageTagsAndImageList', hasReturn],
-        ['addCharacter', hasReturn],
-        ['getWaitingRoomInfo', hasReturn],
-        ['exitWaitingRoomCharacter', hasReturn],
-        ['enterWaitingRoomCharacter', hasReturn],
-        ['sendDiceBotChatMessage', hasReturn],
-        ['deleteChatLog', hasReturn],
-        ['sendChatMessageAll', hasReturn],
-        ['undoDrawOnMap', hasReturn],
+        ['getGraveyardCharacterData', has_return],
+        ['resurrectCharacter', has_return],
+        ['clearGraveyard', has_return],
+        ['getLoginInfo', has_return],
+        ['getPlayRoomStates', has_return],
+        ['getPlayRoomStatesByCount', has_return],
+        ['deleteImage', has_return],
+        ['uploadImageUrl', has_return],
+        ['save', has_return],
+        ['saveMap', has_return],
+        ['saveScenario', has_return],
+        ['load', has_return],
+        ['loadScenario', has_return],
+        ['getDiceBotInfos', has_return],
+        ['getBotTableInfos', has_return],
+        ['addBotTable', has_return],
+        ['changeBotTable', has_return],
+        ['removeBotTable', has_return],
+        ['requestReplayDataList', has_return],
+        ['uploadReplayData', has_return],
+        ['removeReplayData', has_return],
+        ['checkRoomStatus', has_return],
+        ['loginPassword', has_return],
+        ['uploadFile', has_return],
+        ['uploadImageData', has_return],
+        ['createPlayRoom', has_return],
+        ['changePlayRoom', has_return],
+        ['removePlayRoom', has_return],
+        ['removeOldPlayRoom', has_return],
+        ['getImageTagsAndImageList', has_return],
+        ['addCharacter', has_return],
+        ['getWaitingRoomInfo', has_return],
+        ['exitWaitingRoomCharacter', has_return],
+        ['enterWaitingRoomCharacter', has_return],
+        ['sendDiceBotChatMessage', has_return],
+        ['deleteChatLog', has_return],
+        ['sendChatMessageAll', has_return],
+        ['undoDrawOnMap', has_return],
 
-        ['logout', hasNoReturn],
-        ['changeCharacter', hasNoReturn],
-        ['removeCharacter', hasNoReturn],
+        ['logout', no_return],
+        ['changeCharacter', no_return],
+        ['removeCharacter', no_return],
 
         # Card Command Get
-        ['getMountCardInfos', hasReturn],
-        ['getTrushMountCardInfos', hasReturn],
+        ['getMountCardInfos', has_return],
+        ['getTrushMountCardInfos', has_return],
 
         # Card Command Set
-        ['drawTargetCard', hasReturn],
-        ['drawTargetTrushCard', hasReturn],
-        ['drawCard', hasReturn],
-        ['addCard', hasNoReturn],
-        ['addCardZone', hasNoReturn],
-        ['initCards', hasReturn],
-        ['returnCard', hasNoReturn],
-        ['shuffleCards', hasNoReturn],
-        ['shuffleForNextRandomDungeon', hasNoReturn],
-        ['dumpTrushCards', hasNoReturn],
+        ['drawTargetCard', has_return],
+        ['drawTargetTrushCard', has_return],
+        ['drawCard', has_return],
+        ['addCard', no_return],
+        ['addCardZone', no_return],
+        ['initCards', has_return],
+        ['returnCard', no_return],
+        ['shuffleCards', no_return],
+        ['shuffleForNextRandomDungeon', no_return],
+        ['dumpTrushCards', no_return],
 
-        ['clearCharacterByType', hasNoReturn],
-        ['moveCharacter', hasNoReturn],
-        ['changeMap', hasNoReturn],
-        ['drawOnMap', hasNoReturn],
-        ['clearDrawOnMap', hasNoReturn],
-        ['sendChatMessage', hasNoReturn],
-        ['changeRoundTime', hasNoReturn],
-        ['addEffect', hasNoReturn],
-        ['changeEffect', hasNoReturn],
-        ['removeEffect', hasNoReturn],
-        ['changeImageTags', hasNoReturn],
+        ['clearCharacterByType', no_return],
+        ['moveCharacter', no_return],
+        ['changeMap', no_return],
+        ['drawOnMap', no_return],
+        ['clearDrawOnMap', no_return],
+        ['sendChatMessage', no_return],
+        ['changeRoundTime', no_return],
+        ['addEffect', no_return],
+        ['changeEffect', no_return],
+        ['removeEffect', no_return],
+        ['changeImageTags', no_return],
     ]
 
-    commands.each do |command, commandType|
-      next unless (command == commandName)
-      logging(commandType, "commandType")
+    commands.each do |command, type|
+      next unless (command == current_command)
+      logging(type, "commandType")
 
-      case commandType
-        when hasReturn
-          return eval(command)
-        when hasNoReturn
+      case type
+        when has_return
+          return eval(command) #TODO:WHAT? 以前はsendだった気がするが、なぜevalなのか
+        when no_return
           eval(command)
           return nil
         else
       end
     end
 
-    throw Exception.new("\"" + commandName.untaint + "\" is invalid command")
+    throw Exception.new("\"" + current_command.untaint + "\" is invalid command")
 
   end
 
-  def getResponseTextWhenNoCommandName
+  def response_for_none_command
     logging("getResponseTextWhenNoCommandName Begin")
 
-    response = analyzeWebInterface
+    response = analyze_webif_command
 
     if response.nil?
-      response = getTestResponseText
+      response = test_response
     end
 
     response
   end
 
-  def analyzeWebInterface
+  def analyze_webif_command
     result = {'result' => 'NG'}
 
     begin
-      result = analyzeWebInterfaceCatched
+      result = routing_webif_command
       logging("analyzeWebInterfaceCatched end result", result)
-      setJsonpCallBack
+      set_jsonp_callback
     rescue => e
       result['result'] = e.to_s
     end
@@ -826,27 +826,27 @@ class DodontoFServer
     result
   end
 
-  def analyzeWebInterfaceCatched
+  def routing_webif_command
     logging("analyzeWebInterfaceCatched begin")
 
     @is_web_interface = true
     @is_json_result = true
 
-    commandName = request_data('webif')
-    logging(commandName, 'commandName')
+    current_command = request_data('webif')
+    logging(current_command, 'commandName')
 
-    if isInvalidRequestParam(commandName)
+    if invalid_param?(current_command)
       return nil
     end
 
     marker = request_data('marker')
-    if isInvalidRequestParam(marker)
+    if invalid_param?(marker)
       @is_add_marker = false
     end
 
-    logging(commandName, "commandName")
+    logging(current_command, "commandName")
 
-    case commandName
+    case current_command
       when 'getBusyInfo'
         return getBusyInfo
       when 'getServerInfo'
@@ -858,9 +858,9 @@ class DodontoFServer
 
     end
 
-    loginOnWebInterface
+    login_on_web_interface
 
-    case commandName
+    case current_command
       when 'chat'
         return getWebIfChatText
       when 'talk'
@@ -883,70 +883,70 @@ class DodontoFServer
 
     end
 
-    {'result' => "command [#{commandName}] is NOT found"}
+    {'result' => "command [#{current_command}] is NOT found"}
   end
 
 
-  def loginOnWebInterface
-    roomNumberText = request_data('room')
-    if isInvalidRequestParam(roomNumberText)
+  def login_on_web_interface
+    text_room_index = request_data('room')
+    if invalid_param?(text_room_index)
       raise "プレイルーム番号(room)を指定してください"
     end
 
-    unless /^\d+$/ === roomNumberText
+    unless /^\d+$/ === text_room_index
       raise "プレイルーム番号(room)には半角数字のみを指定してください"
     end
 
-    roomNumber = roomNumberText.to_i
+    room_index = text_room_index.to_i
 
     password = request_data('password')
-    visiterMode = true
+    visitor_mode = true
 
-    checkResult = checkLoginPassword(roomNumber, password, visiterMode)
-    if (checkResult['resultText'] != "OK")
+    checked_result = checkLoginPassword(room_index, password, visitor_mode)
+    if checked_result['resultText'] != "OK"
       result['result'] = result['resultText']
       return result
     end
 
-    init_savefiles(roomNumber)
+    init_savefiles(room_index)
   end
 
 
-  def isInvalidRequestParam(param)
+  def invalid_param?(param)
     (param.nil? or param.empty?)
   end
 
-  def setJsonpCallBack
-    callBack = request_data('callback')
+  def set_jsonp_callback
+    callback = request_data('callback')
 
-    logging('callBack', callBack)
-    if isInvalidRequestParam(callBack)
+    logging('callBack', callback)
+    if invalid_param?(callback)
       return
     end
 
-    @jsonp_callback = callBack
+    @jsonp_callback = callback
   end
 
 
-  def getTestResponseText
+  def test_response
     "「どどんとふ」の動作環境は正常に起動しています。"
   end
 
 
-  def getCurrentSaveData()
-    @savefiles.each do |saveFileTypeName, saveFileName|
-      logging(saveFileTypeName, "saveFileTypeName")
-      logging(saveFileName, "saveFileName")
+  def current_save_data()
+    @savefiles.each do |type_name, file_name|
+      logging(type_name, "saveFileTypeName")
+      logging(file_name, "saveFileName")
 
-      targetLastUpdateTime = @last_update_times[saveFileTypeName]
-      next if (targetLastUpdateTime == nil)
+      target_last_update_time = @last_update_times[type_name]
+      next if (target_last_update_time == nil)
 
-      logging(targetLastUpdateTime, "targetLastUpdateTime")
+      logging(target_last_update_time, "targetLastUpdateTime")
 
-      if isSaveFileChanged(targetLastUpdateTime, saveFileName)
-        logging(saveFileName, "saveFile is changed");
-        targetSaveData = load_savefile(saveFileTypeName, saveFileName)
-        yield(targetSaveData, saveFileTypeName)
+      if isSaveFileChanged(target_last_update_time, file_name)
+        logging(file_name, "saveFile is changed")
+        save_data = load_savefile(type_name, file_name)
+        yield(save_data, type_name)
       end
     end
   end
@@ -957,51 +957,51 @@ class DodontoFServer
 
     time= getWebIfRequestNumber('time', -1)
     unless time == -1
-      saveData = getWebIfChatTextFromTime(time)
+      save_data = chat_text_by_time(time)
     else
       seconds = request_data('sec')
-      saveData = getWebIfChatTextFromSecond(seconds)
+      save_data = chat_text_by_second(seconds)
     end
 
-    saveData['result'] = 'OK'
+    save_data['result'] = 'OK'
 
-    saveData
+    save_data
   end
 
 
-  def getWebIfChatTextFromTime(time)
+  def chat_text_by_time(time)
     logging(time, 'getWebIfChatTextFromTime time')
 
-    saveData = {}
+    save_data = {}
     @last_update_times = {'chatMessageDataLog' => time}
-    refreshLoop(saveData)
+    refreshLoop(save_data)
 
-    deleteOldChatTextForWebIf(time, saveData)
+    deleteOldChatTextForWebIf(time, save_data)
 
-    logging(saveData, 'getWebIfChatTextFromTime saveData')
+    logging(save_data, 'getWebIfChatTextFromTime saveData')
 
-    saveData
+    save_data
   end
 
 
-  def getWebIfChatTextFromSecond(seconds)
+  def chat_text_by_second(seconds)
     logging(seconds, 'getWebIfChatTextFromSecond seconds')
 
     time = getTimeForGetWebIfChatText(seconds)
     logging(seconds, "seconds")
     logging(time, "time")
 
-    saveData = {}
+    save_data = {}
     @last_update_times = {'chatMessageDataLog' => time}
-    getCurrentSaveData() do |targetSaveData, saveFileTypeName|
-      saveData.merge!(targetSaveData)
+    current_save_data() do |targetSaveData, saveFileTypeName|
+      save_data.merge!(targetSaveData)
     end
 
-    deleteOldChatTextForWebIf(time, saveData)
+    deleteOldChatTextForWebIf(time, save_data)
 
-    logging("getCurrentSaveData end saveData", saveData)
+    logging("getCurrentSaveData end saveData", save_data)
 
-    saveData
+    save_data
   end
 
   def deleteOldChatTextForWebIf(time, saveData)
@@ -1036,7 +1036,7 @@ class DodontoFServer
   def getChatColor()
     name = getWebIfRequestText('name')
     logging(name, "name")
-    if isInvalidRequestParam(name)
+    if invalid_param?(name)
       raise "対象ユーザー名(name)を指定してください"
     end
 
@@ -1055,7 +1055,7 @@ class DodontoFServer
 
   def getChatColorFromChatSaveData(name)
     seconds = 'all'
-    saveData = getWebIfChatTextFromSecond(seconds)
+    saveData = chat_text_by_second(seconds)
 
     chats = saveData['chatMessageDataLog']
     chats.reverse_each do |time, data|
@@ -1628,7 +1628,7 @@ class DodontoFServer
   end
 
   def refreshOnce(saveData)
-    getCurrentSaveData() do |targetSaveData, saveFileTypeName|
+    current_save_data() do |targetSaveData, saveFileTypeName|
       saveData.merge!(targetSaveData)
     end
   end
@@ -2866,7 +2866,7 @@ class DodontoFServer
     logging("dummy @lastUpdateTimes created")
 
     saveDataAll = {}
-    getCurrentSaveData() do |targetSaveData, saveFileTypeName|
+    current_save_data() do |targetSaveData, saveFileTypeName|
       saveDataAll[saveFileTypeName] = targetSaveData
       logging(saveFileTypeName, "saveFileTypeName in save")
     end
@@ -3884,7 +3884,7 @@ class DodontoFServer
 
     smallImageDir = getSmallImageDir
     uploadSmallImageFileName = fileJoin(smallImageDir, imageFileNameBase)
-    uploadSmallImageFileName += ".png";
+    uploadSmallImageFileName += ".png"
     uploadSmallImageFileName.untaint
     logging(uploadSmallImageFileName, "uploadSmallImageFileName")
 
@@ -5140,8 +5140,8 @@ class DodontoFServer
 
     aceList = aceList.sort_by { rand }
     result << aceList.shift
-    logging(aceList, "aceList shifted");
-    logging(result, "result");
+    logging(aceList, "aceList shifted")
+    logging(result, "result")
 
     noAceList = noAceList.sort_by { rand }
 
@@ -5325,7 +5325,7 @@ class DodontoFServer
       setTrushMountDataCardsInfo(saveData, trushMountData, trushCards)
     end
 
-    logging("returnCard End");
+    logging("returnCard End")
   end
 
   def drawCard
@@ -5390,7 +5390,7 @@ class DodontoFServer
 
 
   def drawTargetTrushCard
-    logging("drawTargetTrushCard Begin");
+    logging("drawTargetTrushCard Begin")
 
     set_no_body_sender
 
@@ -6063,7 +6063,7 @@ class DodontoFServer
   end
 
   def getResponse
-    response = analyzeCommand
+    response = analyze_command
 
     if isJsonResult
       build_json(response)
@@ -6216,7 +6216,7 @@ end
 
 
 def executeDodontoServerCgi()
-  initLog();
+  initLog()
 
   cgiParams = getCgiParams()
 

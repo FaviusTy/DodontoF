@@ -412,7 +412,7 @@ SQL
       return {}
     end
     
-    data = lines.collect{|line| DodontoFServer.getJsonDataFromText(line.chomp) }
+    data = lines.collect{|line| DodontoFServer.parse_json(line.chomp) }
     saveData = {"chatMessageDataLog" => data}
     
     return saveData
@@ -470,7 +470,7 @@ SQL
     open(nil, isReadOnly, tableName) do
       
       time = getCurrentTime
-      text = DodontoFServer.getTextFromJsonData([time, chatMessageData])
+      text = DodontoFServer.build_json([time, chatMessageData])
       
       numberLimit = $chatMessageDataLogAllLineMax
       oldestNumber = 0
@@ -506,7 +506,7 @@ SQL
       unless( saveDataForChat.nil? )
         chatData = saveDataForChat[number]
         unless( chatData.nil? )
-          text = DodontoFServer.getTextFromJsonData(chatData)
+          text = DodontoFServer.build_json(chatData)
         end
       end
       
@@ -684,7 +684,7 @@ class DodontoFServer_MySql < DodontoFServer
     begin
       return FileLockMySql.new(fileName, isReadOnly)
     rescue => e
-      loggingForce(@saveDirInfo.inspect, "when getSaveFileLock error : @saveDirInfo.inspect");
+      loggingForce(@savedir_info.inspect, "when getSaveFileLock error : @saveDirInfo.inspect");
       raise
     end
   end
@@ -719,11 +719,11 @@ class DodontoFServer_MySql < DodontoFServer
   
   
   def loadSaveFileForChat(typeName, saveFileName)
-    getDataAccesser().loadSaveFileForChat(typeName, saveFileName, @lastUpdateTimes)
+    getDataAccesser().loadSaveFileForChat(typeName, saveFileName, @last_update_times)
   end
   
   def loadSaveFile(typeName, saveFileName)
-    if( isChatType(typeName) )
+    if( chat_file?(typeName) )
       return loadSaveFileForChat(typeName, saveFileName)
     end
     
@@ -733,13 +733,13 @@ class DodontoFServer_MySql < DodontoFServer
   
   def sendChatMessageByChatData(chatData)
     logging(chatData, "sendChatMessage chatData")
-    saveFileName = @saveFiles['chatMessageDataLog']
+    saveFileName = @savefiles['chatMessageDataLog']
     getDataAccesser().sendChatMessage(chatData, saveFileName)
   end
   
   
   def loadSaveFileDataForEachType(fileTypeName, trueSaveFileName, saveDataForType)
-    if( isChatType(fileTypeName) )
+    if( chat_file?(fileTypeName) )
       getDataAccesser().loadSaveFileDataForChatType(trueSaveFileName, saveDataForType[fileTypeName])
       return
     end

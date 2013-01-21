@@ -848,12 +848,12 @@ class DodontoFServer
 
     case current_command
       when 'getBusyInfo'
-        return getBusyInfo
+        return busy_info
       when 'getServerInfo'
-        return getWebIfServerInfo
+        return server_info_for_webif
       when 'getRoomList'
         logging("getRoomList passed")
-        return getWebIfRoomList
+        return room_list_for_webif
       else
 
     end
@@ -862,23 +862,23 @@ class DodontoFServer
 
     case current_command
       when 'chat'
-        return getWebIfChatText
+        return chat_text_for_webif
       when 'talk'
-        return sendWebIfChatText
+        return send_chat_text_for_webif
       when 'addCharacter'
-        return sendWebIfAddCharacter
+        return send_add_character_for_webif
       when 'changeCharacter'
-        return sendWebIfChangeCharacter
+        return change_character_for_webif
       when 'addMemo'
-        return sendWebIfAddMemo
+        return send_memo_for_webif
       when 'getRoomInfo'
-        return getWebIfRoomInfo
+        return room_info_for_webif
       when 'setRoomInfo'
-        return setWebIfRoomInfo
+        return set_room_info_for_webif
       when 'getChatColor'
-        return getChatColor
+        return chat_color
       when 'refresh'
-        return getWebIfRefresh
+        return refresh_for_webif
       else
 
     end
@@ -952,10 +952,10 @@ class DodontoFServer
   end
 
 
-  def getWebIfChatText
+  def chat_text_for_webif
     logging("getWebIfChatText begin")
 
-    time= getWebIfRequestNumber('time', -1)
+    time= request_number_for_webif('time', -1)
     unless time == -1
       save_data = chat_text_by_time(time)
     else
@@ -974,9 +974,9 @@ class DodontoFServer
 
     save_data = {}
     @last_update_times = {'chatMessageDataLog' => time}
-    refreshLoop(save_data)
+    refresh_routine(save_data)
 
-    deleteOldChatTextForWebIf(time, save_data)
+    exclude_old_chat_for_webif(time, save_data)
 
     logging(save_data, 'getWebIfChatTextFromTime saveData')
 
@@ -987,7 +987,7 @@ class DodontoFServer
   def chat_text_by_second(seconds)
     logging(seconds, 'getWebIfChatTextFromSecond seconds')
 
-    time = getTimeForGetWebIfChatText(seconds)
+    time = target_range_chat_time(seconds)
     logging(seconds, "seconds")
     logging(time, "time")
 
@@ -997,19 +997,19 @@ class DodontoFServer
       save_data.merge!(targetSaveData)
     end
 
-    deleteOldChatTextForWebIf(time, save_data)
+    exclude_old_chat_for_webif(time, save_data)
 
     logging("getCurrentSaveData end saveData", save_data)
 
     save_data
   end
 
-  def deleteOldChatTextForWebIf(time, saveData)
+  def exclude_old_chat_for_webif(time, save_data)
     logging(time, 'deleteOldChatTextForWebIf time')
 
     return if (time.nil?)
 
-    chats = saveData['chatMessageDataLog']
+    chats = save_data['chatMessageDataLog']
     return if (chats.nil?)
 
     chats.delete_if do |writtenTime, data|
@@ -1020,7 +1020,7 @@ class DodontoFServer
   end
 
 
-  def getTimeForGetWebIfChatText(seconds)
+  def target_range_chat_time(seconds)
     case seconds
       when "all"
         return 0
@@ -1033,14 +1033,14 @@ class DodontoFServer
   end
 
 
-  def getChatColor()
-    name = getWebIfRequestText('name')
+  def chat_color()
+    name = request_text_for_webif('name')
     logging(name, "name")
     if invalid_param?(name)
       raise "対象ユーザー名(name)を指定してください"
     end
 
-    color = getChatColorFromChatSaveData(name)
+    color = chat_color_in_save_data(name)
     # color ||= getTalkDefaultColor
     if color.nil?
       raise "指定ユーザー名の発言が見つかりません"
@@ -1053,14 +1053,14 @@ class DodontoFServer
     result
   end
 
-  def getChatColorFromChatSaveData(name)
+  def chat_color_in_save_data(name)
     seconds = 'all'
-    saveData = chat_text_by_second(seconds)
+    save_data = chat_text_by_second(seconds)
 
-    chats = saveData['chatMessageDataLog']
+    chats = save_data['chatMessageDataLog']
     chats.reverse_each do |time, data|
-      senderName = data['senderName'].split(/\t/).first
-      if name == senderName
+      sender_name = data['senderName'].split(/\t/).first
+      if name == sender_name
         return data['color']
       end
     end
@@ -1068,100 +1068,98 @@ class DodontoFServer
     nil
   end
 
-  def getTalkDefaultColor
+  def default_color
     "000000"
   end
 
-  def getBusyInfo()
-    jsonData = {
+  def busy_info()
+    json_data = {
         "loginCount" => File.readlines($loginCountFile).join.to_i,
         "maxLoginCount" => $aboutMaxLoginCount,
         "version" => $version,
         "result" => 'OK',
     }
-
-    jsonData
   end
 
-  def getWebIfServerInfo()
-    jsonData = {
+  def server_info_for_webif()
+    result_data = {
         "maxRoom" => ($saveDataMaxCount - 1),
         'isNeedCreatePassword' => (not $createPlayRoomPassword.empty?),
         'result' => 'OK',
     }
 
-    if getWebIfRequestBoolean("card", false)
-      cardInfos = cards_info.collectCardTypeAndTypeName()
-      jsonData["cardInfos"] = cardInfos
+    if request_boolean_for_webif("card", false)
+      cards_infos = cards_info.collectCardTypeAndTypeName()
+      result_data["cardInfos"] = cards_infos
     end
 
-    if getWebIfRequestBoolean("dice", false)
+    if request_boolean_for_webif("dice", false)
       require 'diceBotInfos'
-      diceBotInfos = DiceBotInfos.new.getInfos
-      jsonData['diceBotInfos'] = getDiceBotInfos()
+      dicebot_infos = DiceBotInfos.new.getInfos
+      result_data['diceBotInfos'] = getDiceBotInfos()
     end
 
-    jsonData
+    result_data
   end
 
-  def getWebIfRoomList()
+  def room_list_for_webif()
     logging("getWebIfRoomList Begin")
-    minRoom = getWebIfRequestInt('minRoom', 0)
-    maxRoom = getWebIfRequestInt('maxRoom', ($saveDataMaxCount - 1))
+    min_room = request_int_for_webif('minRoom', 0)
+    max_room = request_int_for_webif('maxRoom', ($saveDataMaxCount - 1))
 
-    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
+    room_states = getPlayRoomStatesLocal(min_room, max_room)
 
-    jsonData = {
-        "playRoomStates" => playRoomStates,
+    result_data = {
+        "playRoomStates" => room_states,
         "result" => 'OK',
     }
 
     logging("getWebIfRoomList End")
-    jsonData
+    result_data
   end
 
-  def sendWebIfChatText
+  def send_chat_text_for_webif
     logging("sendWebIfChatText begin")
-    saveData = {}
+    save_data = {}
 
-    name = getWebIfRequestText('name')
+    name = request_text_for_webif('name')
     logging(name, "name")
 
-    message = getWebIfRequestText('message')
+    message = request_text_for_webif('message')
     message.gsub!(/\r\n/, "\r")
     logging(message, "message")
 
-    color = getWebIfRequestText('color', getTalkDefaultColor)
+    color = request_text_for_webif('color', default_color)
     logging(color, "color")
 
-    channel = getWebIfRequestInt('channel')
+    channel = request_int_for_webif('channel')
     logging(channel, "channel")
 
-    gameType = getWebIfRequestText('bot')
-    logging(gameType, 'gameType')
+    game_type = request_text_for_webif('bot')
+    logging(game_type, 'gameType')
 
-    rollResult, isSecret, randResults = rollDice(message, gameType, false)
+    roll_result, is_secret, rand_results = rollDice(message, game_type, false)
 
-    message = message + rollResult
+    message = message + roll_result
     logging(message, "diceRolled message")
 
-    chatData = {
+    chat_data = {
         "senderName" => name,
         "message" => message,
         "color" => color,
         "uniqueId" => '0',
         "channel" => channel,
     }
-    logging("sendWebIfChatText chatData", chatData)
+    logging("sendWebIfChatText chatData", chat_data)
 
-    sendChatMessageByChatData(chatData)
+    sendChatMessageByChatData(chat_data)
 
     result = {}
     result['result'] = 'OK'
     result
   end
 
-  def getWebIfRequestText(key, default = '')
+  def request_text_for_webif(key, default = '')
     text = request_data(key)
 
     if text.nil? or text.empty?
@@ -1171,18 +1169,18 @@ class DodontoFServer
     text
   end
 
-  def getWebIfRequestInt(key, default = 0)
-    text = getWebIfRequestText(key, default.to_s)
+  def request_int_for_webif(key, default = 0)
+    text = request_text_for_webif(key, default.to_s)
     text.to_i
   end
 
-  def getWebIfRequestNumber(key, default = 0)
-    text = getWebIfRequestText(key, default.to_s)
+  def request_number_for_webif(key, default = 0)
+    text = request_text_for_webif(key, default.to_s)
     text.to_f
   end
 
-  def getWebIfRequestBoolean(key, default = false)
-    text = getWebIfRequestText(key)
+  def request_boolean_for_webif(key, default = false)
+    text = request_text_for_webif(key)
     if text.empty?
       return default
     end
@@ -1190,8 +1188,8 @@ class DodontoFServer
     (text == "true")
   end
 
-  def getWebIfRequestArray(key, empty = [], separator = ',')
-    text = getWebIfRequestText(key, nil)
+  def request_array_for_webif(key, empty = [], separator = ',')
+    text = request_text_for_webif(key, nil)
 
     if text.nil?
       return empty
@@ -1200,13 +1198,13 @@ class DodontoFServer
     text.split(separator)
   end
 
-  def getWebIfRequestHash(key, default = {}, separator1 = ':', separator2 = ',')
+  def request_hash_for_webif(key, default = {}, separator1 = ':', separator2 = ',')
     logging("getWebIfRequestHash begin")
     logging(key, "key")
     logging(separator1, "separator1")
     logging(separator2, "separator2")
 
-    array = getWebIfRequestArray(key, [], separator2)
+    array = request_array_for_webif(key, [], separator2)
     logging(array, "array")
 
     if array.empty?
@@ -1225,14 +1223,14 @@ class DodontoFServer
     hash
   end
 
-  def sendWebIfAddMemo
+  def send_memo_for_webif
     logging('sendWebIfAddMemo begin')
 
     result = {}
     result['result'] = 'OK'
 
-    jsonData = {
-        "message" => getWebIfRequestText('message', ''),
+  result_context = {
+        "message" => request_text_for_webif('message', ''),
         "x" => 0,
         "y" => 0,
         "height" => 1,
@@ -1245,63 +1243,63 @@ class DodontoFServer
         "imgId" => createCharacterImgId(),
     }
 
-    logging(jsonData, 'sendWebIfAddMemo jsonData')
-    addResult = addCharacterData([jsonData])
+    logging(result_context, 'sendWebIfAddMemo jsonData')
+    addResult = addCharacterData([result_context]) #TODO:WAHT? addResultはここで始めて宣言されているように見える
 
     result
   end
 
 
-  def sendWebIfAddCharacter
+  def send_add_character_for_webif
     logging("sendWebIfAddCharacter begin")
 
     result = {}
     result['result'] = 'OK'
 
-    jsonData = {
-        "name" => getWebIfRequestText('name'),
-        "size" => getWebIfRequestInt('size', 1),
-        "x" => getWebIfRequestInt('x', 0),
-        "y" => getWebIfRequestInt('y', 0),
-        "initiative" => getWebIfRequestNumber('initiative', 0),
-        "counters" => getWebIfRequestHash('counters'),
-        "info" => getWebIfRequestText('info'),
-        "imageName" => getWebIfImageName('image', ".\/image\/defaultImageSet\/pawn\/pawnBlack.png"),
-        "rotation" => getWebIfRequestInt('rotation', 0),
-        "statusAlias" => getWebIfRequestHash('statusAlias'),
-        "dogTag" => getWebIfRequestText('dogTag', ""),
-        "draggable" => getWebIfRequestBoolean("draggable", true),
-        "isHide" => getWebIfRequestBoolean("isHide", false),
+    character_data = {
+        "name" => request_text_for_webif('name'),
+        "size" => request_int_for_webif('size', 1),
+        "x" => request_int_for_webif('x', 0),
+        "y" => request_int_for_webif('y', 0),
+        "initiative" => request_number_for_webif('initiative', 0),
+        "counters" => request_hash_for_webif('counters'),
+        "info" => request_text_for_webif('info'),
+        "imageName" => image_name_for_webif('image', ".\/image\/defaultImageSet\/pawn\/pawnBlack.png"),
+        "rotation" => request_int_for_webif('rotation', 0),
+        "statusAlias" => request_hash_for_webif('statusAlias'),
+        "dogTag" => request_text_for_webif('dogTag', ""),
+        "draggable" => request_boolean_for_webif("draggable", true),
+        "isHide" => request_boolean_for_webif("isHide", false),
         "type" => "characterData",
         "imgId" => createCharacterImgId(),
     }
 
-    logging(jsonData, 'sendWebIfAddCharacter jsonData')
+    logging(character_data, 'sendWebIfAddCharacter jsonData')
 
 
-    if jsonData['name'].empty?
+    if character_data['name'].empty?
       result['result'] = "キャラクターの追加に失敗しました。キャラクター名が設定されていません"
       return result
     end
 
 
-    addResult = addCharacterData([jsonData])
-    addFailedCharacterNames = addResult["addFailedCharacterNames"]
-    logging(addFailedCharacterNames, 'addFailedCharacterNames')
+    add_result = addCharacterData([character_data])
+    add_failed_char_names = add_result["addFailedCharacterNames"]
+    logging(add_failed_char_names, 'addFailedCharacterNames')
 
-    if (addFailedCharacterNames.length > 0)
-      result['result'] = "キャラクターの追加に失敗しました。同じ名前のキャラクターがすでに存在しないか確認してください。\"#{addFailedCharacterNames.join(' ')}\""
+    if add_failed_char_names.length > 0
+      result['result'] = "キャラクターの追加に失敗しました。同じ名前のキャラクターがすでに存在しないか確認してください。\"#{add_failed_char_names.join(' ')}\""
     end
 
     result
   end
 
-  def getWebIfImageName(key, default)
+  def image_name_for_webif(key, default)
     logging("getWebIfImageName begin")
     logging(key, "key")
     logging(default, "default")
 
-    image = getWebIfRequestText(key, default)
+    image = request_text_for_webif(key, default)
     logging(image, "image")
 
     if image != default
@@ -1315,14 +1313,14 @@ class DodontoFServer
   end
 
 
-  def sendWebIfChangeCharacter
+  def change_character_for_webif
     logging("sendWebIfChangeCharacter begin")
 
     result = {}
     result['result'] = 'OK'
 
     begin
-      sendWebIfChangeCharacterChatched
+      change_character_chatched_for_webif
     rescue => e
       loggingException(e)
       result['result'] = e.to_s
@@ -1331,49 +1329,49 @@ class DodontoFServer
     result
   end
 
-  def sendWebIfChangeCharacterChatched
+  def change_character_chatched_for_webif
     logging("sendWebIfChangeCharacterChatched begin")
 
-    targetName = getWebIfRequestText('targetName')
-    logging(targetName, "targetName")
+    target_name = request_text_for_webif('targetName')
+    logging(target_name, "targetName")
 
-    if targetName.empty?
+    if target_name.empty?
       raise '変更するキャラクターの名前(\'target\'パラメータ）が正しく指定されていません'
     end
 
 
     change_save_data(@savefiles['characters']) do |saveData|
 
-      characterData = getCharacterDataByName(saveData, targetName)
-      logging(characterData, "characterData")
+      character_data = character_by_name(saveData, target_name)
+      logging(character_data, "characterData")
 
-      if characterData.nil?
-        raise "「#{targetName}」という名前のキャラクターは存在しません"
+      if character_data.nil?
+        raise "「#{target_name}」という名前のキャラクターは存在しません"
       end
 
-      name = getWebIfRequestAny(:getWebIfRequestText, 'name', characterData)
+      name = request_any_for_webif(:request_text_for_webif, 'name', character_data)
       logging(name, "name")
 
-      if characterData['name'] != name
-        failedName = isAlreadyExistCharacterInRoom?(saveData, {'name' => name})
-        if failedName
+      if character_data['name'] != name
+        failed_name = isAlreadyExistCharacterInRoom?(saveData, {'name' => name})
+        if failed_name
           raise "「#{name}」という名前のキャラクターはすでに存在しています"
         end
       end
 
-      characterData['name'] = name
-      characterData['size'] = getWebIfRequestAny(:getWebIfRequestInt, 'size', characterData)
-      characterData['x'] = getWebIfRequestAny(:getWebIfRequestNumber, 'x', characterData)
-      characterData['y'] = getWebIfRequestAny(:getWebIfRequestNumber, 'y', characterData)
-      characterData['initiative'] = getWebIfRequestAny(:getWebIfRequestNumber, 'initiative', characterData)
-      characterData['counters'] = getWebIfRequestAny(:getWebIfRequestHash, 'counters', characterData)
-      characterData['info'] = getWebIfRequestAny(:getWebIfRequestText, 'info', characterData)
-      characterData['imageName'] = getWebIfRequestAny(:getWebIfImageName, 'image', characterData, 'imageName')
-      characterData['rotation'] = getWebIfRequestAny(:getWebIfRequestInt, 'rotation', characterData)
-      characterData['statusAlias'] = getWebIfRequestAny(:getWebIfRequestHash, 'statusAlias', characterData)
-      characterData['dogTag'] = getWebIfRequestAny(:getWebIfRequestText, 'dogTag', characterData)
-      characterData['draggable'] = getWebIfRequestAny(:getWebIfRequestBoolean, 'draggable', characterData)
-      characterData['isHide'] = getWebIfRequestAny(:getWebIfRequestBoolean, 'isHide', characterData)
+      character_data['name'] = name
+      character_data['size'] = request_any_for_webif(:request_int_for_webif, 'size', character_data)
+      character_data['x'] = request_any_for_webif(:request_number_for_webif, 'x', character_data)
+      character_data['y'] = request_any_for_webif(:request_number_for_webif, 'y', character_data)
+      character_data['initiative'] = request_any_for_webif(:request_number_for_webif, 'initiative', character_data)
+      character_data['counters'] = request_any_for_webif(:request_hash_for_webif, 'counters', character_data)
+      character_data['info'] = request_any_for_webif(:request_text_for_webif, 'info', character_data)
+      character_data['imageName'] = request_any_for_webif(:image_name_for_webif, 'image', character_data, 'imageName')
+      character_data['rotation'] = request_any_for_webif(:request_int_for_webif, 'rotation', character_data)
+      character_data['statusAlias'] = request_any_for_webif(:request_hash_for_webif, 'statusAlias', character_data)
+      character_data['dogTag'] = request_any_for_webif(:request_text_for_webif, 'dogTag', character_data)
+      character_data['draggable'] = request_any_for_webif(:request_boolean_for_webif, 'draggable', character_data)
+      character_data['isHide'] = request_any_for_webif(:request_boolean_for_webif, 'isHide', character_data)
       # 'type' => 'characterData',
       # 'imgId' =>  createCharacterImgId(),
 
@@ -1381,18 +1379,16 @@ class DodontoFServer
 
   end
 
-  def getCharacterDataByName(saveData, targetName)
-    characters = getCharactersFromSaveData(saveData)
+  def character_by_name(save_data, target_name)
+    characters = getCharactersFromSaveData(save_data)
 
-    characterData = characters.find do |i|
-      (i['name'] == targetName)
+    character_data = characters.find do |i|
+      (i['name'] == target_name)
     end
-
-    characterData
   end
 
 
-  def getWebIfRoomInfo
+  def room_info_for_webif
     logging("getWebIfRoomInfo begin")
 
     result = {}
@@ -1400,57 +1396,57 @@ class DodontoFServer
 
     save_data(@savefiles['time']) do |saveData|
       logging(saveData, "saveData")
-      roundTimeData = getHashValue(saveData, 'roundTimeData', {})
-      result['counter'] = getHashValue(roundTimeData, "counterNames", [])
+      round_time_data = hash_value(saveData, 'roundTimeData', {})
+      result['counter'] = hash_value(round_time_data, "counterNames", [])
     end
 
-    roomInfo = getRoomInfoForWebIf
-    result.merge!(roomInfo)
+    room_info = _room_info_for_webif
+    result.merge!(room_info)
 
     logging(result, "getWebIfRoomInfo result")
 
     result
   end
 
-  def getRoomInfoForWebIf
+  def _room_info_for_webif
     result = {}
 
-    trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
+    real_savefile_name = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
-    save_data(trueSaveFileName) do |saveData|
-      result['roomName'] = getHashValue(saveData, 'playRoomName', '')
-      result['chatTab'] = getHashValue(saveData, 'chatChannelNames', [])
-      result['outerImage'] = getHashValue(saveData, 'canUseExternalImage', false)
-      result['visit'] = getHashValue(saveData, 'canVisit', false)
-      result['game'] = getHashValue(saveData, 'gameType', '')
+    save_data(real_savefile_name) do |saveData|
+      result['roomName'] = hash_value(saveData, 'playRoomName', '')
+      result['chatTab'] = hash_value(saveData, 'chatChannelNames', [])
+      result['outerImage'] = hash_value(saveData, 'canUseExternalImage', false)
+      result['visit'] = hash_value(saveData, 'canVisit', false)
+      result['game'] = hash_value(saveData, 'gameType', '')
     end
 
     result
   end
 
-  def getHashValue(hash, key, default)
+  #TODO:FIXME 削除候補メソッド (デフォルト値の設定含め、現状ではメソッド抽出するほどの処理ではない)
+  def hash_value(hash, key, default)
     value = hash[key]
     value ||= default
-    value
   end
 
-  def setWebIfRoomInfo
+  def set_room_info_for_webif
     logging("setWebIfRoomInfo begin")
 
     result = {}
     result['result'] = 'OK'
 
-    setWebIfRoomInfoCounterNames
+    set_counter_names_in_room_info_webif
 
-    trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
+    real_savefile_name = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
-    roomInfo = getRoomInfoForWebIf
-    change_save_data(trueSaveFileName) do |saveData|
-      saveData['playRoomName'] = getWebIfRequestAny(:getWebIfRequestText, 'roomName', roomInfo)
-      saveData['chatChannelNames'] = getWebIfRequestAny(:getWebIfRequestArray, 'chatTab', roomInfo)
-      saveData['canUseExternalImage'] = getWebIfRequestAny(:getWebIfRequestBoolean, 'outerImage', roomInfo)
-      saveData['canVisit'] = getWebIfRequestAny(:getWebIfRequestBoolean, 'visit', roomInfo)
-      saveData['gameType'] = getWebIfRequestAny(:getWebIfRequestText, 'game', roomInfo)
+    room_info = _room_info_for_webif
+    change_save_data(real_savefile_name) do |saveData|
+      saveData['playRoomName'] = request_any_for_webif(:request_text_for_webif, 'roomName', room_info)
+      saveData['chatChannelNames'] = request_any_for_webif(:request_array_for_webif, 'chatTab', room_info)
+      saveData['canUseExternalImage'] = request_any_for_webif(:request_boolean_for_webif, 'outerImage', room_info)
+      saveData['canVisit'] = request_any_for_webif(:request_boolean_for_webif, 'visit', room_info)
+      saveData['gameType'] = request_any_for_webif(:request_text_for_webif, 'game', room_info)
     end
 
     logging(result, "setWebIfRoomInfo result")
@@ -1458,34 +1454,34 @@ class DodontoFServer
     result
   end
 
-  def setWebIfRoomInfoCounterNames
-    counterNames = getWebIfRequestArray('counter', nil, ',')
-    return if (counterNames.nil?)
+  def set_counter_names_in_room_info_webif
+    counter_names = request_array_for_webif('counter', nil, ',')
+    return if (counter_names.nil?)
 
-    changeCounterNames(counterNames)
+    change_counter_names(counter_names)
   end
 
-  def changeCounterNames(counterNames)
-    logging(counterNames, "changeCounterNames(counterNames)")
+  def change_counter_names(counter_names)
+    logging(counter_names, "changeCounterNames(counterNames)")
     change_save_data(@savefiles['time']) do |saveData|
       saveData['roundTimeData'] ||= {}
-      roundTimeData = saveData['roundTimeData']
-      roundTimeData['counterNames'] = counterNames
+      round_time_data = saveData['roundTimeData']
+      round_time_data['counterNames'] = counter_names
     end
   end
 
-  def getWebIfRequestAny(functionName, key, defaultInfos, key2 = nil)
+  def request_any_for_webif(function_name, key, default_infos, key2 = nil) #TODO:WHAT? key,key2の具体的な値が不明
     key2 ||= key
 
     logging("getWebIfRequestAny begin")
     logging(key, "key")
     logging(key2, "key2")
-    logging(defaultInfos, "defaultInfos")
+    logging(default_infos, "defaultInfos")
 
-    defaultValue = defaultInfos[key2]
-    logging(defaultValue, "defaultValue")
+    default_value = default_infos[key2]
+    logging(default_value, "defaultValue")
 
-    command = "#{functionName}( key, defaultValue )"
+    command = "#{function_name}( key, defaultValue )"
     logging(command, "getWebIfRequestAny command")
 
     result = eval(command)
@@ -1495,36 +1491,36 @@ class DodontoFServer
   end
 
 
-  def getWebIfRefresh
+  def refresh_for_webif
     logging("getWebIfRefresh Begin")
 
-    chatTime = getWebIfRequestNumber('chat', -1)
+    chat_time = request_number_for_webif('chat', -1)
 
     @last_update_times = {
-        'chatMessageDataLog' => chatTime,
-        'map' => getWebIfRequestNumber('map', -1),
-        'characters' => getWebIfRequestNumber('characters', -1),
-        'time' => getWebIfRequestNumber('time', -1),
-        'effects' => getWebIfRequestNumber('effects', -1),
-        $playRoomInfoTypeName => getWebIfRequestNumber('roomInfo', -1),
+        'chatMessageDataLog' => chat_time,
+        'map' => request_number_for_webif('map', -1),
+        'characters' => request_number_for_webif('characters', -1),
+        'time' => request_number_for_webif('time', -1),
+        'effects' => request_number_for_webif('effects', -1),
+        $playRoomInfoTypeName => request_number_for_webif('roomInfo', -1),
     }
 
     @last_update_times.delete_if { |type, time| time == -1 }
     logging(@last_update_times, "getWebIfRefresh lastUpdateTimes")
 
-    saveData = {}
-    refreshLoop(saveData)
-    deleteOldChatTextForWebIf(chatTime, saveData)
+    save_data = {}
+    refresh_routine(save_data)
+    exclude_old_chat_for_webif(chat_time, save_data)
 
     result = {}
     ["chatMessageDataLog", "mapData", "characters", "graveyard", "effects"].each do |key|
-      value = saveData.delete(key)
+      value = save_data.delete(key)
       next if (value.nil?)
 
       result[key] = value
     end
 
-    result['roomInfo'] = saveData
+    result['roomInfo'] = save_data
     result['lastUpdateTimes'] = @last_update_times
     result['result'] = 'OK'
 
@@ -1534,92 +1530,92 @@ class DodontoFServer
   end
 
 
-  def refresh()
+  def refresh
     logging("==>Begin refresh")
 
-    saveData = {}
+    save_data = {}
 
-    if ($isMentenanceNow)
-      saveData["warning"] = {"key" => "canNotRefreshBecauseMentenanceNow"}
-      return saveData
+    if $isMentenanceNow
+      save_data["warning"] = {"key" => "canNotRefreshBecauseMentenanceNow"}
+      return save_data
     end
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     logging(params, "params")
 
     @last_update_times = params['times']
     logging(@last_update_times, "@lastUpdateTimes")
 
-    isFirstChatRefresh = (@last_update_times['chatMessageDataLog'] == 0)
-    logging(isFirstChatRefresh, "isFirstChatRefresh")
+    is_first_chat_refresh = (@last_update_times['chatMessageDataLog'] == 0)
+    logging(is_first_chat_refresh, "isFirstChatRefresh")
 
-    refreshIndex = params['rIndex']
-    logging(refreshIndex, "refreshIndex")
+    refresh_index = params['rIndex']
+    logging(refresh_index, "refreshIndex")
 
     @isGetOwnRecord = params['isGetOwnRecord']
 
     if $isCommet
-      refreshLoop(saveData)
+      refresh_routine(save_data)
     else
-      refreshOnce(saveData)
+      refresh_once(save_data)
     end
 
-    uniqueId = command_sender
-    userName = params['name']
-    isVisiter = params['isVisiter']
+    unique_id = command_sender
+    user_name = params['name']
+    is_visitor = params['isVisiter']
 
-    loginUserInfo = getLoginUserInfo(userName, uniqueId, isVisiter)
+    login_user_info = login_user_info(user_name, unique_id, is_visitor)
 
-    unless saveData.empty?
-      saveData['lastUpdateTimes'] = @last_update_times
-      saveData['refreshIndex'] = refreshIndex
-      saveData['loginUserInfo'] = loginUserInfo
+    unless save_data.empty?
+      save_data['lastUpdateTimes'] = @last_update_times
+      save_data['refreshIndex'] = refresh_index
+      save_data['loginUserInfo'] = login_user_info
     end
 
-    if isFirstChatRefresh
-      saveData['isFirstChatRefresh'] = isFirstChatRefresh
+    if is_first_chat_refresh
+      save_data['isFirstChatRefresh'] = is_first_chat_refresh
     end
 
-    logging(saveData, "refresh end saveData")
+    logging(save_data, "refresh end saveData")
     logging("==>End refresh")
 
-    saveData
+    save_data
   end
 
-  def getLoginUserInfo(userName, uniqueId, isVisiter)
-    loginUserInfoSaveFile = @savedir_info.getTrueSaveFileName($loginUserInfo)
-    loginUserInfo = updateLoginUserInfo(loginUserInfoSaveFile, userName, uniqueId, isVisiter)
+  def login_user_info(user_name, unique_id, is_visitor)
+    current_login_user_info = @savedir_info.getTrueSaveFileName($loginUserInfo)
+    update_login_user_info(current_login_user_info, user_name, unique_id, is_visitor)
   end
 
 
-  def getParamsFromRequestData()
+  def extract_params_in_request()
     params = request_data('params')
     logging(params, "params")
     params
   end
 
 
-  def refreshLoop(saveData)
+  def refresh_routine(save_data)
     now = Time.now
-    whileLimitTime = now + $refreshTimeout
+    while_limit_time = now + $refreshTimeout
 
     logging(now, "now")
-    logging(whileLimitTime, "whileLimitTime")
+    logging(while_limit_time, "whileLimitTime")
 
-    while Time.now < whileLimitTime
+    while Time.now < while_limit_time
 
-      refreshOnce(saveData)
+      refresh_once(save_data)
 
-      break unless (saveData.empty?)
+      break unless (save_data.empty?)
 
-      intalval = getRefreshInterval
+      intalval = refresh_interval
       logging(intalval, "saveData is empty, sleep second")
       sleep(intalval)
       logging("awake.")
     end
   end
 
-  def getRefreshInterval
+  def refresh_interval
     if $isCommet
       $refreshInterval
     else
@@ -1627,51 +1623,51 @@ class DodontoFServer
     end
   end
 
-  def refreshOnce(saveData)
+  def refresh_once(save_data)
     current_save_data() do |targetSaveData, saveFileTypeName|
-      saveData.merge!(targetSaveData)
+      save_data.merge!(targetSaveData)
     end
   end
 
 
-  def updateLoginUserInfo(trueSaveFileName, userName = '', uniqueId = '', isVisiter = false)
-    logging(uniqueId, 'updateLoginUserInfo uniqueId')
-    logging(userName, 'updateLoginUserInfo userName')
+  def update_login_user_info(real_Savefile_name, user_name = '', unique_id = '', is_visitor = false)
+    logging(unique_id, 'updateLoginUserInfo uniqueId')
+    logging(user_name, 'updateLoginUserInfo userName')
 
     result = []
 
-    return result if (uniqueId == -1)
+    return result if (unique_id == -1)
 
-    nowSeconds = Time.now.to_i
-    logging(nowSeconds, 'nowSeconds')
+    now_seconds = Time.now.to_i
+    logging(now_seconds, 'nowSeconds')
 
 
-    isGetOnly = (userName.empty? and uniqueId.empty?)
-    getDataFunction = nil
-    if isGetOnly
-      getDataFunction = method(:save_data)
+    is_get_only = (user_name.empty? and unique_id.empty?)
+    target_function = nil
+    if is_get_only
+      target_function = method(:save_data)
     else
-      getDataFunction = method(:change_save_data)
+      target_function = method(:change_save_data)
     end
 
-    getDataFunction.call(trueSaveFileName) do |saveData|
+    target_function.call(real_Savefile_name) do |saveData|
 
-      unless isGetOnly
-        changeUserInfo(saveData, uniqueId, nowSeconds, userName, isVisiter)
+      unless is_get_only
+        change_user_info(saveData, unique_id, now_seconds, user_name, is_visitor)
       end
 
       saveData.delete_if do |existUserId, userInfo|
-        isDeleteUserInfo?(existUserId, userInfo, nowSeconds)
+        delete_user_info?(existUserId, userInfo, now_seconds)
       end
 
       saveData.keys.sort.each do |userId|
-        userInfo = saveData[userId]
+        user_info = saveData[userId]
         data = {
-            "userName" => userInfo['userName'],
+            "userName" => user_info['userName'],
             "userId" => userId,
         }
 
-        data['isVisiter'] = true if (userInfo['isVisiter'])
+        data['isVisiter'] = true if (user_info['isVisiter'])
 
         result << data
       end
@@ -1680,62 +1676,61 @@ class DodontoFServer
     result
   end
 
-  def isDeleteUserInfo?(existUserId, userInfo, nowSeconds)
-    isLogout = userInfo['isLogout']
-    return true if (isLogout)
+  def delete_user_info?(exist_user_id, user_info, now_seconds)
+    is_logout = user_info['isLogout']
+    return true if (is_logout)
 
-    timeSeconds = userInfo['timeSeconds']
-    diffSeconds = nowSeconds - timeSeconds
-    (diffSeconds > $loginTimeOut)
+    time_seconds = user_info['timeSeconds']
+    diff_seconds = now_seconds - time_seconds
+    (diff_seconds > $loginTimeOut)
   end
 
-  def changeUserInfo(saveData, uniqueId, nowSeconds, userName, isVisiter)
-    return if (uniqueId.empty?)
+  def change_user_info(save_data, unique_id, now_seconds, user_name, is_visitor)
+    return if (unique_id.empty?)
 
-    isLogout = false
-    if saveData.include?(uniqueId)
-      isLogout = saveData[uniqueId]['isLogout']
+    is_logout = false
+    if save_data.include?(unique_id)
+      is_logout = save_data[unique_id]['isLogout']
     end
 
-    return if (isLogout)
+    return if (is_logout)
 
-    userInfo = {
-        'userName' => userName,
-        'timeSeconds' => nowSeconds,
+    user_info = {
+        'userName' => user_name,
+        'timeSeconds' => now_seconds,
     }
 
-    userInfo['isVisiter'] = true if (isVisiter)
+    user_info['isVisiter'] = true if (is_visitor)
 
-    saveData[uniqueId] = userInfo
+    save_data[unique_id] = user_info
   end
 
 
-  def getPlayRoomName(saveData, index)
-    playRoomName = saveData['playRoomName']
-    playRoomName ||= "プレイルームNo.#{index}"
-    playRoomName
+  def play_room_name(save_data, index)
+    play_room_name = save_data['playRoomName']
+    play_room_name ||= "プレイルームNo.#{index}"
   end
 
-  def getLoginUserCountList(roomNumberRange)
-    loginUserCountList = {}
-    roomNumberRange.each { |i| loginUserCountList[i] = 0 }
+  def login_user_count_list(target_range)
+    result_list = {}
+    target_range.each { |i| result_list[i] = 0 }
 
-    @savedir_info.each_with_index(roomNumberRange, $loginUserInfo) do |saveFiles, index|
-      next unless (roomNumberRange.include?(index))
+    @savedir_info.each_with_index(target_range, $loginUserInfo) do |saveFiles, index|
+      next unless (target_range.include?(index))
 
       if saveFiles.size != 1
         logging("emptry room")
-        loginUserCountList[index] = 0
+        result_list[index] = 0
         next
       end
 
-      trueSaveFileName = saveFiles.first
+      real_savefile_name = saveFiles.first
 
-      loginUserInfo = updateLoginUserInfo(trueSaveFileName)
-      loginUserCountList[index] = loginUserInfo.size
+      login_user_info = update_login_user_info(real_savefile_name)
+      result_list[index] = login_user_info.size
     end
 
-    loginUserCountList
+    result_list
   end
 
   def getLoginUserList(roomNumberRange)
@@ -1753,7 +1748,7 @@ class DodontoFServer
 
       userNames = []
       trueSaveFileName = saveFiles.first
-      loginUserInfo = updateLoginUserInfo(trueSaveFileName)
+      loginUserInfo = update_login_user_info(trueSaveFileName)
       loginUserInfo.each do |data|
         userNames << data["userName"]
       end
@@ -1846,7 +1841,7 @@ class DodontoFServer
   end
 
   def getPlayRoomStates()
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     logging(params, "params")
 
     minRoom = getMinRoom(params)
@@ -1919,7 +1914,7 @@ class DodontoFServer
 
     return playRoomState if (playRoomData.empty?)
 
-    playRoomName = getPlayRoomName(playRoomData, roomNo)
+    playRoomName = play_room_name(playRoomData, roomNo)
     passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
     canVisit = playRoomData['canVisit']
     gameType = playRoomData['gameType']
@@ -1956,7 +1951,7 @@ class DodontoFServer
 
     save_data(trueSaveFileName) do |userInfos|
       userInfos.each do |uniqueId, userInfo|
-        next if (isDeleteUserInfo?(uniqueId, userInfo, @now_getLoginUserNames))
+        next if (delete_user_info?(uniqueId, userInfo, @now_getLoginUserNames))
         userNames << userInfo['userName']
       end
     end
@@ -1977,7 +1972,7 @@ class DodontoFServer
 
 
   def getPlayRoomStatesByCount()
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     logging(params, "params")
 
     minRoom = getMinRoom(params)
@@ -2014,7 +2009,7 @@ class DodontoFServer
 
   def getAllLoginCount()
     roomNumberRange = (0 .. $saveDataMaxCount)
-    loginUserCountList = getLoginUserCountList(roomNumberRange)
+    loginUserCountList = login_user_count_list(roomNumberRange)
 
     total = 0
     userList = []
@@ -2079,7 +2074,7 @@ class DodontoFServer
   def getLoginInfo()
     logging("getLoginInfo begin")
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
 
     uniqueId = params['uniqueId']
     uniqueId ||= createUniqueId()
@@ -2097,7 +2092,7 @@ class DodontoFServer
         "isDiceBotOn" => $isDiceBotOn,
         "uniqueId" => uniqueId,
         "refreshTimeout" => $refreshTimeout,
-        "refreshInterval" => getRefreshInterval(),
+        "refreshInterval" => refresh_interval(),
         "isCommet" => $isCommet,
         "version" => $version,
         "playRoomMaxNumber" => ($saveDataMaxCount - 1),
@@ -2277,7 +2272,7 @@ class DodontoFServer
     resultText = "OK"
     playRoomIndex = -1
     begin
-      params = getParamsFromRequestData()
+      params = extract_params_in_request()
       logging(params, "params")
 
       checkCreatePlayRoomPassword(params['createPassword'])
@@ -2389,7 +2384,7 @@ class DodontoFServer
     resultText = "OK"
 
     begin
-      params = getParamsFromRequestData()
+      params = extract_params_in_request()
       logging(params, "params")
 
       playRoomPassword = params['playRoomPassword']
@@ -2527,7 +2522,7 @@ class DodontoFServer
 
 
   def removePlayRoom()
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
 
     roomNumbers = params['roomNumbers']
     ignoreLoginUser = params['ignoreLoginUser']
@@ -2591,7 +2586,7 @@ class DodontoFServer
     dir = getRoomLocalSpaceDirName
     makeDir(dir)
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     @saveScenarioBaseUrl = params['baseUrl']
     chatPaletteSaveDataString = params['chatPaletteSaveData']
 
@@ -2969,7 +2964,7 @@ class DodontoFServer
   def checkRoomStatus()
     deleteOldUploadFile()
 
-    checkRoomStatusData = getParamsFromRequestData()
+    checkRoomStatusData = extract_params_in_request()
     logging(checkRoomStatusData, 'checkRoomStatusData')
 
     roomNumber = checkRoomStatusData['roomNumber']
@@ -2989,7 +2984,7 @@ class DodontoFServer
 
     if isExistPlayRoomInfo
       save_data(trueSaveFileName) do |saveData|
-        playRoomName = getPlayRoomName(saveData, roomNumber)
+        playRoomName = play_room_name(saveData, roomNumber)
         changedPassword = saveData['playRoomChangedPassword']
         chatChannelNames = saveData['chatChannelNames']
         canUseExternalImage = saveData['canUseExternalImage']
@@ -3028,7 +3023,7 @@ class DodontoFServer
   end
 
   def loginPassword()
-    loginData = getParamsFromRequestData()
+    loginData = extract_params_in_request()
     logging(loginData, 'loginData')
 
     roomNumber = loginData['roomNumber']
@@ -3084,7 +3079,7 @@ class DodontoFServer
 
 
   def logout()
-    logoutData = getParamsFromRequestData()
+    logoutData = extract_params_in_request()
     logging(logoutData, 'logoutData')
 
     uniqueId = logoutData['uniqueId']
@@ -3177,7 +3172,7 @@ class DodontoFServer
 
     dir = getDiceBotExtraTableDirName
     makeDir(dir)
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
 
     require 'TableFileData'
 
@@ -3211,7 +3206,7 @@ class DodontoFServer
     logging("changeBotTableMain Begin")
 
     dir = getDiceBotExtraTableDirName
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
 
     require 'TableFileData'
 
@@ -3238,7 +3233,7 @@ class DodontoFServer
   def removeBotTableMain()
     logging("removeBotTableMain Begin")
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     command = params["command"]
 
     dir = getDiceBotExtraTableDirName
@@ -3288,7 +3283,7 @@ class DodontoFServer
     uploadFileBase($replayDataUploadDir, $UPLOAD_REPALY_DATA_MAX_SIZE) do |fileNameFullPath, fileNameOriginal, result|
       logging("uploadReplayData yield Begin")
 
-      params = getParamsFromRequestData()
+      params = extract_params_in_request()
 
       ownUrl = params['ownUrl']
       replayUrl = ownUrl + "?replay=" + CGI.escape(fileNameFullPath)
@@ -3349,7 +3344,7 @@ class DodontoFServer
     }
 
     begin
-      replayData = getParamsFromRequestData()
+      replayData = extract_params_in_request()
 
       logging(replayData, "replayData")
 
@@ -3385,7 +3380,7 @@ class DodontoFServer
 
       deleteOldUploadFile()
 
-      params = getParamsFromRequestData()
+      params = extract_params_in_request()
       baseUrl = params['baseUrl']
       logging(baseUrl, "baseUrl")
 
@@ -3436,7 +3431,7 @@ class DodontoFServer
         return result
       end
 
-      params = getParamsFromRequestData()
+      params = extract_params_in_request()
 
       fileData = params['fileData']
 
@@ -3693,7 +3688,7 @@ class DodontoFServer
 
       set_record_empty
 
-      params = getParamsFromRequestData()
+      params = extract_params_in_request()
       logging(params, 'load params')
 
       jsonDataString = params['fileData']
@@ -3747,7 +3742,7 @@ class DodontoFServer
     logging(jsonData, 'loadFromJsonData jsonData')
 
     saveDataAll = getSaveDataAllFromSaveData(jsonData)
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
 
     removeCharacterDataList = params['removeCharacterDataList']
     if removeCharacterDataList != nil
@@ -3893,7 +3888,7 @@ class DodontoFServer
     end
     logging("small image create successed.")
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     tagInfo = params['tagInfo']
     logging(tagInfo, "uploadImageData tagInfo")
 
@@ -3929,7 +3924,7 @@ class DodontoFServer
     }
 
     begin
-      params = getParamsFromRequestData()
+      params = extract_params_in_request()
 
       imageFileName = params["imageFileName"]
       logging(imageFileName, "imageFileName")
@@ -3989,7 +3984,7 @@ class DodontoFServer
   def deleteImage()
     logging("deleteImage begin")
 
-    imageData = getParamsFromRequestData()
+    imageData = extract_params_in_request()
     logging(imageData, "imageData")
 
     imageUrlList = imageData['imageUrlList']
@@ -4078,7 +4073,7 @@ class DodontoFServer
   def uploadImageUrl()
     logging("uploadImageUrl begin")
 
-    imageData = getParamsFromRequestData()
+    imageData = extract_params_in_request()
     logging(imageData, "imageData")
 
     imageUrl = imageData['imageUrl']
@@ -4201,7 +4196,7 @@ class DodontoFServer
   def sendDiceBotChatMessage
     logging('sendDiceBotChatMessage')
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
 
     repeatCount = getDiceBotRepeatCount(params)
 
@@ -4367,7 +4362,7 @@ class DodontoFServer
     result = {'result' => "NG"}
 
     return result if ($mentenanceModePassword.nil?)
-    chatData = getParamsFromRequestData()
+    chatData = extract_params_in_request()
 
     password = chatData["password"]
     logging(password, "password check...")
@@ -4399,7 +4394,7 @@ class DodontoFServer
   end
 
   def sendChatMessage
-    chatData = getParamsFromRequestData()
+    chatData = extract_params_in_request()
     sendChatMessageByChatData(chatData)
   end
 
@@ -4506,7 +4501,7 @@ class DodontoFServer
   end
 
   def changeMap()
-    mapData = getParamsFromRequestData()
+    mapData = extract_params_in_request()
     logging(mapData, "mapData")
 
     changeMapSaveData(mapData)
@@ -4537,7 +4532,7 @@ class DodontoFServer
   def drawOnMap
     logging('drawOnMap Begin')
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     data = params['data']
     logging(data, 'data')
 
@@ -4589,7 +4584,7 @@ class DodontoFServer
 
 
   def addEffect()
-    effectData = getParamsFromRequestData()
+    effectData = extract_params_in_request()
     effectDataList = [effectData]
     addEffectData(effectDataList)
   end
@@ -4642,7 +4637,7 @@ class DodontoFServer
 
   def changeEffect
     change_save_data(@savefiles['effects']) do |saveData|
-      effectData = getParamsFromRequestData()
+      effectData = extract_params_in_request()
       targetCutInId = effectData['effectId']
 
       saveData['effects'] ||= []
@@ -4667,7 +4662,7 @@ class DodontoFServer
     logging('removeEffect Begin')
 
     change_save_data(@savefiles['effects']) do |saveData|
-      params = getParamsFromRequestData()
+      params = extract_params_in_request()
       effectId = params['effectId']
       logging(effectId, 'effectId')
 
@@ -4689,7 +4684,7 @@ class DodontoFServer
   end
 
   def changeImageTags()
-    effectData = getParamsFromRequestData()
+    effectData = extract_params_in_request()
     source = effectData['source']
     tagInfo = effectData['tagInfo']
 
@@ -4780,7 +4775,7 @@ class DodontoFServer
 
 
   def addCharacter()
-    characterData = getParamsFromRequestData()
+    characterData = extract_params_in_request()
     characterDataList = [characterData]
 
     addCharacterData(characterDataList)
@@ -4842,7 +4837,7 @@ class DodontoFServer
 
 
   def changeCharacter()
-    characterData = getParamsFromRequestData()
+    characterData = extract_params_in_request()
     logging(characterData.inspect, "characterData")
 
     changeCharacterData(characterData)
@@ -4944,7 +4939,7 @@ class DodontoFServer
   def addCardZone()
     logging("addCardZone Begin")
 
-    data = getParamsFromRequestData()
+    data = extract_params_in_request()
 
     x = data['x']
     y = data['y']
@@ -4976,7 +4971,7 @@ class DodontoFServer
     clearCharacterByTypeLocal(getRandomDungeonCardTrushMountType)
 
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     cardTypeInfos = params['cardTypeInfos']
     logging(cardTypeInfos, "cardTypeInfos")
 
@@ -5057,7 +5052,7 @@ class DodontoFServer
   def addCard()
     logging("addCard begin")
 
-    addCardData = getParamsFromRequestData()
+    addCardData = extract_params_in_request()
 
     isText = addCardData['isText']
     imageName = addCardData['imageName']
@@ -5294,7 +5289,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
 
     mountName = params['mountName']
     logging(mountName, "mountName")
@@ -5333,7 +5328,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     logging(params, 'params')
 
     result = {
@@ -5394,7 +5389,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
 
     mountName = params['mountName']
     logging(mountName, "mountName")
@@ -5431,7 +5426,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     logging(params, 'params')
 
     mountName = params['mountName']
@@ -5501,7 +5496,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    dumpTrushCardsData = getParamsFromRequestData()
+    dumpTrushCardsData = extract_params_in_request()
     logging(dumpTrushCardsData, 'dumpTrushCardsData')
 
     mountName = dumpTrushCardsData['mountName']
@@ -5561,7 +5556,7 @@ class DodontoFServer
 
     set_record_empty
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     mountName = params['mountName']
     trushMountId = params['mountId']
     isShuffle = params['isShuffle']
@@ -5611,7 +5606,7 @@ class DodontoFServer
 
     set_record_empty
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     mountName = params['mountName']
     trushMountId = params['mountId']
 
@@ -5730,7 +5725,7 @@ class DodontoFServer
   end
 
   def getMountCardInfos
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     logging(params, 'getTrushMountCardInfos params')
 
     mountName = params['mountName']
@@ -5762,7 +5757,7 @@ class DodontoFServer
   end
 
   def getTrushMountCardInfos
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     logging(params, 'getTrushMountCardInfos params')
 
     mountName = params['mountName']
@@ -5784,7 +5779,7 @@ class DodontoFServer
 
     set_record_empty
 
-    clearData = getParamsFromRequestData()
+    clearData = extract_params_in_request()
     logging(clearData, 'clearData')
 
     targetTypes = clearData['types']
@@ -5813,7 +5808,7 @@ class DodontoFServer
 
 
   def removeCharacter()
-    removeCharacterDataList = getParamsFromRequestData()
+    removeCharacterDataList = extract_params_in_request()
     removeCharacterByRemoveCharacterDataList(removeCharacterDataList)
   end
 
@@ -5863,7 +5858,7 @@ class DodontoFServer
 
     set_record_empty
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     characterId = params['characterId']
 
     logging(characterId, "enterWaitingRoomCharacter characterId")
@@ -5885,7 +5880,7 @@ class DodontoFServer
 
 
   def resurrectCharacter
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     resurrectCharacterId = params['imgId']
     logging(resurrectCharacterId, "resurrectCharacterId")
 
@@ -5953,7 +5948,7 @@ class DodontoFServer
 
     set_record_empty
 
-    params = getParamsFromRequestData()
+    params = extract_params_in_request()
     targetCharacterId = params['characterId']
     x = params['x']
     y = params['y']
@@ -6001,7 +5996,7 @@ class DodontoFServer
 
 
   def changeRoundTime
-    roundTimeData = getParamsFromRequestData()
+    roundTimeData = extract_params_in_request()
     changeInitiativeData(roundTimeData)
   end
 
@@ -6015,7 +6010,7 @@ class DodontoFServer
   def moveCharacter()
     change_save_data(@savefiles['characters']) do |saveData|
 
-      characterMoveData = getParamsFromRequestData()
+      characterMoveData = extract_params_in_request()
       logging(characterMoveData, "moveCharacter() characterMoveData")
 
       logging(characterMoveData['imgId'], "character.imgId")
@@ -6114,7 +6109,7 @@ def main(cgiParams)
   logging("main called")
   server = DodontoFServer.new(SaveDirInfo.new(), cgiParams)
   logging("server created")
-  printResult(server)
+  print_Response(server)
   logging("printResult called")
 end
 
@@ -6135,7 +6130,7 @@ def getInitializedHeaderText(server)
   header
 end
 
-def printResult(server)
+def print_Response(server)
   logging("========================================>CGI begin.")
 
   text = "empty"
@@ -6171,11 +6166,11 @@ def printResult(server)
       text = result
     end
   rescue Exception => e
-    errorMessage = getErrorResponseText(e)
-    loggingForce(errorMessage, "errorMessage")
+    error_message = getErrorResponseText(e)
+    loggingForce(error_message, "errorMessage")
 
     text = "\n= ERROR ====================\n"
-    text << errorMessage
+    text << error_message
     text << "============================\n"
   end
 
@@ -6192,7 +6187,7 @@ def printResult(server)
 end
 
 
-def getCgiParams()
+def extract_params_in_cgi()
   logging("getCgiParams Begin")
 
   length = ENV['CONTENT_LENGTH'].to_i
@@ -6206,32 +6201,32 @@ def getCgiParams()
   end
 
   logging(input, "getCgiParams input")
-  messagePackedData = DodontoFServer.parse_msgpack(input)
+  params = DodontoFServer.parse_msgpack(input)
 
-  logging(messagePackedData, "messagePackedData")
+  logging(params, "messagePackedData")
   logging("getCgiParams End")
 
-  messagePackedData
+  params
 end
 
 
-def executeDodontoServerCgi()
+def execute_server()
   initLog()
 
-  cgiParams = getCgiParams()
+  params = extract_params_in_cgi()
 
   case $dbType
     when "mysql"
       #mod_ruby でも再読み込みするようにloadに
       require 'DodontoFServerMySql.rb'
-      mainMySql(cgiParams)
+      mainMySql(params)
     else
       #通常のテキストファイル形式
-      main(cgiParams)
+      main(params)
   end
 
 end
 
 if $0 === __FILE__
-  executeDodontoServerCgi()
+  execute_server()
 end

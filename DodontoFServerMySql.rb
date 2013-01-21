@@ -769,7 +769,7 @@ def mainMySql(cgiParams)
     
     server = DodontoFServer_MySql.new(SaveDirInfoMySql.new(), cgiParams)
     
-    printResult(server)
+    print_Response(server)
   ensure
     saveDataManager.closeDb
   end
@@ -780,7 +780,7 @@ end
 if( $0 === __FILE__ )
   initLog();
   
-  cgiParams = getCgiParams()
+  cgiParams = extract_params_in_cgi()
   
   
   mainMySql(cgiParams)

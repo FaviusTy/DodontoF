@@ -42,7 +42,7 @@ class TestDodontoFServer < Test::Unit::TestCase
     }
     $imageTypeInfos['map'] = "./testMapImages"
     server = DodontoFServer.new(cgi)
-    result = server.getResponse
+    result = server.response_body
     assert_equal('{"mapImageList":["./testMapImages/01akt11.jpeg","./testMapImages/Blue hills.jpg","./testMapImages/Sunset.jpg"]}', result);
   end
   
@@ -64,7 +64,7 @@ class TestDodontoFServer < Test::Unit::TestCase
     }
     
     server = DodontoFServer.new(cgi)
-    result = server.getResponse.tosjis
+    result = server.response_body.tosjis
     
     print(result + "\n")
     

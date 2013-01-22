@@ -199,7 +199,7 @@ class DodontoFServer
         lines = readlines(savefile_name)
       end
 
-      @last_update_times[type_name] = getSaveFileTimeStampMillSecond(savefile_name)
+      @last_update_times[type_name] = savefile_timestamp_millisec(savefile_name)
     end
 
     if lines.empty?
@@ -253,7 +253,7 @@ class DodontoFServer
   def load_character(type_name, file_name)
     logging(@last_update_times, "loadSaveFileForCharacter begin @lastUpdateTimes")
 
-    character_update_time = getSaveFileTimeStampMillSecond(file_name)
+    character_update_time = savefile_timestamp_millisec(file_name)
 
     #後の操作順序に依存せずRecord情報が取得できるよう、ここでRecordをキャッシュしておく。
     #こうしないとRecordを取得する順序でセーブデータと整合性が崩れる場合があるため
@@ -366,7 +366,7 @@ class DodontoFServer
 
     text_data = ""
     lockfile.lock do
-      @last_update_times[type_name] = getSaveFileTimeStampMillSecond(file_name)
+      @last_update_times[type_name] = savefile_timestamp_millisec(file_name)
       text_data = extract_safed_file_text(file_name)
     end
 
@@ -943,7 +943,7 @@ class DodontoFServer
 
       logging(target_last_update_time, "targetLastUpdateTime")
 
-      if isSaveFileChanged(target_last_update_time, file_name)
+      if savefile_changed?(target_last_update_time, file_name)
         logging(file_name, "saveFile is changed")
         save_data = load_savefile(type_name, file_name)
         yield(save_data, type_name)
@@ -1733,12 +1733,12 @@ class DodontoFServer
     result_list
   end
 
-  def getLoginUserList(roomNumberRange)
-    loginUserList = {}
-    roomNumberRange.each { |i| loginUserList[i] = [] }
+  def login_user_list(target_range)
+    login_user_list = {}
+    target_range.each { |i| login_user_list[i] = [] }
 
-    @savedir_info.each_with_index(roomNumberRange, $loginUserInfo) do |saveFiles, index|
-      next unless (roomNumberRange.include?(index))
+    @savedir_info.each_with_index(target_range, $loginUserInfo) do |saveFiles, index|
+      next unless (target_range.include?(index))
 
       if saveFiles.size != 1
         logging("emptry room")
@@ -1746,60 +1746,60 @@ class DodontoFServer
         next
       end
 
-      userNames = []
-      trueSaveFileName = saveFiles.first
-      loginUserInfo = update_login_user_info(trueSaveFileName)
-      loginUserInfo.each do |data|
-        userNames << data["userName"]
+      user_names = []
+      real_savefile_name = saveFiles.first
+      login_user_info = update_login_user_info(real_savefile_name)
+      login_user_info.each do |data|
+        user_names << data["userName"]
       end
 
-      loginUserList[index] = userNames
+      login_user_list[index] = user_names
     end
 
-    loginUserList
+    login_user_list
   end
 
 
-  def getSaveDataLastAccessTimes(roomNumberRange)
-    @savedir_info.getSaveDataLastAccessTimes($saveFiles.values, roomNumberRange)
+  def save_data_lastaccess_times(target_range)
+    @savedir_info.getSaveDataLastAccessTimes($saveFiles.values, target_range)
   end
 
-  def getSaveDataLastAccessTime(fileName, roomNo)
-    data = @savedir_info.getSaveDataLastAccessTime(fileName, roomNo)
-    time = data[roomNo]
+  def save_data_lastaccess_time(file_name, room_no)
+    data = @savedir_info.getSaveDataLastAccessTime(file_name, room_no)
+    time = data[room_no]
   end
 
 
-  def removeOldPlayRoom()
-    roomNumberRange = (0 .. $saveDataMaxCount)
-    accessTimes = getSaveDataLastAccessTimes(roomNumberRange)
-    removeOldRoomFromAccessTimes(accessTimes)
+  def remove_old_play_room()
+    all_ange = (0 .. $saveDataMaxCount)
+    access_times = save_data_lastaccess_times(all_ange)
+    remove_old_room_for_access_times(access_times)
   end
 
-  def removeOldRoomFromAccessTimes(accessTimes)
+  def remove_old_room_for_access_times(access_times)
     logging("removeOldRoom Begin")
     if $removeOldPlayRoomLimitDays <= 0
-      return accessTimes
+      return access_times
     end
 
-    logging(accessTimes, "accessTimes")
+    logging(access_times, "accessTimes")
 
-    roomNumbers = getDeleteTargetRoomNumbers(accessTimes)
+    target_rooms = delete_room_numbers(access_times)
 
-    ignoreLoginUser = true
+    ignore_login_user = true
     password = nil
-    result = removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+    result = removePlayRoomByParams(target_rooms, ignore_login_user, password)
     logging(result, "removePlayRoomByParams result")
 
     result
   end
 
-  def getDeleteTargetRoomNumbers(accessTimes)
-    logging(accessTimes, "getDeleteTargetRoomNumbers accessTimes")
+  def delete_room_numbers(access_times)
+    logging(access_times, "getDeleteTargetRoomNumbers accessTimes")
 
     roomNumbers = []
 
-    accessTimes.each do |index, time|
+    access_times.each do |index, time|
       logging(index, "index")
       logging(time, "time")
 
@@ -1918,7 +1918,7 @@ class DodontoFServer
     passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
     canVisit = playRoomData['canVisit']
     gameType = playRoomData['gameType']
-    timeStamp = getSaveDataLastAccessTime($saveFiles['chatMessageDataLog'], roomNo)
+    timeStamp = save_data_lastaccess_time($saveFiles['chatMessageDataLog'], roomNo)
 
     timeString = ""
     unless timeStamp.nil?
@@ -2483,7 +2483,7 @@ class DodontoFServer
       return "unremovablePlayRoomNumber"
     end
 
-    lastAccessTimes = getSaveDataLastAccessTimes(roomNumberRange)
+    lastAccessTimes = save_data_lastaccess_times(roomNumberRange)
     lastAccessTime = lastAccessTimes[roomNumber]
     logging(lastAccessTime, "lastAccessTime")
 
@@ -2869,7 +2869,7 @@ class DodontoFServer
     if isAddPlayRoomInfo
       trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
       @last_update_times[$playRoomInfoTypeName] = 0
-      if isSaveFileChanged(0, trueSaveFileName)
+      if savefile_changed?(0, trueSaveFileName)
         saveDataAll[$playRoomInfoTypeName] = load_savefile($playRoomInfoTypeName, trueSaveFileName)
       end
     end
@@ -2922,7 +2922,7 @@ class DodontoFServer
         logging(saveFileName, 'saveFileName')
         next unless (regExp === saveFileName)
 
-        createdTime = getSaveFileTimeStamp(saveFileName)
+        createdTime = savefile_timestamp(saveFileName)
         now = Time.now.to_i
         diff = (now - createdTime)
         logging(diff, "createdTime diff")
@@ -3816,7 +3816,7 @@ class DodontoFServer
           addEffectData(effects)
         when "initiative"
           roundTimeData = getLoadData(saveDataAll, 'time', 'roundTimeData', {})
-          changeInitiativeData(roundTimeData)
+          change_initiative_data(roundTimeData)
         else
           loggingForce(target, "invalid load target type")
       end
@@ -4727,7 +4727,7 @@ class DodontoFServer
       begin
         deleteFile(smallImage)
       rescue => e
-        errorMessage = getErrorResponseText(e)
+        errorMessage = error_response_body(e)
         loggingException(e)
       end
     end
@@ -5398,7 +5398,7 @@ class DodontoFServer
 
       trushMount, trushCards = findTrushMountAndTrushCards(saveData, mountName)
 
-      cardData = removeFromArray(trushCards) { |i| i['imgId'] === params['targetCardId'] }
+      cardData = remove_from_array(trushCards) { |i| i['imgId'] === params['targetCardId'] }
       logging(cardData, "cardData")
       return if (cardData.nil?)
 
@@ -5867,7 +5867,7 @@ class DodontoFServer
     change_save_data(@savefiles['characters']) do |saveData|
       characters = getCharactersFromSaveData(saveData)
 
-      enterCharacterData = removeFromArray(characters) { |i| (i['imgId'] == characterId) }
+      enterCharacterData = remove_from_array(characters) { |i| (i['imgId'] == characterId) }
       return result if (enterCharacterData.nil?)
 
       waitingRoom = getWaitinigRoomFromSaveData(saveData)
@@ -5887,7 +5887,7 @@ class DodontoFServer
     change_save_data(@savefiles['characters']) do |saveData|
       graveyard = getGraveyardFromSaveData(saveData)
 
-      characterData = removeFromArray(graveyard) do |character|
+      characterData = remove_from_array(graveyard) do |character|
         character['imgId'] == resurrectCharacterId
       end
 
@@ -5913,20 +5913,20 @@ class DodontoFServer
   end
 
 
-  def getGraveyardFromSaveData(saveData)
-    getArrayInfoFromHash(saveData, 'graveyard')
+  def getGraveyardFromSaveData(save_data)
+    getArrayInfoFromHash(save_data, 'graveyard')
   end
 
-  def getWaitinigRoomFromSaveData(saveData)
-    getArrayInfoFromHash(saveData, 'waitingRoom')
+  def getWaitinigRoomFromSaveData(save_data)
+    getArrayInfoFromHash(save_data, 'waitingRoom')
   end
 
-  def getCharactersFromSaveData(saveData)
-    getArrayInfoFromHash(saveData, 'characters')
+  def getCharactersFromSaveData(save_data)
+    getArrayInfoFromHash(save_data, 'characters')
   end
 
-  def getCardsFromCardMount(cardMount, mountName)
-    getArrayInfoFromHash(cardMount, mountName)
+  def getCardsFromCardMount(card_mount, mount_name)
+    getArrayInfoFromHash(card_mount, mount_name)
   end
 
   def getArrayInfoFromHash(hash, key)
@@ -5934,8 +5934,8 @@ class DodontoFServer
     hash[key]
   end
 
-  def getCardMountFromSaveData(saveData)
-    getHashInfoFromHash(saveData, 'cardMount')
+  def getCardMountFromSaveData(save_data)
+    getHashInfoFromHash(save_data, 'cardMount')
   end
 
   def getHashInfoFromHash(hash, key)
@@ -5958,7 +5958,7 @@ class DodontoFServer
     change_save_data(@savefiles['characters']) do |saveData|
       waitingRoom = getWaitinigRoomFromSaveData(saveData)
 
-      characterData = removeFromArray(waitingRoom) do |character|
+      characterData = remove_from_array(waitingRoom) do |character|
         character['imgId'] == targetCharacterId
       end
 
@@ -5977,7 +5977,7 @@ class DodontoFServer
   end
 
 
-  def removeFromArray(array)
+  def remove_from_array(array)
     index = nil
     array.each_with_index do |i, targetIndex|
       logging(i, "i")
@@ -5995,33 +5995,33 @@ class DodontoFServer
   end
 
 
-  def changeRoundTime
-    roundTimeData = extract_params_in_request()
-    changeInitiativeData(roundTimeData)
+  def change_round_time
+    round_time_data = extract_params_in_request()
+    change_initiative_data(round_time_data)
   end
 
-  def changeInitiativeData(roundTimeData)
+  def change_initiative_data(round_time_data)
     change_save_data(@savefiles['time']) do |saveData|
-      saveData['roundTimeData'] = roundTimeData
+      saveData['roundTimeData'] = round_time_data
     end
   end
 
 
-  def moveCharacter()
+  def move_character()
     change_save_data(@savefiles['characters']) do |saveData|
 
-      characterMoveData = extract_params_in_request()
-      logging(characterMoveData, "moveCharacter() characterMoveData")
+      character_move_data = extract_params_in_request()
+      logging(character_move_data, "moveCharacter() characterMoveData")
 
-      logging(characterMoveData['imgId'], "character.imgId")
+      logging(character_move_data['imgId'], "character.imgId")
 
       characters = getCharactersFromSaveData(saveData)
 
       characters.each do |characterData|
-        next unless (characterData['imgId'] == characterMoveData['imgId'])
+        next unless (characterData['imgId'] == character_move_data['imgId'])
 
-        characterData['x'] = characterMoveData['x']
-        characterData['y'] = characterMoveData['y']
+        characterData['x'] = character_move_data['x']
+        characterData['y'] = character_move_data['y']
 
         break
       end
@@ -6032,32 +6032,32 @@ class DodontoFServer
   end
 
   #override
-  def getSaveFileTimeStamp(saveFileName)
-    unless exist?(saveFileName)
+  def savefile_timestamp(savefile_name)
+    unless exist?(savefile_name)
       return 0
     end
 
-    timeStamp = File.mtime(saveFileName).to_f
+    timestamp = File.mtime(savefile_name).to_f
   end
 
-  def getSaveFileTimeStampMillSecond(saveFileName)
-    (getSaveFileTimeStamp(saveFileName) * 1000).to_i
+  def savefile_timestamp_millisec(savefile_name)
+    (savefile_timestamp(savefile_name) * 1000).to_i
   end
 
-  def isSaveFileChanged(lastUpdateTime, saveFileName)
-    lastUpdateTime = lastUpdateTime.to_i
-    saveFileTimeStamp = getSaveFileTimeStampMillSecond(saveFileName)
-    changed = (saveFileTimeStamp != lastUpdateTime)
+  def savefile_changed?(last_update_time, savefile_name)
+    last_update_time = last_update_time.to_i
+    savefile_timestamp = savefile_timestamp_millisec(savefile_name)
+    changed = (savefile_timestamp != last_update_time)
 
-    logging(saveFileName, "saveFileName")
-    logging(saveFileTimeStamp.inspect, "saveFileTimeStamp")
-    logging(lastUpdateTime.inspect, "lastUpdateTime   ")
+    logging(savefile_name, "saveFileName")
+    logging(savefile_timestamp.inspect, "saveFileTimeStamp")
+    logging(last_update_time.inspect, "lastUpdateTime   ")
     logging(changed, "changed")
 
     changed
   end
 
-  def getResponse
+  def response_body
     response = analyze_command
 
     if isJsonResult
@@ -6069,51 +6069,52 @@ class DodontoFServer
 end
 
 
-def getErrorResponseText(e)
-  errorMessage = ""
-  errorMessage << "e.to_s : " << e.to_s << "\n"
-  errorMessage << "e.inspect : " << e.inspect << "\n"
-  errorMessage << "$@ : " << $@.join("\n") << "\n"
-  errorMessage << "$! : " << $!.to_s << "\n"
+def error_response_body(e)
+  error_message <<-ERR
+  e.to_s : #{e.to_s}
+  e.inspect : #{e.inspect}
+  $@ : #{$@.join("\n")}
+  $! : #{$!.to_s("\n")}
+  ERR
 
-  errorMessage
+  error_message
 end
 
 
-def isGzipTarget(result, server)
+def compress?(result, server)
   return false if ($gzipTargetSize <= 0)
   return false if (server.jsonp_callback)
 
   ((/gzip/ =~ ENV["HTTP_ACCEPT_ENCODING"]) and (result.length > $gzipTargetSize))
 end
 
-def getGzipResult(result)
+def compress_response(result)
   require 'zlib'
   require 'stringio'
 
-  stringIo = StringIO.new
-  Zlib::GzipWriter.wrap(stringIo) do |gz|
+  io = StringIO.new
+  Zlib::GzipWriter.wrap(io) do |gz|
     gz.write(result)
     gz.flush
     gz.finish
   end
 
-  gzipResult = stringIo.string
-  logging(gzipResult.length.to_s, "CGI response zipped length  ")
+  compressed = io.string
+  logging(compressed.length.to_s, "CGI response zipped length  ")
 
-  gzipResult
+  compressed
 end
 
 
-def main(cgiParams)
+def main(params)
   logging("main called")
-  server = DodontoFServer.new(SaveDirInfo.new(), cgiParams)
+  server = DodontoFServer.new(SaveDirInfo.new(), params)
   logging("server created")
-  print_Response(server)
+  print_response(server)
   logging("printResult called")
 end
 
-def getInitializedHeaderText(server)
+def response_header(server)
   header = ""
 
   if $isModRuby
@@ -6130,15 +6131,15 @@ def getInitializedHeaderText(server)
   header
 end
 
-def print_Response(server)
+def print_response(server)
   logging("========================================>CGI begin.")
 
   text = "empty"
 
-  header = getInitializedHeaderText(server)
+  header = response_header(server)
 
   begin
-    result = server.getResponse
+    result = server.response_body
 
     if server.is_add_marker
       result = "#D@EM>#" + result + "#<D@EM#"
@@ -6150,7 +6151,7 @@ def print_Response(server)
 
     logging(result.length.to_s, "CGI response original length")
 
-    if isGzipTarget(result, server)
+    if compress?(result, server)
       if $isModRuby
         Apache.request.content_encoding = 'gzip'
       else
@@ -6161,12 +6162,12 @@ def print_Response(server)
         end
       end
 
-      text = getGzipResult(result)
+      text = compress_response(result)
     else
       text = result
     end
   rescue Exception => e
-    error_message = getErrorResponseText(e)
+    error_message = error_response_body(e)
     loggingForce(error_message, "errorMessage")
 
     text = "\n= ERROR ====================\n"

@@ -1083,7 +1083,7 @@ class DodontoFServer
 
   def server_info_for_webif()
     result_data = {
-        "maxRoom" => ($saveDataMaxCount - 1),
+        "max_room" => ($saveDataMaxCount - 1),
         'isNeedCreatePassword' => (not $createPlayRoomPassword.empty?),
         'result' => 'OK',
     }
@@ -1096,7 +1096,7 @@ class DodontoFServer
     if request_boolean_for_webif("dice", false)
       require 'diceBotInfos'
       dicebot_infos = DiceBotInfos.new.getInfos
-      result_data['diceBotInfos'] = getDiceBotInfos()
+      result_data['diceBotInfos'] = dicebot_infos()
     end
 
     result_data
@@ -1104,10 +1104,10 @@ class DodontoFServer
 
   def room_list_for_webif()
     logging("getWebIfRoomList Begin")
-    min_room = request_int_for_webif('minRoom', 0)
-    max_room = request_int_for_webif('maxRoom', ($saveDataMaxCount - 1))
+    min_room = request_int_for_webif('min_room', 0)
+    max_room = request_int_for_webif('max_room', ($saveDataMaxCount - 1))
 
-    room_states = getPlayRoomStatesLocal(min_room, max_room)
+    room_states = play_room_states_local(min_room, max_room)
 
     result_data = {
         "playRoomStates" => room_states,
@@ -1630,7 +1630,7 @@ class DodontoFServer
   end
 
 
-  def update_login_user_info(real_Savefile_name, user_name = '', unique_id = '', is_visitor = false)
+  def update_login_user_info(real_savefile_name, user_name = '', unique_id = '', is_visitor = false)
     logging(unique_id, 'updateLoginUserInfo uniqueId')
     logging(user_name, 'updateLoginUserInfo userName')
 
@@ -1650,7 +1650,7 @@ class DodontoFServer
       target_function = method(:change_save_data)
     end
 
-    target_function.call(real_Savefile_name) do |saveData|
+    target_function.call(real_savefile_name) do |saveData|
 
       unless is_get_only
         change_user_info(saveData, unique_id, now_seconds, user_name, is_visitor)
@@ -1797,7 +1797,7 @@ class DodontoFServer
   def delete_room_numbers(access_times)
     logging(access_times, "getDeleteTargetRoomNumbers accessTimes")
 
-    roomNumbers = []
+    room_numbers = []
 
     access_times.each do |index, time|
       logging(index, "index")
@@ -1805,53 +1805,53 @@ class DodontoFServer
 
       next if (time.nil?)
 
-      timeDiffSeconds = (Time.now - time)
-      logging(timeDiffSeconds, "timeDiffSeconds")
+      time_diff_sec = (Time.now - time)
+      logging(time_diff_sec, "timeDiffSeconds")
 
-      limitSeconds = $removeOldPlayRoomLimitDays * 24 * 60 * 60
-      logging(limitSeconds, "limitSeconds")
+      limit_sec = $removeOldPlayRoomLimitDays * 24 * 60 * 60
+      logging(limit_sec, "limitSeconds")
 
-      if timeDiffSeconds > limitSeconds
+      if time_diff_sec > limit_sec
         logging(index, "roomNumbers added index")
-        roomNumbers << index
+        room_numbers << index
       end
     end
 
-    logging(roomNumbers, "roomNumbers")
-    roomNumbers
+    logging(room_numbers, "roomNumbers")
+    room_numbers
   end
 
 
-  def findEmptyRoomNumber()
-    emptyRoomNubmer = -1
+  def find_empty_room_number()
+    empty_room_number = -1
 
-    roomNumberRange = (0..$saveDataMaxCount)
+    room_number_range = (0..$saveDataMaxCount)
 
-    roomNumberRange.each do |roomNumber|
+    room_number_range.each do |roomNumber|
       @savedir_info.setSaveDataDirIndex(roomNumber)
-      trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
+      real_savefile_name = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
-      next if (exist?(trueSaveFileName))
+      next if (exist?(real_savefile_name))
 
-      emptyRoomNubmer = roomNumber
+      empty_room_number = roomNumber
       break
     end
 
-    emptyRoomNubmer
+    empty_room_number
   end
 
-  def getPlayRoomStates()
+  def play_room_states()
     params = extract_params_in_request()
     logging(params, "params")
 
-    minRoom = getMinRoom(params)
-    maxRoom = getMaxRoom(params)
-    playRoomStates = getPlayRoomStatesLocal(minRoom, maxRoom)
+    min_room = min_room(params)
+    max_room = max_room(params)
+    play_room_states = play_room_states_local(min_room, max_room)
 
     result = {
-        "minRoom" => minRoom,
-        "maxRoom" => maxRoom,
-        "playRoomStates" => playRoomStates,
+        "min_room" => min_room,
+        "max_room" => max_room,
+        "playRoomStates" => play_room_states,
     }
 
     logging(result, "getPlayRoomStatesLocal result")
@@ -1859,37 +1859,37 @@ class DodontoFServer
     result
   end
 
-  def getPlayRoomStatesLocal(minRoom, maxRoom)
-    roomNumberRange = (minRoom .. maxRoom)
-    playRoomStates = []
+  def play_room_states_local(min_room, max_room)
+    room_number_range = (min_room .. max_room)
+    play_room_states = []
 
-    roomNumberRange.each do |roomNo|
+    room_number_range.each do |roomNo|
 
       @savedir_info.setSaveDataDirIndex(roomNo)
 
-      playRoomState = getPlayRoomState(roomNo)
-      next if (playRoomState.nil?)
+      play_room_state = play_room_state(roomNo)
+      next if (play_room_state.nil?)
 
-      playRoomStates << playRoomState
+      play_room_states << play_room_state
     end
 
-    playRoomStates
+    play_room_states
   end
 
-  def getPlayRoomState(roomNo)
+  def play_room_state(room_no)
 
     # playRoomState = nil
-    playRoomState = {}
-    playRoomState['passwordLockState'] = false
-    playRoomState['index'] = sprintf("%3d", roomNo)
-    playRoomState['playRoomName'] = "（空き部屋）"
-    playRoomState['lastUpdateTime'] = ""
-    playRoomState['canVisit'] = false
-    playRoomState['gameType'] = ''
-    playRoomState['loginUsers'] = []
+    play_room_state = {}
+    play_room_state['passwordLockState'] = false
+    play_room_state['index'] = sprintf("%3d", room_no)
+    play_room_state['playRoomName'] = "（空き部屋）"
+    play_room_state['lastUpdateTime'] = ""
+    play_room_state['canVisit'] = false
+    play_room_state['gameType'] = ''
+    play_room_state['login_users'] = []
 
     begin
-      playRoomState = getPlayRoomStateLocal(roomNo, playRoomState)
+      play_room_state = play_room_state_local(room_no, play_room_state)
     rescue => e
       loggingForce("getPlayRoomStateLocal rescue")
       loggingException(e)
@@ -1898,89 +1898,89 @@ class DodontoFServer
       loggingException(e)
     end
 
-    playRoomState
+    play_room_state
   end
 
-  def getPlayRoomStateLocal(roomNo, playRoomState)
-    playRoomInfoFile = @savedir_info.getTrueSaveFileName($playRoomInfo)
+  def play_room_state_local(room_no, play_room_state)
+    play_room_info_file = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
-    return playRoomState unless (exist?(playRoomInfoFile))
+    return play_room_state unless (exist?(play_room_info_file))
 
-    playRoomData = nil
-    save_data(playRoomInfoFile) do |playRoomDataTmp|
-      playRoomData = playRoomDataTmp
+    play_room_data = nil
+    save_data(play_room_info_file) do |playRoomDataTmp|
+      play_room_data = playRoomDataTmp
     end
-    logging(playRoomData, "playRoomData")
+    logging(play_room_data, "playRoomData")
 
-    return playRoomState if (playRoomData.empty?)
+    return play_room_state if (play_room_data.empty?)
 
-    playRoomName = play_room_name(playRoomData, roomNo)
-    passwordLockState = (not playRoomData['playRoomChangedPassword'].nil?)
-    canVisit = playRoomData['canVisit']
-    gameType = playRoomData['gameType']
-    timeStamp = save_data_lastaccess_time($saveFiles['chatMessageDataLog'], roomNo)
+    play_room_name = play_room_name(play_room_data, room_no)
+    password_lock_state = (not play_room_data['playRoomChangedPassword'].nil?)
+    can_visit = play_room_data['canVisit']
+    game_type = play_room_data['gameType']
+    timestamp = save_data_lastaccess_time($saveFiles['chatMessageDataLog'], room_no)
 
-    timeString = ""
-    unless timeStamp.nil?
-      timeString = "#{timeStamp.strftime('%Y/%m/%d %H:%M:%S')}"
+    time_display = ""
+    unless timestamp.nil?
+      time_display = "#{timestamp.strftime('%Y/%m/%d %H:%M:%S')}"
     end
 
-    loginUsers = getLoginUserNames()
+    login_users = login_user_names()
 
-    playRoomState['passwordLockState'] = passwordLockState
-    playRoomState['playRoomName'] = playRoomName
-    playRoomState['lastUpdateTime'] = timeString
-    playRoomState['canVisit'] = canVisit
-    playRoomState['gameType'] = gameType
-    playRoomState['loginUsers'] = loginUsers
+    play_room_state['passwordLockState'] = password_lock_state
+    play_room_state['playRoomName'] = play_room_name
+    play_room_state['lastUpdateTime'] = time_display
+    play_room_state['canVisit'] = can_visit
+    play_room_state['gameType'] = game_type
+    play_room_state['loginUsers'] = login_users
 
-    playRoomState
+    play_room_state
   end
 
-  def getLoginUserNames()
-    userNames = []
+  def login_user_names()
+    user_names = []
 
-    trueSaveFileName = @savedir_info.getTrueSaveFileName($loginUserInfo)
-    logging(trueSaveFileName, "getLoginUserNames trueSaveFileName")
+    real_savefile_name = @savedir_info.getTrueSaveFileName($loginUserInfo)
+    logging(real_savefile_name, "getLoginUserNames real_savefile_name")
 
-    unless exist?(trueSaveFileName)
-      return userNames
+    unless exist?(real_savefile_name)
+      return user_names
     end
 
-    @now_getLoginUserNames ||= Time.now.to_i
+    @now_login_user_names ||= Time.now.to_i
 
-    save_data(trueSaveFileName) do |userInfos|
+    save_data(real_savefile_name) do |userInfos|
       userInfos.each do |uniqueId, userInfo|
-        next if (delete_user_info?(uniqueId, userInfo, @now_getLoginUserNames))
-        userNames << userInfo['userName']
+        next if (delete_user_info?(uniqueId, userInfo, @now_login_user_names))
+        user_names << userInfo['userName']
       end
     end
 
-    logging(userNames, "getLoginUserNames userNames")
-    userNames
+    logging(user_names, "getLoginUserNames user_names")
+    user_names
   end
 
-  def getGameName(gameType)
+  def game_title(game_type)
     require 'diceBotInfos'
-    diceBotInfos = DiceBotInfos.new.getInfos
-    gameInfo = diceBotInfos.find { |i| i["gameType"] == gameType }
+    dicebot_infos = DiceBotInfos.new.getInfos
+    game_info = dicebot_infos.find { |i| i["gameType"] == game_type }
 
-    return '--' if (gameInfo.nil?)
+    return '--' if (game_info.nil?)
 
-    gameInfo["name"]
+    game_info["name"]
   end
 
 
-  def getPlayRoomStatesByCount()
+  def play_room_states_by_count()
     params = extract_params_in_request()
     logging(params, "params")
 
-    minRoom = getMinRoom(params)
+    min_room = min_room(params)
     count = params["count"]
-    playRoomStates = getPlayRoomStatesByCountLocal(minRoom, count)
+    play_room_states = play_room_states_by_count_local(min_room, count)
 
     result = {
-        "playRoomStates" => playRoomStates,
+        "playRoomStates" => play_room_states,
     }
 
     logging(result, "getPlayRoomStatesByCount result")
@@ -1988,52 +1988,52 @@ class DodontoFServer
     result
   end
 
-  def getPlayRoomStatesByCountLocal(startRoomNo, count)
-    playRoomStates = []
+  def play_room_states_by_count_local(start_room_no, count)
+    play_room_states = []
 
-    (startRoomNo .. ($saveDataMaxCount - 1)).each do |roomNo|
+    (start_room_no .. ($saveDataMaxCount - 1)).each do |roomNo|
 
-      break if (playRoomStates.length > count)
+      break if (play_room_states.length > count)
 
       @savedir_info.setSaveDataDirIndex(roomNo)
 
-      playRoomState = getPlayRoomState(roomNo)
-      next if (playRoomState.nil?)
+      play_room_state = play_room_state(roomNo)
+      next if (play_room_state.nil?)
 
-      playRoomStates << playRoomState
+      play_room_states << play_room_state
     end
 
-    playRoomStates
+    play_room_states
   end
 
 
-  def getAllLoginCount()
-    roomNumberRange = (0 .. $saveDataMaxCount)
-    loginUserCountList = login_user_count_list(roomNumberRange)
+  def all_login_count()
+    room_number_range = (0 .. $saveDataMaxCount)
+    login_user_count_list = login_user_count_list(room_number_range)
 
     total = 0
-    userList = []
+    user_list = []
 
-    loginUserCountList.each do |key, value|
+    login_user_count_list.each do |key, value|
       next if (value == 0)
 
       total += value
-      userList << [key, value]
+      user_list << [key, value]
     end
 
-    userList.sort!
+    user_list.sort!
 
     logging(total, "getAllLoginCount total")
-    logging(userList, "getAllLoginCount userList")
-    return total, userList
+    logging(user_list, "getAllLoginCount userList")
+    return total, user_list
   end
 
-  def getFamousGames
-    roomNumberRange = (0 .. $saveDataMaxCount)
-    gameTypeList = getGameTypeList(roomNumberRange)
+  def famous_games
+    room_number_range = (0 .. $saveDataMaxCount)
+    game_type_list = getGameTypeList(room_number_range)
 
     counts = {}
-    gameTypeList.each do |roomNo, gameType|
+    game_type_list.each do |roomNo, gameType|
       next if (gameType.empty?)
 
       counts[gameType] ||= 0
@@ -2042,65 +2042,65 @@ class DodontoFServer
 
     logging(counts, 'counts')
 
-    countList = counts.collect { |gameType, count| [count, gameType] }
-    countList.sort!
-    countList.reverse!
+    count_list = counts.collect { |gameType, count| [count, gameType] }
+    count_list.sort!
+    count_list.reverse!
 
-    logging('countList', countList)
+    logging('countList', count_list)
 
-    famousGames = []
+    famous_games = []
 
-    countList.each_with_index do |info, index|
+    count_list.each_with_index do |info, index|
       # next if( index >= 3 )
 
-      count, gameType = info
-      famousGames << {"gameType" => gameType, "count" => count}
+      count, game_type = info
+      famous_games << {"gameType" => game_type, "count" => count}
     end
 
-    logging('famousGames', famousGames)
+    logging('famousGames', famous_games)
 
-    famousGames
+    famous_games
   end
 
 
-  def getMinRoom(params)
-    minRoom = [[params['minRoom'], 0].max, ($saveDataMaxCount - 1)].min
+  def min_room(params)
+    [[params['min_room'], 0].max, ($saveDataMaxCount - 1)].min
   end
 
-  def getMaxRoom(params)
-    maxRoom = [[params['maxRoom'], ($saveDataMaxCount - 1)].min, 0].max
+  def max_room(params)
+    [[params['max_room'], ($saveDataMaxCount - 1)].min, 0].max
   end
 
-  def getLoginInfo()
+  def login_info()
     logging("getLoginInfo begin")
 
     params = extract_params_in_request()
 
-    uniqueId = params['uniqueId']
-    uniqueId ||= createUniqueId()
+    unique_id = params['uniqueId']
+    unique_id ||= create_unique_id()
 
-    allLoginCount, loginUserCountList = getAllLoginCount()
-    writeAllLoginInfo(allLoginCount)
+    all_login_count, login_user_count_list = all_login_count()
+    write_all_login_info(all_login_count)
 
-    loginMessage = getLoginMessage()
-    cardInfos = cards_info.collectCardTypeAndTypeName()
-    diceBotInfos = getDiceBotInfos()
+    login_message = login_message()
+    card_infos = cards_info.collectCardTypeAndTypeName()
+    dicebot_infos = dicebot_infos()
 
     result = {
-        "loginMessage" => loginMessage,
-        "cardInfos" => cardInfos,
+        "loginMessage" => login_message,
+        "cardInfos" => card_infos,
         "isDiceBotOn" => $isDiceBotOn,
-        "uniqueId" => uniqueId,
+        "uniqueId" => unique_id,
         "refreshTimeout" => $refreshTimeout,
         "refreshInterval" => refresh_interval(),
         "isCommet" => $isCommet,
         "version" => $version,
         "playRoomMaxNumber" => ($saveDataMaxCount - 1),
-        "warning" => getLoginWarning(),
+        "warning" => login_warning(),
         "playRoomGetRangeMax" => $playRoomGetRangeMax,
-        "allLoginCount" => allLoginCount.to_i,
+        "allLoginCount" => all_login_count.to_i,
         "limitLoginCount" => $limitLoginCount,
-        "loginUserCountList" => loginUserCountList,
+        "loginUserCountList" => login_user_count_list,
         "maxLoginCount" => $aboutMaxLoginCount.to_i,
         "skinImage" => $skinImage,
         "isPaformanceMonitor" => $isPaformanceMonitor,
@@ -2112,7 +2112,7 @@ class DodontoFServer
         "imageUploadDirInfo" => {$localUploadDirMarker => $imageUploadDir},
         "mapMaxWidth" => $mapMaxWidth,
         "mapMaxHeigth" => $mapMaxHeigth,
-        'diceBotInfos' => diceBotInfos,
+        'diceBotInfos' => dicebot_infos,
         'isNeedCreatePassword' => (not $createPlayRoomPassword.empty?),
         'defaultUserNames' => $defaultUserNames,
     }
@@ -2123,26 +2123,26 @@ class DodontoFServer
   end
 
 
-  def createUniqueId
+  def create_unique_id
     # 識別子用の文字列生成。
     (Time.now.to_f * 1000).to_i.to_s(36)
   end
 
-  def writeAllLoginInfo(allLoginCount)
-    text = "#{allLoginCount}"
+  def write_all_login_info(all_login_count)
+    text = "#{all_login_count}"
 
-    saveFileName = $loginCountFile
-    saveFileLock = real_savefile_lock_readonly(saveFileName)
+    savefile_name = $loginCountFile
+    lockfile = real_savefile_lock_readonly(savefile_name)
 
-    saveFileLock.lock do
-      File.open(saveFileName, "w+") do |file|
+    lockfile.lock do
+      File.open(savefile_name, "w+") do |file|
         file.write(text.toutf8)
       end
     end
   end
 
 
-  def getLoginWarning
+  def login_warning
     unless exist_dir?(getSmallImageDir)
       return {
           "key" => "noSmallImageDir",
@@ -2150,7 +2150,7 @@ class DodontoFServer
       }
     end
 
-    if ($isMentenanceNow)
+    if $isMentenanceNow
       return {
           "key" => "canNotLoginBecauseMentenanceNow",
       }
@@ -2159,88 +2159,88 @@ class DodontoFServer
     nil
   end
 
-  def getLoginMessage
+  def login_message
     mesasge = ""
-    mesasge << getLoginMessageHeader
-    mesasge << getLoginMessageHistoryPart
+    mesasge << login_message_header
+    mesasge << login_message_history_part
     mesasge
   end
 
-  def getLoginMessageHeader
-    loginMessage = ""
+  def login_message_header
+    login_message = ""
 
     if File.exist?($loginMessageFile)
       File.readlines($loginMessageFile).each do |line|
-        loginMessage << line.chomp << "\n"
+        login_message << line.chomp << "\n"
       end
-      logging(loginMessage, "loginMessage")
+      logging(login_message, "loginMessage")
     else
       logging("#{$loginMessageFile} is NOT found.")
     end
 
-    loginMessage
+    login_message
   end
 
-  def getLoginMessageHistoryPart
-    loginMessage = ""
+  def login_message_history_part
+    login_message = ""
     if File.exist?($loginMessageBaseFile)
       File.readlines($loginMessageBaseFile).each do |line|
-        loginMessage << line.chomp << "\n"
+        login_message << line.chomp << "\n"
       end
     else
       logging("#{$loginMessageFile} is NOT found.")
     end
 
-    loginMessage
+    login_message
   end
 
-  def getDiceBotInfos()
+  def dicebot_infos()
     logging("getDiceBotInfos() Begin")
 
     require 'diceBotInfos'
-    diceBotInfos = DiceBotInfos.new.getInfos
+    dicebot_infos = DiceBotInfos.new.getInfos
 
-    commandInfos = getGameCommandInfos
+    command_infos = game_command_infos
 
-    commandInfos.each do |commandInfo|
+    command_infos.each do |commandInfo|
       logging(commandInfo, "commandInfos.each commandInfos")
-      setDiceBotPrefix(diceBotInfos, commandInfo)
+      dicebot_prefix(dicebot_infos, commandInfo)
     end
 
-    logging(diceBotInfos, "getDiceBotInfos diceBotInfos")
+    logging(dicebot_infos, "getDiceBotInfos diceBotInfos")
 
-    diceBotInfos
+    dicebot_infos
   end
 
-  def setDiceBotPrefix(diceBotInfos, commandInfo)
-    gameType = commandInfo["gameType"]
+  def dicebot_prefix(dicebot_infos, command_info)
+    game_type = command_info["gameType"]
 
-    if gameType.empty?
-      setDiceBotPrefixToAll(diceBotInfos, commandInfo)
+    if game_type.empty?
+      dicebot_prefix_all(dicebot_infos, command_info)
       return
     end
 
-    botInfo = diceBotInfos.find { |i| i["gameType"] == gameType }
-    setDiceBotPrefixToOne(botInfo, commandInfo)
+    bot_info = dicebot_infos.find { |i| i["gameType"] == game_type }
+    dicebot_prefix_one(bot_info, command_info)
   end
 
-  def setDiceBotPrefixToAll(diceBotInfos, commandInfo)
-    diceBotInfos.each do |botInfo|
-      setDiceBotPrefixToOne(botInfo, commandInfo)
+  def dicebot_prefix_all(dicebot_infos, command_info)
+    dicebot_infos.each do |botInfo|
+      dicebot_prefix_one(botInfo, command_info)
     end
   end
 
-  def setDiceBotPrefixToOne(botInfo, commandInfo)
-    logging(botInfo, "botInfo")
-    return if (botInfo.nil?)
+  def dicebot_prefix_one(botinfo, command_info)
+    logging(botinfo, "botInfo")
+    return if (botinfo.nil?) #TODO:FIXME この条件式の戻り値はnull.かつこの条件が真である場合も以下のif条件は正常に動作し、同様にnullを返すので不要とおもわれる.
 
-    prefixs = botInfo["prefixs"]
+    prefixs = botinfo["prefixs"]
     return if (prefixs.nil?)
 
-    prefixs << commandInfo["command"]
+    prefixs << command_info["command"]
   end
 
-  def getGameCommandInfos
+  def game_command_infos
     logging('getGameCommandInfos Begin')
 
     if @savedir_info.getSaveDataDirIndex == -1
@@ -2254,87 +2254,87 @@ class DodontoFServer
     dir = getDiceBotExtraTableDirName
     logging(dir, 'dir')
 
-    commandInfos = bot.getGameCommandInfos(dir, @dicebot_table_prefix)
-    logging(commandInfos, "getGameCommandInfos End commandInfos")
+    command_infos = bot.getGameCommandInfos(dir, @dicebot_table_prefix)
+    logging(command_infos, "getGameCommandInfos End commandInfos")
 
-    commandInfos
+    command_infos
   end
 
 
-  def createDir(playRoomIndex)
-    @savedir_info.setSaveDataDirIndex(playRoomIndex)
-    @savedir_info.createDir()
+  def create_dir(play_room_index)
+    @savedir_info.setSaveDataDirIndex(play_room_index)
+    @savedir_info.create_dir
   end
 
-  def createPlayRoom()
+  def create_play_room
     logging('createPlayRoom begin')
 
-    resultText = "OK"
-    playRoomIndex = -1
+    result_text = "OK"
+    play_room_index = -1
     begin
       params = extract_params_in_request()
       logging(params, "params")
 
-      checkCreatePlayRoomPassword(params['createPassword'])
+      check_create_play_room_password(params['createPassword'])
 
-      playRoomName = params['playRoomName']
-      playRoomPassword = params['playRoomPassword']
-      chatChannelNames = params['chatChannelNames']
-      canUseExternalImage = params['canUseExternalImage']
+      play_room_name = params['playRoomName']
+      play_room_password = params['playRoomPassword']
+      chat_channel_names = params['chatChannelNames']
+      can_use_external_image = params['canUseExternalImage']
 
-      canVisit = params['canVisit']
-      playRoomIndex = params['playRoomIndex']
+      can_visit = params['canVisit']
+      play_room_index = params['playRoomIndex']
 
-      if playRoomIndex == -1
-        playRoomIndex = findEmptyRoomNumber()
-        raise Exception.new("noEmptyPlayRoom") if (playRoomIndex == -1)
+      if play_room_index == -1
+        play_room_index = find_empty_room_number()
+        raise Exception.new("noEmptyPlayRoom") if (play_room_index == -1)
 
-        logging(playRoomIndex, "findEmptyRoomNumber playRoomIndex")
+        logging(play_room_index, "findEmptyRoomNumber playRoomIndex")
       end
 
-      logging(playRoomName, 'playRoomName')
+      logging(play_room_name, 'playRoomName')
       logging('playRoomPassword is get')
-      logging(playRoomIndex, 'playRoomIndex')
+      logging(play_room_index, 'playRoomIndex')
 
-      init_savefiles(playRoomIndex)
-      checkSetPassword(playRoomPassword, playRoomIndex)
+      init_savefiles(play_room_index)
+      check_set_password(play_room_password, play_room_index)
 
       logging("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
-      @savedir_info.removeSaveDir(playRoomIndex)
+      @savedir_info.removeSaveDir(play_room_index)
       logging("@saveDirInfo.removeSaveDir(playRoomIndex) End")
 
-      createDir(playRoomIndex)
+      create_dir(play_room_index)
 
-      playRoomChangedPassword = getChangedPassword(playRoomPassword)
-      logging(playRoomChangedPassword, 'playRoomChangedPassword')
+      play_room_changed_password = changed_password(play_room_password)
+      logging(play_room_changed_password, 'playRoomChangedPassword')
 
-      viewStates = params['viewStates']
-      logging("viewStates", viewStates)
+      view_states = params['viewStates']
+      logging("viewStates", view_states)
 
-      trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
+      real_savefile_name = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
-      change_save_data(trueSaveFileName) do |saveData|
-        saveData['playRoomName'] = playRoomName
-        saveData['playRoomChangedPassword'] = playRoomChangedPassword
-        saveData['chatChannelNames'] = chatChannelNames
-        saveData['canUseExternalImage'] = canUseExternalImage
-        saveData['canVisit'] = canVisit
+      change_save_data(real_savefile_name) do |saveData|
+        saveData['playRoomName'] = play_room_name
+        saveData['playRoomChangedPassword'] = play_room_changed_password
+        saveData['chatChannelNames'] = chat_channel_names
+        saveData['canUseExternalImage'] = can_use_external_image
+        saveData['canVisit'] = can_visit
         saveData['gameType'] = params['gameType']
 
-        addViewStatesToSaveData(saveData, viewStates)
+        add_view_states_to_savedata(saveData, view_states)
       end
 
-      sendRoomCreateMessage(playRoomIndex)
+      send_room_create_message(play_room_index)
     rescue => e
       loggingException(e)
-      resultText = e.inspect + "$@ : " + $@.join("\n")
+      result_text = e.inspect + "$@ : " + $@.join("\n")
     rescue Exception => errorMessage
-      resultText = errorMessage.to_s
+      result_text = errorMessage.to_s
     end
 
     result = {
-        "resultText" => resultText,
-        "playRoomIndex" => playRoomIndex,
+        "resultText" => result_text,
+        "playRoomIndex" => play_room_index,
     }
     logging(result, 'result')
     logging('createDir finished')
@@ -2342,7 +2342,7 @@ class DodontoFServer
     result
   end
 
-  def checkCreatePlayRoomPassword(password)
+  def check_create_play_room_password(password)
     logging('checkCreatePlayRoomPassword Begin')
     logging(password, 'password')
 
@@ -2353,76 +2353,76 @@ class DodontoFServer
   end
 
 
-  def sendRoomCreateMessage(roomNo)
-    chatData = {
+  def send_room_create_message(room_no)
+    chat_data = {
         "senderName" => "どどんとふ",
-        "message" => "＝＝＝＝＝＝＝　プレイルーム　【　No.　#{roomNo}　】　へようこそ！　＝＝＝＝＝＝＝",
+        "message" => "＝＝＝＝＝＝＝　プレイルーム　【　No.　#{room_no}　】　へようこそ！　＝＝＝＝＝＝＝",
         "color" => "cc0066",
         "uniqueId" => '0',
         "channel" => 0,
     }
 
-    sendChatMessageByChatData(chatData)
+    sendChatMessageByChatData(chat_data)
   end
 
 
-  def addViewStatesToSaveData(saveData, viewStates)
-    viewStates['key'] = Time.now.to_f.to_s
-    saveData['viewStateInfo'] = viewStates
+  def add_view_states_to_savedata(save_data, view_states)
+    view_states['key'] = Time.now.to_f.to_s
+    save_data['viewStateInfo'] = view_states
   end
 
-  def getChangedPassword(pass)
+  def changed_password(pass)
     return nil if (pass.empty?)
 
     salt = [rand(64), rand(64)].pack("C*").tr("\x00-\x3f", "A-Za-z0-9./")
     pass.crypt(salt)
   end
 
-  def changePlayRoom()
+  def change_play_room()
     logging("changePlayRoom begin")
 
-    resultText = "OK"
+    result_text = "OK"
 
     begin
       params = extract_params_in_request()
       logging(params, "params")
 
-      playRoomPassword = params['playRoomPassword']
-      checkSetPassword(playRoomPassword)
+      play_room_password = params['playRoomPassword']
+      check_set_password(play_room_password)
 
-      playRoomChangedPassword = getChangedPassword(playRoomPassword)
+      play_room_changed_password = changed_password(play_room_password)
       logging('playRoomPassword is get')
 
-      viewStates = params['viewStates']
-      logging("viewStates", viewStates)
+      view_states = params['viewStates']
+      logging("viewStates", view_states)
 
-      trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
+      real_savefile_name = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
-      change_save_data(trueSaveFileName) do |saveData|
+      change_save_data(real_savefile_name) do |saveData|
         saveData['playRoomName'] = params['playRoomName']
-        saveData['playRoomChangedPassword'] = playRoomChangedPassword
+        saveData['playRoomChangedPassword'] = play_room_changed_password
         saveData['chatChannelNames'] = params['chatChannelNames']
         saveData['canUseExternalImage'] = params['canUseExternalImage']
         saveData['canVisit'] = params['canVisit']
         saveData['backgroundImage'] = params['backgroundImage']
         saveData['gameType'] = params['gameType']
 
-        preViewStateInfo = saveData['viewStateInfo']
-        unless isSameViewState(viewStates, preViewStateInfo)
-          addViewStatesToSaveData(saveData, viewStates)
+        preview_state_info = saveData['viewStateInfo']
+        unless same_view_state?(view_states, preview_state_info)
+          add_view_states_to_savedata(saveData, view_states)
         end
 
       end
     rescue => e
       loggingException(e)
-      resultText = e.to_s
+      result_text = e.to_s
     rescue Exception => e
       loggingException(e)
-      resultText = e.to_s
+      result_text = e.to_s
     end
 
     result = {
-        "resultText" => resultText,
+        "resultText" => result_text,
     }
     logging(result, 'changePlayRoom result')
 
@@ -2430,26 +2430,26 @@ class DodontoFServer
   end
 
 
-  def checkSetPassword(playRoomPassword, roomNumber = nil)
-    return if (playRoomPassword.empty?)
+  def check_set_password(play_room_password, room_number = nil)
+    return if (play_room_password.empty?)
 
-    if roomNumber.nil?
-      roomNumber = @savedir_info.getSaveDataDirIndex
+    if room_number.nil?
+      room_number = @savedir_info.getSaveDataDirIndex
     end
 
-    if $noPasswordPlayRoomNumbers.include?(roomNumber)
+    if $noPasswordPlayRoomNumbers.include?(room_number)
       raise Exception.new("noPasswordPlayRoomNumber")
     end
   end
 
 
-  def isSameViewState(viewStates, preViewStateInfo)
+  def same_view_state?(view_states, preview_state_info)
     result = true
 
-    preViewStateInfo ||= {}
+    preview_state_info ||= {}
 
-    viewStates.each do |key, value|
-      unless value == preViewStateInfo[key]
+    view_states.each do |key, value|
+      unless value == preview_state_info[key]
         result = false
         break
       end
@@ -2459,32 +2459,32 @@ class DodontoFServer
   end
 
 
-  def checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
-    roomNumberRange = (roomNumber..roomNumber)
-    logging(roomNumberRange, "checkRemovePlayRoom roomNumberRange")
+  def check_remove_play_room(room_number, ignore_login_user, password)
+    room_number_range = (room_number..room_number)
+    logging(room_number_range, "checkRemovePlayRoom roomNumberRange")
 
-    unless ignoreLoginUser
-      userNames = getLoginUserNames()
-      userCount = userNames.size
-      logging(userCount, "checkRemovePlayRoom userCount")
+    unless ignore_login_user
+      user_names = login_user_names
+      user_count = user_names.size
+      logging(user_count, "checkRemovePlayRoom userCount")
 
-      if userCount > 0
+      if user_count > 0
         return "userExist"
       end
     end
 
-    if not password.nil?
-      if not checkPassword(roomNumber, password)
+    unless password.nil?
+      unless checkPassword(room_number, password)
         return "password"
       end
     end
 
-    if $unremovablePlayRoomNumbers.include?(roomNumber)
+    if $unremovablePlayRoomNumbers.include?(room_number)
       return "unremovablePlayRoomNumber"
     end
 
-    lastAccessTimes = save_data_lastaccess_times(roomNumberRange)
-    lastAccessTime = lastAccessTimes[roomNumber]
+    lastAccessTimes = save_data_lastaccess_times(room_number_range)
+    lastAccessTime = lastAccessTimes[room_number]
     logging(lastAccessTime, "lastAccessTime")
 
     unless lastAccessTime.nil?
@@ -2493,7 +2493,7 @@ class DodontoFServer
       logging(spendTimes, "spendTimes")
       logging(spendTimes / 60 / 60, "spendTimes / 60 / 60")
       if (spendTimes < $deletablePassedSeconds)
-        return "プレイルームNo.#{roomNumber}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
+        return "プレイルームNo.#{room_number}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
       end
     end
 
@@ -2544,7 +2544,7 @@ class DodontoFServer
       roomNumber = roomNumber.to_i
       logging(roomNumber, 'roomNumber')
 
-      resultText = checkRemovePlayRoom(roomNumber, ignoreLoginUser, password)
+      resultText = check_remove_play_room(roomNumber, ignoreLoginUser, password)
       logging(resultText, "checkRemovePlayRoom resultText")
 
       case resultText
@@ -3828,7 +3828,7 @@ class DodontoFServer
 
     @savefiles.each do |fileTypeName, trueSaveFileName|
       logging(fileTypeName, "fileTypeName")
-      logging(trueSaveFileName, "trueSaveFileName")
+      logging(trueSaveFileName, "real_savefile_name")
 
       saveDataForType = saveDataAll[fileTypeName]
       saveDataForType ||= {}
@@ -5391,29 +5391,29 @@ class DodontoFServer
 
     params = extract_params_in_request()
 
-    mountName = params['mountName']
-    logging(mountName, "mountName")
+    mount_name = params['mountName']
+    logging(mount_name, "mountName")
 
     change_save_data(@savefiles['characters']) do |saveData|
 
-      trushMount, trushCards = findTrushMountAndTrushCards(saveData, mountName)
+      trush_mount, trush_cards = findTrushMountAndTrushCards(saveData, mount_name)
 
-      cardData = remove_from_array(trushCards) { |i| i['imgId'] === params['targetCardId'] }
-      logging(cardData, "cardData")
-      return if (cardData.nil?)
+      card_data = remove_from_array(trush_cards) { |i| i['imgId'] === params['targetCardId'] }
+      logging(card_data, "cardData")
+      return if (card_data.nil?)
 
-      cardData['x'] = params['x']
-      cardData['y'] = params['y']
+      card_data['x'] = params['x']
+      card_data['y'] = params['y']
 
       characters = getCharactersFromSaveData(saveData)
-      characters.push(cardData)
+      characters.push(card_data)
 
       trushMountData = findCardData(characters, params['mountId'])
       logging(trushMountData, "returnCard trushMountData")
 
       return if (trushMountData.nil?)
 
-      setTrushMountDataCardsInfo(saveData, trushMountData, trushCards)
+      setTrushMountDataCardsInfo(saveData, trushMountData, trush_cards)
     end
 
     logging("drawTargetTrushCard End")

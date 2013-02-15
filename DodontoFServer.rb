@@ -3151,9 +3151,9 @@ class DodontoFServer
   end
 
 
-  def addBotTable()
+  def add_bot_table()
     result = {}
-    result['resultText'] = addBotTableMain()
+    result['resultText'] = add_bot_table_main()
 
     if result['resultText'] != "OK"
       return result
@@ -3167,7 +3167,7 @@ class DodontoFServer
     result
   end
 
-  def addBotTableMain()
+  def add_bot_table_main()
     logging("addBotTableMain Begin")
 
     dir = getDiceBotExtraTableDirName
@@ -3176,24 +3176,24 @@ class DodontoFServer
 
     require 'TableFileData'
 
-    resultText = 'OK'
+    result_text = 'OK'
     begin
       creator = TableFileCreator.new(dir, @dicebot_table_prefix, params)
       creator.execute
     rescue Exception => e
       logging_exception(e)
-      resultText = e.to_s
+      result_text = e.to_s
     end
 
-    logging(resultText, "addBotTableMain End resultText")
+    logging(result_text, "addBotTableMain End resultText")
 
-    resultText
+    result_text
   end
 
 
-  def changeBotTable()
+  def change_bot_table()
     result = {}
-    result['resultText'] = changeBotTableMain()
+    result['resultText'] = change_bot_table_main()
 
     if result['resultText'] != "OK"
       return result
@@ -3202,7 +3202,7 @@ class DodontoFServer
     get_bot_table_infos()
   end
 
-  def changeBotTableMain()
+  def change_bot_table_main()
     logging("changeBotTableMain Begin")
 
     dir = getDiceBotExtraTableDirName
@@ -3210,27 +3210,27 @@ class DodontoFServer
 
     require 'TableFileData'
 
-    resultText = 'OK'
+    result_text = 'OK'
     begin
       creator = TableFileEditer.new(dir, @dicebot_table_prefix, params)
       creator.execute
     rescue Exception => e
       logging_exception(e)
-      resultText = e.to_s
+      result_text = e.to_s
     end
 
-    logging(resultText, "changeBotTableMain End resultText")
+    logging(result_text, "changeBotTableMain End resultText")
 
-    resultText
+    result_text
   end
 
 
-  def removeBotTable()
-    removeBotTableMain()
-    get_bot_table_infos()
+  def remove_bot_table()
+    remove_bot_table_main
+    get_bot_table_infos
   end
 
-  def removeBotTableMain()
+  def remove_bot_table_main()
     logging("removeBotTableMain Begin")
 
     params = extract_params_in_request()
@@ -3240,24 +3240,24 @@ class DodontoFServer
 
     require 'TableFileData'
 
-    isLoadCommonTable = false
-    tableFileData = TableFileData.new(isLoadCommonTable)
-    tableFileData.setDir(dir, @dicebot_table_prefix)
-    tableInfos = tableFileData.getAllTableInfo
+    is_load_common_table = false
+    table_file_Data = TableFileData.new(is_load_common_table)
+    table_file_Data.setDir(dir, @dicebot_table_prefix)
+    table_infos = table_file_Data.getAllTableInfo
 
-    tableInfo = tableInfos.find { |i| i["command"] == command }
-    logging(tableInfo, "tableInfo")
-    return if (tableInfo.nil?)
+    table_info = table_infos.find { |i| i["command"] == command }
+    logging(table_info, "tableInfo")
+    return if (table_info.nil?)
 
-    fileName = tableInfo["fileName"]
-    logging(fileName, "fileName")
-    return if (fileName.nil?)
+    file_name = table_info["fileName"]
+    logging(file_name, "fileName")
+    return if (file_name.nil?)
 
     logging("isFile exist?")
-    return unless (File.exist?(fileName))
+    return unless (File.exist?(file_name))
 
     begin
-      File.delete(fileName)
+      File.delete(file_name)
     rescue Exception => e
       logging_exception(e)
     end
@@ -3266,73 +3266,73 @@ class DodontoFServer
   end
 
 
-  def requestReplayDataList()
+  def request_replay_data_list()
     logging("requestReplayDataList begin")
     result = {
         "resultText" => "OK",
     }
 
-    result["replayDataList"] = getReplayDataList() #[{"title"=>x, "url"=>y}]
+    result["replayDataList"] = get_replay_data_list() #[{"title"=>x, "url"=>y}]
 
     logging(result, "result")
     logging("requestReplayDataList end")
     result
   end
 
-  def uploadReplayData()
+  def upload_replay_data()
     uploadFileBase($replayDataUploadDir, $UPLOAD_REPALY_DATA_MAX_SIZE) do |fileNameFullPath, fileNameOriginal, result|
       logging("uploadReplayData yield Begin")
 
       params = extract_params_in_request()
 
-      ownUrl = params['ownUrl']
-      replayUrl = ownUrl + "?replay=" + CGI.escape(fileNameFullPath)
+      own_url = params['ownUrl']
+      replay_url = own_url + "?replay=" + CGI.escape(fileNameFullPath)
 
-      replayDataName = params['replayDataName']
-      replayDataInfo = setReplayDataInfo(fileNameFullPath, replayDataName, replayUrl)
+      replay_data_name = params['replayDataName']
+      replay_data_info = set_replay_data_info(fileNameFullPath, replay_data_name, replay_url)
 
-      result["replayDataInfo"] = replayDataInfo
-      result["replayDataList"] = getReplayDataList() #[{"title"=>x, "url"=>y}]
+      result["replayDataInfo"] = replay_data_info
+      result["replayDataList"] = get_replay_data_list() #[{"title"=>x, "url"=>y}]
 
       logging("uploadReplayData yield End")
     end
 
   end
 
-  def getReplayDataList
-    replayDataList = nil
+  def get_replay_data_list
+    replay_data_list = nil
 
-    save_data(getReplayDataInfoFileName()) do |saveData|
-      replayDataList = saveData['replayDataList']
+    save_data(get_replay_data_info_file_name()) do |saveData|
+      replay_data_list = saveData['replayDataList']
     end
 
-    replayDataList ||= []
+    replay_data_list ||= []
 
-    replayDataList
+    replay_data_list
   end
 
-  def getReplayDataInfoFileName
-    infoFileName = file_join($replayDataUploadDir, 'replayDataInfo.json')
-    infoFileName
+  def get_replay_data_info_file_name
+    info_file_name = file_join($replayDataUploadDir, 'replayDataInfo.json')
+    info_file_name
   end
 
 
   #getImageInfoFileName() ) do |saveData|
-  def setReplayDataInfo(fileName, title, url)
+  def set_replay_data_info(file_name, title, url)
 
-    replayDataInfo = {
-        "fileName" => fileName,
+    replay_data_info = {
+        "fileName" => file_name,
         "title" => title,
         "url" => url,
     }
 
-    change_save_data(getReplayDataInfoFileName()) do |saveData|
+    change_save_data(get_replay_data_info_file_name()) do |saveData|
       saveData['replayDataList'] ||= []
-      replayDataList = saveData['replayDataList']
-      replayDataList << replayDataInfo
+      replay_data_list = saveData['replayDataList']
+      replay_data_list << replay_data_info
     end
 
-    replayDataInfo
+    replay_data_info
   end
 
 
@@ -3349,7 +3349,7 @@ class DodontoFServer
       logging(replayData, "replayData")
 
       replayDataList = []
-      change_save_data(getReplayDataInfoFileName()) do |saveData|
+      change_save_data(get_replay_data_info_file_name()) do |saveData|
         saveData['replayDataList'] ||= []
         replayDataList = saveData['replayDataList']
 
@@ -3365,7 +3365,7 @@ class DodontoFServer
 
       logging("removeReplayData replayDataList", replayDataList)
 
-      result = requestReplayDataList()
+      result = request_replay_data_list()
     rescue => e
       result["resultText"] = e.to_s
       logging_exception(e)

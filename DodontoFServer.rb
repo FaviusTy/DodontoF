@@ -96,7 +96,7 @@ class DodontoFServer
     $saveFiles.each do |saveDataKeyName, saveFileName|
       logging(saveDataKeyName, "saveDataKeyName")
       logging(saveFileName, "saveFileName")
-      @savefiles[saveDataKeyName] = @savedir_info.real_savefile_name(saveFileName)
+      @savefiles[saveDataKeyName] = @savedir_info.getTrueSaveFileName(saveFileName)
     end
 
   end
@@ -190,7 +190,7 @@ class DodontoFServer
   end
 
   def load_long_chatlog(type_name, savefile_name)
-    savefile_name = @savedir_info.real_savefile_name($chatMessageDataLogAll)
+    savefile_name = @savedir_info.getTrueSaveFileName($chatMessageDataLogAll)
     lockfile = savefile_lock_readonly(savefile_name)
 
     lines = []
@@ -226,7 +226,7 @@ class DodontoFServer
         save_data = load_default_savefile(type_name, file_name)
       end
     rescue => e
-      logging_exception(e)
+      loggingException(e)
       raise e
     end
 
@@ -356,7 +356,7 @@ class DodontoFServer
       return @record
     end
 
-    real_savefile_name = @savedir_info.real_savefile_name($record)
+    real_savefile_name = @savedir_info.getTrueSaveFileName($record)
     save_data = load_default_savefile($recordKey, real_savefile_name)
     @record = record_by_save_data(save_data)
   end
@@ -423,7 +423,7 @@ class DodontoFServer
 
     removed_ids = removed.collect { |i| i['imgId'] }
 
-    real_savefile_name = @savedir_info.real_savefile_name($record)
+    real_savefile_name = @savedir_info.getTrueSaveFileName($record)
     change_save_data(real_savefile_name) do |_save_data|
       if @is_record_empty
         clear_record(_save_data)
@@ -567,7 +567,7 @@ class DodontoFServer
         file.write(text.toutf8)
       end
     rescue => e
-      logging_exception(e)
+      loggingException(e)
       raise e
     end
   end
@@ -638,10 +638,10 @@ class DodontoFServer
       end
     rescue => e
       loggingForce("getMessagePackFromData rescue")
-      logging_exception(e)
+      loggingException(e)
     rescue Exception => e
       loggingForce("getMessagePackFromData Exception rescue")
-      logging_exception(e)
+      loggingException(e)
     end
 
     logging(parsed_data, "messagePack")
@@ -902,7 +902,7 @@ class DodontoFServer
     password = request_data('password')
     visitor_mode = true
 
-    checked_result = check_login_password(room_index, password, visitor_mode)
+    checked_result = checkLoginPassword(room_index, password, visitor_mode)
     if checked_result['resultText'] != "OK"
       result['result'] = result['resultText']
       return result
@@ -1322,7 +1322,7 @@ class DodontoFServer
     begin
       change_character_chatched_for_webif
     rescue => e
-      logging_exception(e)
+      loggingException(e)
       result['result'] = e.to_s
     end
 
@@ -1411,7 +1411,7 @@ class DodontoFServer
   def _room_info_for_webif
     result = {}
 
-    real_savefile_name = @savedir_info.real_savefile_name($playRoomInfo)
+    real_savefile_name = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
     save_data(real_savefile_name) do |saveData|
       result['roomName'] = hash_value(saveData, 'playRoomName', '')
@@ -1438,7 +1438,7 @@ class DodontoFServer
 
     set_counter_names_in_room_info_webif
 
-    real_savefile_name = @savedir_info.real_savefile_name($playRoomInfo)
+    real_savefile_name = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
     room_info = _room_info_for_webif
     change_save_data(real_savefile_name) do |saveData|
@@ -1583,7 +1583,7 @@ class DodontoFServer
   end
 
   def login_user_info(user_name, unique_id, is_visitor)
-    current_login_user_info = @savedir_info.real_savefile_name($loginUserInfo)
+    current_login_user_info = @savedir_info.getTrueSaveFileName($loginUserInfo)
     update_login_user_info(current_login_user_info, user_name, unique_id, is_visitor)
   end
 
@@ -1788,7 +1788,7 @@ class DodontoFServer
 
     ignore_login_user = true
     password = nil
-    result = remove_play_room_by_params(target_rooms, ignore_login_user, password)
+    result = removePlayRoomByParams(target_rooms, ignore_login_user, password)
     logging(result, "removePlayRoomByParams result")
 
     result
@@ -1829,7 +1829,7 @@ class DodontoFServer
 
     room_number_range.each do |roomNumber|
       @savedir_info.setSaveDataDirIndex(roomNumber)
-      real_savefile_name = @savedir_info.real_savefile_name($playRoomInfo)
+      real_savefile_name = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
       next if (exist?(real_savefile_name))
 
@@ -1892,17 +1892,17 @@ class DodontoFServer
       play_room_state = play_room_state_local(room_no, play_room_state)
     rescue => e
       loggingForce("getPlayRoomStateLocal rescue")
-      logging_exception(e)
+      loggingException(e)
     rescue Exception => e
       loggingForce("getPlayRoomStateLocal Exception rescue")
-      logging_exception(e)
+      loggingException(e)
     end
 
     play_room_state
   end
 
   def play_room_state_local(room_no, play_room_state)
-    play_room_info_file = @savedir_info.real_savefile_name($playRoomInfo)
+    play_room_info_file = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
     return play_room_state unless (exist?(play_room_info_file))
 
@@ -1940,7 +1940,7 @@ class DodontoFServer
   def login_user_names()
     user_names = []
 
-    real_savefile_name = @savedir_info.real_savefile_name($loginUserInfo)
+    real_savefile_name = @savedir_info.getTrueSaveFileName($loginUserInfo)
     logging(real_savefile_name, "getLoginUserNames real_savefile_name")
 
     unless exist?(real_savefile_name)
@@ -2311,7 +2311,7 @@ class DodontoFServer
       view_states = params['viewStates']
       logging("viewStates", view_states)
 
-      real_savefile_name = @savedir_info.real_savefile_name($playRoomInfo)
+      real_savefile_name = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
       change_save_data(real_savefile_name) do |saveData|
         saveData['playRoomName'] = play_room_name
@@ -2326,7 +2326,7 @@ class DodontoFServer
 
       send_room_create_message(play_room_index)
     rescue => e
-      logging_exception(e)
+      loggingException(e)
       result_text = e.inspect + "$@ : " + $@.join("\n")
     rescue Exception => errorMessage
       result_text = errorMessage.to_s
@@ -2396,7 +2396,7 @@ class DodontoFServer
       view_states = params['viewStates']
       logging("viewStates", view_states)
 
-      real_savefile_name = @savedir_info.real_savefile_name($playRoomInfo)
+      real_savefile_name = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
       change_save_data(real_savefile_name) do |saveData|
         saveData['playRoomName'] = params['playRoomName']
@@ -2414,10 +2414,10 @@ class DodontoFServer
 
       end
     rescue => e
-      logging_exception(e)
+      loggingException(e)
       result_text = e.to_s
     rescue Exception => e
-      logging_exception(e)
+      loggingException(e)
       result_text = e.to_s
     end
 
@@ -2474,7 +2474,7 @@ class DodontoFServer
     end
 
     unless password.nil?
-      unless check_password(room_number, password)
+      unless checkPassword(room_number, password)
         return "password"
       end
     end
@@ -2483,16 +2483,16 @@ class DodontoFServer
       return "unremovablePlayRoomNumber"
     end
 
-    last_access_times = save_data_lastaccess_times(room_number_range)
-    last_access_time = last_access_times[room_number]
-    logging(last_access_time, "lastAccessTime")
+    lastAccessTimes = save_data_lastaccess_times(room_number_range)
+    lastAccessTime = lastAccessTimes[room_number]
+    logging(lastAccessTime, "lastAccessTime")
 
-    unless last_access_time.nil?
+    unless lastAccessTime.nil?
       now = Time.now
-      spend_times = now - last_access_time
-      logging(spend_times, "spendTimes")
-      logging(spend_times / 60 / 60, "spendTimes / 60 / 60")
-      if spend_times < $deletablePassedSeconds
+      spendTimes = now - lastAccessTime
+      logging(spendTimes, "spendTimes")
+      logging(spendTimes / 60 / 60, "spendTimes / 60 / 60")
+      if (spendTimes < $deletablePassedSeconds)
         return "プレイルームNo.#{room_number}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
       end
     end
@@ -2501,207 +2501,207 @@ class DodontoFServer
   end
 
 
-  def check_password(room_number, password)
+  def checkPassword(roomNumber, password)
 
     return true unless ($isPasswordNeedFroDeletePlayRoom)
 
-    @savedir_info.setSaveDataDirIndex(room_number)
-    real_savefile_name = @savedir_info.real_savefile_name($playRoomInfo)
-    exist_play_room_info = (exist?(real_savefile_name))
+    @savedir_info.setSaveDataDirIndex(roomNumber)
+    trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
+    isExistPlayRoomInfo = (exist?(trueSaveFileName))
 
-    return true unless (exist_play_room_info)
+    return true unless (isExistPlayRoomInfo)
 
     matched = false
-    save_data(real_savefile_name) do |saveData|
-      changed_password = saveData['playRoomChangedPassword']
-      matched = password_match?(password, changed_password)
+    save_data(trueSaveFileName) do |saveData|
+      changedPassword = saveData['playRoomChangedPassword']
+      matched = isPasswordMatch?(password, changedPassword)
     end
 
     matched
   end
 
 
-  def remove_play_room
+  def removePlayRoom()
     params = extract_params_in_request()
 
-    room_numbers = params['roomNumbers']
-    ignore_login_user = params['ignoreLoginUser']
+    roomNumbers = params['roomNumbers']
+    ignoreLoginUser = params['ignoreLoginUser']
     password = params['password']
     password ||= ""
 
-    remove_play_room_by_params(room_numbers, ignore_login_user, password)
+    removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
   end
 
-  def remove_play_room_by_params(room_numbers, ignore_login_user, password)
-    logging(ignore_login_user, 'removePlayRoomByParams Begin ignoreLoginUser')
+  def removePlayRoomByParams(roomNumbers, ignoreLoginUser, password)
+    logging(ignoreLoginUser, 'removePlayRoomByParams Begin ignoreLoginUser')
 
-    deleted_room_numbers = []
-    error_messages = []
-    password_room_numbers = []
-    ask_delete_room_numbers = []
+    deletedRoomNumbers = []
+    errorMessages = []
+    passwordRoomNumbers = []
+    askDeleteRoomNumbers = []
 
-    room_numbers.each do |room_number|
-      room_number = room_number.to_i
-      logging(room_number, 'roomNumber')
+    roomNumbers.each do |roomNumber|
+      roomNumber = roomNumber.to_i
+      logging(roomNumber, 'roomNumber')
 
-      result_text = check_remove_play_room(room_number, ignore_login_user, password)
-      logging(result_text, "checkRemovePlayRoom resultText")
+      resultText = check_remove_play_room(roomNumber, ignoreLoginUser, password)
+      logging(resultText, "checkRemovePlayRoom resultText")
 
-      case result_text
+      case resultText
         when "OK"
-          @savedir_info.removeSaveDir(room_number)
-          remove_local_space_dir(room_number)
-          deleted_room_numbers << room_number
+          @savedir_info.removeSaveDir(roomNumber)
+          removeLocalSpaceDir(roomNumber)
+          deletedRoomNumbers << roomNumber
         when "password"
-          password_room_numbers << room_number
+          passwordRoomNumbers << roomNumber
         when "userExist"
-          ask_delete_room_numbers << room_number
+          askDeleteRoomNumbers << roomNumber
         else
-          error_messages << result_text
+          errorMessages << resultText
       end
     end
 
     result = {
-        "deletedRoomNumbers" => deleted_room_numbers,
-        "askDeleteRoomNumbers" => ask_delete_room_numbers,
-        "passwordRoomNumbers" => password_room_numbers,
-        "errorMessages" => error_messages,
+        "deletedRoomNumbers" => deletedRoomNumbers,
+        "askDeleteRoomNumbers" => askDeleteRoomNumbers,
+        "passwordRoomNumbers" => passwordRoomNumbers,
+        "errorMessages" => errorMessages,
     }
     logging(result, 'result')
 
     result
   end
 
-  def remove_local_space_dir(room_number)
-    dir = getRoomLocalSpaceDirNameByRoomNo(room_number)
+  def removeLocalSpaceDir(roomNumber)
+    dir = getRoomLocalSpaceDirNameByRoomNo(roomNumber)
     rmdir(dir)
   end
 
-  def real_savefile_name(file_name)
-    @savedir_info.real_savefile_name($saveFileTempName)
+  def getTrueSaveFileName(fileName)
+    saveFileName = @savedir_info.getTrueSaveFileName($saveFileTempName)
   end
 
-  def save_scenario
+  def saveScenario()
     logging("saveScenario begin")
     dir = getRoomLocalSpaceDirName
     makeDir(dir)
 
     params = extract_params_in_request()
-    @save_scenario_base_url = params['baseUrl']
-    chat_palette_savedata_string = params['chatPaletteSaveData']
+    @saveScenarioBaseUrl = params['baseUrl']
+    chatPaletteSaveDataString = params['chatPaletteSaveData']
 
-    all_save_data = savedata_all_for_scenario
-    all_save_data = move_all_images_to_dir(dir, all_save_data)
-    make_chat_pallet_savefile(dir, chat_palette_savedata_string)
-    make_scenari_default_savefile(dir, all_save_data)
+    saveDataAll = getSaveDataAllForScenario
+    saveDataAll = moveAllImagesToDir(dir, saveDataAll)
+    makeChatPalletSaveFile(dir, chatPaletteSaveDataString)
+    makeScenariDefaultSaveFile(dir, saveDataAll)
 
-    remove_old_scenario_file(dir)
-    base_name = get_new_savefile_base_name(@full_backup_base_name)
-    scenario_file = make_scenario_file(dir, base_name)
+    removeOldScenarioFile(dir)
+    baseName = getNewSaveFileBaseName(@full_backup_base_name)
+    scenarioFile = makeScenarioFile(dir, baseName)
 
     result = {}
     result['result'] = "OK"
-    result["saveFileName"] = scenario_file
+    result["saveFileName"] = scenarioFile
 
     logging(result, "saveScenario result")
     result
   end
 
-  def savedata_all_for_scenario
-    select_types = $saveFiles.keys
-    select_types.delete_if { |i| i == 'chatMessageDataLog' }
+  def getSaveDataAllForScenario
+    selectTypes = $saveFiles.keys
+    selectTypes.delete_if { |i| i == 'chatMessageDataLog' }
 
-    is_add_play_room_info = true
-    get_select_files_data(select_types, is_add_play_room_info)
+    isAddPlayRoomInfo = true
+    getSelectFilesData(selectTypes, isAddPlayRoomInfo)
   end
 
-  def move_all_images_to_dir(dir, savedata_all)
-    logging(savedata_all, 'moveAllImagesToDir saveDataAll')
+  def moveAllImagesToDir(dir, saveDataAll)
+    logging(saveDataAll, 'moveAllImagesToDir saveDataAll')
 
-    move_map_image(dir, savedata_all)
-    move_effects_image(dir, savedata_all)
-    move_character_images(dir, savedata_all)
-    move_playroom_images(dir, savedata_all)
+    moveMapImageToDir(dir, saveDataAll)
+    moveEffectsImageToDir(dir, saveDataAll)
+    moveCharactersImagesToDir(dir, saveDataAll)
+    movePlayroomImagesToDir(dir, saveDataAll)
 
-    logging(savedata_all, 'moveAllImagesToDir result saveDataAll')
+    logging(saveDataAll, 'moveAllImagesToDir result saveDataAll')
 
-    savedata_all
+    saveDataAll
   end
 
-  def move_map_image(dir, all_savedata)
-    map_data = getLoadData(all_savedata, 'map', 'mapData', {})
-    image = map_data['imageSource']
+  def moveMapImageToDir(dir, saveDataAll)
+    mapData = getLoadData(saveDataAll, 'map', 'mapData', {})
+    imageSource = mapData['imageSource']
 
-    change_file_place(image, dir)
+    changeFilePlace(imageSource, dir)
   end
 
-  def move_effects_image(dir, all_savedata)
-    effects = getLoadData(all_savedata, 'effects', 'effects', [])
+  def moveEffectsImageToDir(dir, saveDataAll)
+    effects = getLoadData(saveDataAll, 'effects', 'effects', [])
 
     effects.each do |effect|
-      image = effect['source']
-      change_file_place(image, dir)
+      imageFile = effect['source']
+      changeFilePlace(imageFile, dir)
     end
   end
 
-  def move_character_images(dir, all_savedata)
-    characters = getLoadData(all_savedata, 'characters', 'characters', [])
-    move_character_images_from_characters(dir, characters)
+  def moveCharactersImagesToDir(dir, saveDataAll)
+    characters = getLoadData(saveDataAll, 'characters', 'characters', [])
+    moveCharactersImagesToDirFromCharacters(dir, characters)
 
-    characters = getLoadData(all_savedata, 'characters', 'graveyard', [])
-    move_character_images_from_characters(dir, characters)
+    characters = getLoadData(saveDataAll, 'characters', 'graveyard', [])
+    moveCharactersImagesToDirFromCharacters(dir, characters)
 
-    characters = getLoadData(all_savedata, 'characters', 'waitingRoom', [])
-    move_character_images_from_characters(dir, characters)
+    characters = getLoadData(saveDataAll, 'characters', 'waitingRoom', [])
+    moveCharactersImagesToDirFromCharacters(dir, characters)
   end
 
-  def move_character_images_from_characters(dir, characters)
+  def moveCharactersImagesToDirFromCharacters(dir, characters)
 
     characters.each do |character|
 
-      image_names = []
+      imageNames = []
 
       case character['type']
         when 'characterData'
-          image_names << character['imageName']
+          imageNames << character['imageName']
         when 'Card', 'CardMount', 'CardTrushMount'
-          image_names << character['imageName']
-          image_names << character['imageNameBack']
+          imageNames << character['imageName']
+          imageNames << character['imageNameBack']
         when 'floorTile', 'chit'
-          image_names << character['imageUrl']
+          imageNames << character['imageUrl']
         else
 
       end
 
-      next if (image_names.empty?)
+      next if (imageNames.empty?)
 
-      image_names.each do |imageName|
-        change_file_place(imageName, dir)
+      imageNames.each do |imageName|
+        changeFilePlace(imageName, dir)
       end
     end
   end
 
-  def move_playroom_images(dir, all_savedata)
+  def movePlayroomImagesToDir(dir, saveDataAll)
     logging(dir, "movePlayroomImagesToDir dir")
-    playroom_info = all_savedata['playRoomInfo']
-    return if (playroom_info.nil?)
-    logging(playroom_info, "playRoomInfo")
+    playRoomInfo = saveDataAll['playRoomInfo']
+    return if (playRoomInfo.nil?)
+    logging(playRoomInfo, "playRoomInfo")
 
-    background_image = playroom_info['backgroundImage']
-    logging(background_image, "backgroundImage")
-    return if (background_image.nil?)
-    return if (background_image.empty?)
+    backgroundImage = playRoomInfo['backgroundImage']
+    logging(backgroundImage, "backgroundImage")
+    return if (backgroundImage.nil?)
+    return if (backgroundImage.empty?)
 
-    change_file_place(background_image, dir)
+    changeFilePlace(backgroundImage, dir)
   end
 
-  def change_file_place(from, to)
+  def changeFilePlace(from, to)
     logging(from, "changeFilePlace from")
 
-    from_file_name, text = from.split(/\t/)
-    from_file_name ||= from
+    fromFileName, text = from.split(/\t/)
+    fromFileName ||= from
 
-    result = copy_file(from_file_name, to)
+    result = copyFile(fromFileName, to)
     logging(result, "copyFile result")
 
     return unless (result)
@@ -2710,21 +2710,21 @@ class DodontoFServer
     logging(from, "changeFilePlace result")
   end
 
-  def copy_file(from, to)
+  def copyFile(from, to)
     logging("moveFile begin")
     logging(from, "from")
     logging(to, "to")
 
-    logging(@save_scenario_base_url, "@saveScenarioBaseUrl")
-    from.gsub!(@save_scenario_base_url, './')
+    logging(@saveScenarioBaseUrl, "@saveScenarioBaseUrl")
+    from.gsub!(@saveScenarioBaseUrl, './')
     logging(from, "from2")
 
     return false if (from.nil?)
     return false unless (File.exist?(from))
 
-    from_dir = File.dirname(from)
-    logging(from_dir, "fromDir")
-    if from_dir == to
+    fromDir = File.dirname(from)
+    logging(fromDir, "fromDir")
+    if fromDir == to
       logging("from, to is equal dir")
       return true
     end
@@ -2741,27 +2741,27 @@ class DodontoFServer
     result
   end
 
-  def make_chat_pallet_savefile(dir, chat_palette_savedata_string)
+  def makeChatPalletSaveFile(dir, chatPaletteSaveDataString)
     logging("makeChatPalletSaveFile Begin")
     logging(dir, "makeChatPalletSaveFile dir")
 
-    current_dir = FileUtils.pwd.untaint
+    currentDir = FileUtils.pwd.untaint
     FileUtils.cd(dir)
 
     File.open($scenarioDefaultChatPallete, "a+") do |file|
-      file.write(chat_palette_savedata_string)
+      file.write(chatPaletteSaveDataString)
     end
 
-    FileUtils.cd(current_dir)
+    FileUtils.cd(currentDir)
     logging("makeChatPalletSaveFile End")
   end
 
-  def make_scenari_default_savefile(dir, all_savedata)
+  def makeScenariDefaultSaveFile(dir, saveDataAll)
     logging("makeScenariDefaultSaveFile Begin")
     logging(dir, "makeScenariDefaultSaveFile dir")
 
     extension = "sav"
-    result = save_select_files_from_all_savedata(all_savedata, extension)
+    result = saveSelectFilesFromSaveDataAll(saveDataAll, extension)
 
     from = result["saveFileName"]
     to = File.join(dir, $scenarioDefaultSaveData)
@@ -2772,249 +2772,249 @@ class DodontoFServer
   end
 
 
-  def remove_old_scenario_file(dir)
-    file_names = Dir.glob("#{dir}/#{@full_backup_base_name}*#{@scenario_file_ext}")
-    file_names = file_names.collect { |i| i.untaint }
-    logging(file_names, "removeOldScenarioFile fileNames")
+  def removeOldScenarioFile(dir)
+    fileNames = Dir.glob("#{dir}/#{@full_backup_base_name}*#{@scenario_file_ext}")
+    fileNames = fileNames.collect { |i| i.untaint }
+    logging(fileNames, "removeOldScenarioFile fileNames")
 
-    file_names.each do |fileName|
+    fileNames.each do |fileName|
       File.delete(fileName)
     end
   end
 
-  def make_scenario_file(dir, base_name = "scenario")
+  def makeScenarioFile(dir, fileBaseName = "scenario")
     logging("makeScenarioFile begin")
 
     require 'zlib'
     require 'archive/tar/minitar'
 
-    current_dir = FileUtils.pwd.untaint
+    currentDir = FileUtils.pwd.untaint
     FileUtils.cd(dir)
 
-    scenario_file = base_name + @scenario_file_ext
-    tgz = Zlib::GzipWriter.new(File.open(scenario_file, 'wb'))
+    scenarioFile = fileBaseName + @scenario_file_ext
+    tgz = Zlib::GzipWriter.new(File.open(scenarioFile, 'wb'))
 
-    file_names = Dir.glob('*')
-    file_names = file_names.collect { |i| i.untaint }
+    fileNames = Dir.glob('*')
+    fileNames = fileNames.collect { |i| i.untaint }
 
-    file_names.delete_if { |i| i == scenario_file }
+    fileNames.delete_if { |i| i == scenarioFile }
 
-    Archive::Tar::Minitar.pack(file_names, tgz)
+    Archive::Tar::Minitar.pack(fileNames, tgz)
 
-    FileUtils.cd(current_dir)
+    FileUtils.cd(currentDir)
 
-    File.join(dir, scenario_file)
+    File.join(dir, scenarioFile)
   end
 
 
   def save()
-    is_add_playroom_info = true
+    isAddPlayRoomInfo = true
     extension = request_data('extension')
-    save_select_files($saveFiles.keys, extension, is_add_playroom_info)
+    saveSelectFiles($saveFiles.keys, extension, isAddPlayRoomInfo)
   end
 
-  def save_map()
+  def saveMap()
     extension = request_data('extension')
-    select_types = ['map', 'characters']
-    save_select_files(select_types, extension)
+    selectTypes = ['map', 'characters']
+    saveSelectFiles(selectTypes, extension)
   end
 
 
-  def save_select_files(select_types, extension, is_add_playroom_info = false)
-    all_savedata = get_select_files_data(select_types, is_add_playroom_info)
-    save_select_files_from_all_savedata(all_savedata, extension)
+  def saveSelectFiles(selectTypes, extension, isAddPlayRoomInfo = false)
+    saveDataAll = getSelectFilesData(selectTypes, isAddPlayRoomInfo)
+    saveSelectFilesFromSaveDataAll(saveDataAll, extension)
   end
 
-  def save_select_files_from_all_savedata(all_savedata, extension)
+  def saveSelectFilesFromSaveDataAll(saveDataAll, extension)
     result = {}
     result["result"] = "unknown error"
 
-    if all_savedata.empty?
+    if saveDataAll.empty?
       result["result"] = "no save data"
       return result
     end
 
-    delete_old_savefile
+    deleteOldSaveFile
 
-    save_data = {}
-    save_data['saveDataAll'] = all_savedata
+    saveData = {}
+    saveData['saveDataAll'] = saveDataAll
 
-    text = build_json(save_data)
-    savefile_name = get_new_savefile_name(extension)
-    create_savefile(savefile_name, text)
+    text = build_json(saveData)
+    saveFileName = getNewSaveFileName(extension)
+    create_savefile(saveFileName, text)
 
     result["result"] = "OK"
-    result["saveFileName"] = savefile_name
+    result["saveFileName"] = saveFileName
     logging(result, "saveSelectFiles result")
 
     result
   end
 
 
-  def get_select_files_data(select_types, is_add_playroom_info = false)
+  def getSelectFilesData(selectTypes, isAddPlayRoomInfo = false)
     logging("getSelectFilesData begin")
 
     @last_update_times = {}
-    select_types.each do |type|
+    selectTypes.each do |type|
       @last_update_times[type] = 0
     end
     logging("dummy @lastUpdateTimes created")
 
-    all_savedata = {}
+    saveDataAll = {}
     current_save_data() do |targetSaveData, saveFileTypeName|
-      all_savedata[saveFileTypeName] = targetSaveData
+      saveDataAll[saveFileTypeName] = targetSaveData
       logging(saveFileTypeName, "saveFileTypeName in save")
     end
 
-    if is_add_playroom_info
-      true_savefile_name = @savedir_info.real_savefile_name($playRoomInfo)
+    if isAddPlayRoomInfo
+      trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
       @last_update_times[$playRoomInfoTypeName] = 0
-      if savefile_changed?(0, true_savefile_name)
-        all_savedata[$playRoomInfoTypeName] = load_savefile($playRoomInfoTypeName, true_savefile_name)
+      if savefile_changed?(0, trueSaveFileName)
+        saveDataAll[$playRoomInfoTypeName] = load_savefile($playRoomInfoTypeName, trueSaveFileName)
       end
     end
 
-    logging(all_savedata, "saveDataAll tmp")
+    logging(saveDataAll, "saveDataAll tmp")
 
-    all_savedata
+    saveDataAll
   end
 
   #override
-  def file_join(*parts)
+  def fileJoin(*parts)
     File.join(*parts)
   end
 
-  def get_new_savefile_name(extension)
-    base_name = get_new_savefile_base_name("DodontoF")
-    savefile_name = base_name + ".#{extension}"
-    file_join($saveDataTempDir, savefile_name).untaint
+  def getNewSaveFileName(extension)
+    baseName = getNewSaveFileBaseName("DodontoF")
+    saveFileName = baseName + ".#{extension}"
+    fileJoin($saveDataTempDir, saveFileName).untaint
   end
 
-  def get_new_savefile_base_name(prefix)
+  def getNewSaveFileBaseName(prefix)
     now = Time.now
-    base_name = now.strftime(prefix + "_%Y_%m%d_%H%M%S_#{now.usec}")
-    base_name.untaint
+    baseName = now.strftime(prefix + "_%Y_%m%d_%H%M%S_#{now.usec}")
+    baseName.untaint
   end
 
 
-  def delete_old_savefile
+  def deleteOldSaveFile
     logging('deleteOldSaveFile begin')
     begin
-      delete_old_savefile_catched
+      deleteOldSaveFileCatched
     rescue => e
-      logging_exception(e)
+      loggingException(e)
     end
     logging('deleteOldSaveFile end')
   end
 
-  def delete_old_savefile_catched
+  def deleteOldSaveFileCatched
 
     change_save_data($saveFileNames) do |saveData|
-      exist_file_names = saveData["fileNames"]
-      exist_file_names ||= []
-      logging(exist_file_names, 'existSaveFileNames')
+      existSaveFileNames = saveData["fileNames"]
+      existSaveFileNames ||= []
+      logging(existSaveFileNames, 'existSaveFileNames')
 
-      regexp = /DodontoF_[\d_]+.sav/
+      regExp = /DodontoF_[\d_]+.sav/
 
-      delete_targets = []
+      deleteTargets = []
 
-      exist_file_names.each do |saveFileName|
+      existSaveFileNames.each do |saveFileName|
         logging(saveFileName, 'saveFileName')
-        next unless (regexp === saveFileName)
+        next unless (regExp === saveFileName)
 
-        created_time = savefile_timestamp(saveFileName)
+        createdTime = savefile_timestamp(saveFileName)
         now = Time.now.to_i
-        diff = (now - created_time)
+        diff = (now - createdTime)
         logging(diff, "createdTime diff")
         next if (diff < $oldSaveFileDelteSeconds)
 
         begin
           deleteFile(saveFileName)
         rescue => e
-          logging_exception(e)
+          loggingException(e)
         end
 
-        delete_targets << saveFileName
+        deleteTargets << saveFileName
       end
 
-      logging(delete_targets, "deleteTargets")
+      logging(deleteTargets, "deleteTargets")
 
-      delete_targets.each do |fileName|
-        exist_file_names.delete_if { |i| i == fileName }
+      deleteTargets.each do |fileName|
+        existSaveFileNames.delete_if { |i| i == fileName }
       end
-      logging(exist_file_names, "existSaveFileNames")
+      logging(existSaveFileNames, "existSaveFileNames")
 
-      saveData["fileNames"] = exist_file_names
+      saveData["fileNames"] = existSaveFileNames
     end
 
   end
 
 
-  def logging_exception(e)
-    self.class.logging_exception(e)
+  def loggingException(e)
+    self.class.loggingException(e)
   end
 
-  def self.logging_exception(e)
+  def self.loggingException(e)
     loggingForce(e.to_s, "exception mean")
     loggingForce($@.join("\n"), "exception from")
     loggingForce($!.inspect, "$!.inspect")
   end
 
 
-  def check_room_status()
+  def checkRoomStatus()
     deleteOldUploadFile()
 
-    check_room_status_data = extract_params_in_request()
-    logging(check_room_status_data, 'checkRoomStatusData')
+    checkRoomStatusData = extract_params_in_request()
+    logging(checkRoomStatusData, 'checkRoomStatusData')
 
-    room_number = check_room_status_data['roomNumber']
-    logging(room_number, 'roomNumber')
+    roomNumber = checkRoomStatusData['roomNumber']
+    logging(roomNumber, 'roomNumber')
 
-    @savedir_info.setSaveDataDirIndex(room_number)
+    @savedir_info.setSaveDataDirIndex(roomNumber)
 
-    is_maintenance_on = false
-    is_welcome_message_on = $isWelcomeMessageOn
-    play_room_name = ''
-    chat_channel_names = nil
-    can_use_external_image = false
-    can_visit = false
-    is_password_locked = false
-    true_savefile_name = @savedir_info.real_savefile_name($playRoomInfo)
-    is_exist_playroom_info = (exist?(true_savefile_name))
+    isMentenanceModeOn = false;
+    isWelcomeMessageOn = $isWelcomeMessageOn;
+    playRoomName = ''
+    chatChannelNames = nil
+    canUseExternalImage = false
+    canVisit = false
+    isPasswordLocked = false
+    trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
+    isExistPlayRoomInfo = (exist?(trueSaveFileName))
 
-    if is_exist_playroom_info
-      save_data(true_savefile_name) do |saveData|
-        play_room_name = play_room_name(saveData, room_number)
+    if isExistPlayRoomInfo
+      save_data(trueSaveFileName) do |saveData|
+        playRoomName = play_room_name(saveData, roomNumber)
         changedPassword = saveData['playRoomChangedPassword']
-        chat_channel_names = saveData['chatChannelNames']
-        can_use_external_image = saveData['canUseExternalImage']
-        can_visit = saveData['canVisit']
+        chatChannelNames = saveData['chatChannelNames']
+        canUseExternalImage = saveData['canUseExternalImage']
+        canVisit = saveData['canVisit']
         unless changedPassword.nil?
-          is_password_locked = true
+          isPasswordLocked = true
         end
       end
     end
 
     unless $mentenanceModePassword.nil?
-      if check_room_status_data["adminPassword"] == $mentenanceModePassword
-        is_password_locked = false
-        is_welcome_message_on = false
-        is_maintenance_on = true
+      if checkRoomStatusData["adminPassword"] == $mentenanceModePassword
+        isPasswordLocked = false
+        isWelcomeMessageOn = false
+        isMentenanceModeOn = true
       end
     end
 
-    logging("isPasswordLocked", is_password_locked)
+    logging("isPasswordLocked", isPasswordLocked)
 
     result = {
-        'isRoomExist' => is_exist_playroom_info,
-        'roomName' => play_room_name,
-        'roomNumber' => room_number,
-        'chatChannelNames' => chat_channel_names,
-        'canUseExternalImage' => can_use_external_image,
-        'canVisit' => can_visit,
-        'isPasswordLocked' => is_password_locked,
-        'isMentenanceModeOn' => is_maintenance_on,
-        'isWelcomeMessageOn' => is_welcome_message_on,
+        'isRoomExist' => isExistPlayRoomInfo,
+        'roomName' => playRoomName,
+        'roomNumber' => roomNumber,
+        'chatChannelNames' => chatChannelNames,
+        'canUseExternalImage' => canUseExternalImage,
+        'canVisit' => canVisit,
+        'isPasswordLocked' => isPasswordLocked,
+        'isMentenanceModeOn' => isMentenanceModeOn,
+        'isWelcomeMessageOn' => isWelcomeMessageOn,
     }
 
     logging(result, "checkRoomStatus End result")
@@ -3022,46 +3022,46 @@ class DodontoFServer
     result
   end
 
-  def login_password()
-    login_data = extract_params_in_request()
-    logging(login_data, 'loginData')
+  def loginPassword()
+    loginData = extract_params_in_request()
+    logging(loginData, 'loginData')
 
-    room_number = login_data['roomNumber']
-    password = login_data['password']
-    visiter_mode = login_data['visiterMode']
+    roomNumber = loginData['roomNumber']
+    password = loginData['password']
+    visiterMode = loginData['visiterMode']
 
-    check_login_password(room_number, password, visiter_mode)
+    checkLoginPassword(roomNumber, password, visiterMode)
   end
 
-  def check_login_password(room_number, password, visitor_mode)
-    logging("checkLoginPassword roomNumber", room_number)
-    @savedir_info.setSaveDataDirIndex(room_number)
-    dir_name = @savedir_info.getDirName()
+  def checkLoginPassword(roomNumber, password, visiterMode)
+    logging("checkLoginPassword roomNumber", roomNumber)
+    @savedir_info.setSaveDataDirIndex(roomNumber)
+    dirName = @savedir_info.getDirName()
 
     result = {
         'resultText' => '',
         'visiterMode' => false,
-        'roomNumber' => room_number,
+        'roomNumber' => roomNumber,
     }
 
-    is_room_exist = (exist_dir?(dir_name))
+    isRoomExist = (exist_dir?(dirName))
 
-    unless is_room_exist
-      result['resultText'] = "プレイルームNo.#{room_number}は作成されていません"
+    unless isRoomExist
+      result['resultText'] = "プレイルームNo.#{roomNumber}は作成されていません"
       return result
     end
 
 
-    true_savefile_name = @savedir_info.real_savefile_name($playRoomInfo)
+    trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
 
-    save_data(true_savefile_name) do |saveData|
-      can_visit = saveData['canVisit']
-      if can_visit and visitor_mode
+    save_data(trueSaveFileName) do |saveData|
+      canVisit = saveData['canVisit']
+      if canVisit and visiterMode
         result['resultText'] = "OK"
         result['visiterMode'] = true
       else
-        changed_password = saveData['playRoomChangedPassword']
-        if password_match?(password, changed_password)
+        changedPassword = saveData['playRoomChangedPassword']
+        if isPasswordMatch?(password, changedPassword)
           result['resultText'] = "OK"
         else
           result['resultText'] = "パスワードが違います"
@@ -3072,26 +3072,26 @@ class DodontoFServer
     result
   end
 
-  def password_match?(password, changed_password)
-    return true if (changed_password.nil?)
-    (password.crypt(changed_password) == changed_password)
+  def isPasswordMatch?(password, changedPassword)
+    return true if (changedPassword.nil?)
+    (password.crypt(changedPassword) == changedPassword)
   end
 
 
   def logout()
-    logout_data = extract_params_in_request()
-    logging(logout_data, 'logoutData')
+    logoutData = extract_params_in_request()
+    logging(logoutData, 'logoutData')
 
-    unique_id = logout_data['uniqueId']
-    logging(unique_id, 'uniqueId')
+    uniqueId = logoutData['uniqueId']
+    logging(uniqueId, 'uniqueId');
 
-    true_savefile_name = @savedir_info.real_savefile_name($loginUserInfo)
-    change_save_data(true_savefile_name) do |saveData|
+    trueSaveFileName = @savedir_info.getTrueSaveFileName($loginUserInfo)
+    change_save_data(trueSaveFileName) do |saveData|
       saveData.each do |existUserId, userInfo|
         logging(existUserId, "existUserId in logout check")
-        logging(unique_id, 'uniqueId in logout check')
+        logging(uniqueId, 'uniqueId in logout check')
 
-        if existUserId == unique_id
+        if existUserId == uniqueId
           userInfo['isLogout'] = true
         end
       end
@@ -3101,57 +3101,57 @@ class DodontoFServer
   end
 
 
-  def check_filesize_on_mb(data, max_file_size)
+  def checkFileSizeOnMb(data, size_MB)
     error = false
 
-    limit = (max_file_size * 1024 * 1024)
+    limit = (size_MB * 1024 * 1024)
 
     if data.size > limit
       error = true
     end
 
     if error
-      return "ファイルサイズが最大値(#{max_file_size}MB)以上のためアップロードに失敗しました。"
+      return "ファイルサイズが最大値(#{size_MB}MB)以上のためアップロードに失敗しました。"
     end
 
     ""
   end
 
 
-  def get_bot_table_infos()
+  def getBotTableInfos()
     logging("getBotTableInfos Begin")
     result = {
         "resultText" => "OK",
     }
 
     dir = getDiceBotExtraTableDirName
-    result["tableInfos"] = get_bot_table_infos_from_dir(dir)
+    result["tableInfos"] = getBotTableInfosFromDir(dir)
 
     logging(result, "result")
     logging("getBotTableInfos End")
     result
   end
 
-  def get_bot_table_infos_from_dir(dir)
+  def getBotTableInfosFromDir(dir)
     logging(dir, 'getBotTableInfosFromDir dir')
 
     require 'TableFileData'
 
-    is_load_common_table = false
-    table_file_data = TableFileData.new(is_load_common_table)
-    table_file_data.setDir(dir, @dicebot_table_prefix)
-    table_infos = table_file_data.getAllTableInfo
+    isLoadCommonTable = false
+    tableFileData = TableFileData.new(isLoadCommonTable)
+    tableFileData.setDir(dir, @dicebot_table_prefix)
+    tableInfos = tableFileData.getAllTableInfo
 
-    logging(table_infos, "getBotTableInfosFromDir tableInfos")
-    table_infos.sort! { |a, b| a["command"].to_i <=> b["command"].to_i }
+    logging(tableInfos, "getBotTableInfosFromDir tableInfos")
+    tableInfos.sort! { |a, b| a["command"].to_i <=> b["command"].to_i }
 
-    logging(table_infos, 'getBotTableInfosFromDir result tableInfos')
+    logging(tableInfos, 'getBotTableInfosFromDir result tableInfos')
 
-    table_infos
+    tableInfos
   end
 
 
-  def add_bot_table()
+  def addBotTable()
     result = {}
     result['resultText'] = addBotTableMain()
 
@@ -3161,7 +3161,7 @@ class DodontoFServer
 
     logging("addBotTableMain called")
 
-    result = get_bot_table_infos()
+    result = getBotTableInfos()
     logging(result, "addBotTable result")
 
     result
@@ -3181,7 +3181,7 @@ class DodontoFServer
       creator = TableFileCreator.new(dir, @dicebot_table_prefix, params)
       creator.execute
     rescue Exception => e
-      logging_exception(e)
+      loggingException(e)
       resultText = e.to_s
     end
 
@@ -3199,7 +3199,7 @@ class DodontoFServer
       return result
     end
 
-    get_bot_table_infos()
+    getBotTableInfos()
   end
 
   def changeBotTableMain()
@@ -3215,7 +3215,7 @@ class DodontoFServer
       creator = TableFileEditer.new(dir, @dicebot_table_prefix, params)
       creator.execute
     rescue Exception => e
-      logging_exception(e)
+      loggingException(e)
       resultText = e.to_s
     end
 
@@ -3227,7 +3227,7 @@ class DodontoFServer
 
   def removeBotTable()
     removeBotTableMain()
-    get_bot_table_infos()
+    getBotTableInfos()
   end
 
   def removeBotTableMain()
@@ -3259,7 +3259,7 @@ class DodontoFServer
     begin
       File.delete(fileName)
     rescue Exception => e
-      logging_exception(e)
+      loggingException(e)
     end
 
     logging("removeBotTableMain End")
@@ -3312,7 +3312,7 @@ class DodontoFServer
   end
 
   def getReplayDataInfoFileName
-    infoFileName = file_join($replayDataUploadDir, 'replayDataInfo.json')
+    infoFileName = fileJoin($replayDataUploadDir, 'replayDataInfo.json')
     infoFileName
   end
 
@@ -3368,7 +3368,7 @@ class DodontoFServer
       result = requestReplayDataList()
     rescue => e
       result["resultText"] = e.to_s
-      logging_exception(e)
+      loggingException(e)
     end
 
     result
@@ -3412,7 +3412,7 @@ class DodontoFServer
         File.delete(fileName)
       end
     rescue => e
-      logging_exception(e)
+      loggingException(e)
     end
   end
 
@@ -3435,7 +3435,7 @@ class DodontoFServer
 
       fileData = params['fileData']
 
-      sizeCheckResult = check_filesize_on_mb(fileData, fileMaxSize)
+      sizeCheckResult = checkFileSizeOnMb(fileData, fileMaxSize)
       if sizeCheckResult != ""
         result["resultText"] = sizeCheckResult
         return result
@@ -3448,7 +3448,7 @@ class DodontoFServer
         fileName = getNewFileName(fileNameOriginal)
       end
 
-      fileNameFullPath = file_join(fileUploadDir, fileName).untaint
+      fileNameFullPath = fileJoin(fileUploadDir, fileName).untaint
       logging(fileNameFullPath, "fileNameFullPath")
 
       yield(fileNameFullPath, fileNameOriginal, result)
@@ -3838,7 +3838,7 @@ class DodontoFServer
     end
 
     if saveDataAll.include?($playRoomInfoTypeName)
-      trueSaveFileName = @savedir_info.real_savefile_name($playRoomInfo)
+      trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
       saveDataForType = saveDataAll[$playRoomInfoTypeName]
       loadSaveFileDataForEachType($playRoomInfoTypeName, trueSaveFileName, saveDataForType)
     end
@@ -3867,7 +3867,7 @@ class DodontoFServer
   def getSmallImageDir
     saveDir = $imageUploadDir
     smallImageDirName = "smallImages"
-    smallImageDir = file_join(saveDir, smallImageDirName)
+    smallImageDir = fileJoin(saveDir, smallImageDirName)
 
     smallImageDir
   end
@@ -3878,7 +3878,7 @@ class DodontoFServer
     logging(uploadImageFileName, "uploadImageFileName")
 
     smallImageDir = getSmallImageDir
-    uploadSmallImageFileName = file_join(smallImageDir, imageFileNameBase)
+    uploadSmallImageFileName = fileJoin(smallImageDir, imageFileNameBase)
     uploadSmallImageFileName += ".png"
     uploadSmallImageFileName.untaint
     logging(uploadSmallImageFileName, "uploadSmallImageFileName")
@@ -3943,7 +3943,7 @@ class DodontoFServer
       imageFileNameBase = getNewFileName(imageFileName, "img")
       logging(imageFileNameBase, "imageFileNameBase")
 
-      uploadImageFileName = file_join(saveDir, imageFileNameBase)
+      uploadImageFileName = fileJoin(saveDir, imageFileNameBase)
       logging(uploadImageFileName, "uploadImageFileName")
 
       open(uploadImageFileName, "wb+") do |file|
@@ -3962,7 +3962,7 @@ class DodontoFServer
   def getImageDataFromParams(params, key)
     value = params[key]
 
-    sizeCheckResult = check_filesize_on_mb(value, $UPLOAD_IMAGE_MAX_SIZE)
+    sizeCheckResult = checkFileSizeOnMb(value, $UPLOAD_IMAGE_MAX_SIZE)
     raise sizeCheckResult unless (sizeCheckResult.empty?)
 
     value
@@ -4377,7 +4377,7 @@ class DodontoFServer
 
       init_savefiles(roomNumber)
 
-      trueSaveFileName = @savedir_info.real_savefile_name($playRoomInfo)
+      trueSaveFileName = @savedir_info.getTrueSaveFileName($playRoomInfo)
       next unless (exist?(trueSaveFileName))
 
       logging(roomNumber, "sendChatMessageAll to No.")
@@ -4453,7 +4453,7 @@ class DodontoFServer
   def deleteChatLogAll()
     logging("deleteChatLogAll Begin")
 
-    file = @savedir_info.real_savefile_name($chatMessageDataLogAll)
+    file = @savedir_info.getTrueSaveFileName($chatMessageDataLogAll)
     logging(file, "file")
 
     if File.exist?(file)
@@ -4479,7 +4479,7 @@ class DodontoFServer
       return
     end
 
-    saveFileName = @savedir_info.real_savefile_name($chatMessageDataLogAll)
+    saveFileName = @savedir_info.getTrueSaveFileName($chatMessageDataLogAll)
 
     locker = savefile_lock(saveFileName)
     locker.lock do
@@ -4676,7 +4676,7 @@ class DodontoFServer
 
 
   def getImageInfoFileName
-    imageInfoFileName = file_join($imageUploadDir, 'imageInfo.json')
+    imageInfoFileName = fileJoin($imageUploadDir, 'imageInfo.json')
 
     logging(imageInfoFileName, 'imageInfoFileName')
 
@@ -4728,7 +4728,7 @@ class DodontoFServer
         deleteFile(smallImage)
       rescue => e
         errorMessage = error_response_body(e)
-        logging_exception(e)
+        loggingException(e)
       end
     end
 

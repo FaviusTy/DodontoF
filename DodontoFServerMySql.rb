@@ -22,7 +22,7 @@ class SaveDataManagerOnMySql
   end
   
   def getDb
-    if( @db.nil? )
+    if @db.nil?
       @db = openDb
     end
     
@@ -48,14 +48,14 @@ class SaveDataManagerOnMySql
     #yield
     #return;
     
-    if( tableName.nil? )
+    if tableName.nil?
       dirName = File.dirname(fileName)
       tableName = getTableName(dirName)
     end
     
     lockType = (isReadOnly ? "READ" : "WRITE")
     
-    if( @tableLocked )
+    if @tableLocked
       yield
       return
     end
@@ -74,7 +74,7 @@ class SaveDataManagerOnMySql
   
   
   def changeText(fileName, text)
-    if( isExist?(fileName) )
+    if isExist?(fileName)
       update(fileName, text)
     else
       createData(fileName, text)
@@ -83,7 +83,7 @@ class SaveDataManagerOnMySql
   
   def getTableName(dirName)
     #return dirName.gsub(/\./, "_").gsub(/\//, "_")
-    return dirName.gsub(/\./, "_").gsub(/\//, "_").downcase
+    dirName.gsub(/\./, "_").gsub(/\//, "_").downcase
   end
   
   
@@ -94,13 +94,13 @@ class SaveDataManagerOnMySql
     
     sqlParts = sqlOriginal.split(/\?/)
     
-    if( (sqlParts.length - 1) != args.length )
+    if (sqlParts.length - 1) != args.length
       raise "executeSql args.lengt error (sqlParts.lengt:#{sqlParts.length.to_s}, args.length:#{args.length.to_s})"
     end
     
     sql = sqlParts.shift
     args.each_with_index do |arg, index|
-      if( arg.class.name == "String" )
+      if arg.class.name == "String"
         arg = "'" + Mysql::quote(arg) + "'"
       end
       
@@ -111,8 +111,8 @@ class SaveDataManagerOnMySql
     logging(sql, "SQL query")
     
     result = getDb.query(sql)
-    
-    return result
+
+    result
   end
   
   def getSaveDataLastAccessTimes(dirNames, roomNumberRange)
@@ -149,8 +149,8 @@ class SaveDataManagerOnMySql
     end
     
     logging(lastAccessTimeInfos, "getSaveDataLastAccessTimes lastAccessTimeInfos")
-    
-    return lastAccessTimeInfos
+
+    lastAccessTimeInfos
   end
 
   def update(fileName, text)
@@ -158,7 +158,7 @@ class SaveDataManagerOnMySql
     tableName = getTableName(dirName)
     
     time = getCurrentTime
-    executeSql("UPDATE #{tableName} SET text=?, time=? WHERE fileName=?", text, time, fileName);
+    executeSql("UPDATE #{tableName} SET text=?, time=? WHERE fileName=?", text, time, fileName)
   end
   
   def getText(fileName)
@@ -170,13 +170,13 @@ class SaveDataManagerOnMySql
     result.each do |row|
       text += row.first
     end
-    
-    return text
+
+    text
   end
   
   def isChatFileName(fileName)
     base = File.basename(fileName)
-    return ( base == "chat.json" )
+    ( base == "chat.json" )
   end
   
   def getChatTime(fileName)
@@ -195,8 +195,8 @@ class SaveDataManagerOnMySql
     end
     
     logging(maxTime, "getChatTime maxTime")
-    
-    return maxTime
+
+    maxTime
   end
     
   def getTime(fileName)
@@ -215,12 +215,12 @@ class SaveDataManagerOnMySql
     result.each do |row|
       time = row.first.to_f
     end
-    
-    return time.to_f
+
+    time.to_f
   end
   
   def createTable(dirName)
-    if( isExistDir?(dirName) )
+    if isExistDir?(dirName)
       raise "このプレイルームはすでに作成済みです。"
     end
     
@@ -307,8 +307,8 @@ SQL
     else
       maxNumber = maxNumber.to_i
     end
-    
-    return maxNumber
+
+    maxNumber
   end
   
   def createChatTableInstance(tableName)
@@ -353,8 +353,7 @@ SQL
   end
   
   def getCurrentTime
-    @currentMilliTime ||= Time.now.to_f;
-    return @currentMilliTime;
+    @currentMilliTime ||= Time.now.to_f
   end
   
   def isExist?(fileName)
@@ -369,9 +368,10 @@ SQL
     begin
       count = executeCountSql("SELECT count(*) FROM #{tableName} WHERE fileName=?", fileName)
     rescue
+      # ignored
     end
-    
-    return (count >= 1)
+
+    (count >= 1)
   end
   
   def executeCountSql(sql, *args)
@@ -408,14 +408,12 @@ SQL
       lastUpdateTimes[typeName] = row.shift.to_f
     end
     
-    if( lines.empty? )
+    if lines.empty?
       return {}
     end
     
     data = lines.collect{|line| DodontoFServer.parse_json(line.chomp) }
     saveData = {"chatMessageDataLog" => data}
-    
-    return saveData
   end
   
   def isSaveData(dirName)
@@ -423,15 +421,15 @@ SQL
     saveDir2 = File.join(saveDir, "")
     logging(saveDir, "saveDir")
     logging(saveDir2, "saveDir2")
-    
-    return (( saveDir == dirName ) || ( dirName.index(saveDir2) == 0 ))
+
+    (( saveDir == dirName ) || ( dirName.index(saveDir2) == 0 ))
   end
   
   def isExistTable?(tableName)
     logging(tableName, "isExistDir? tableName")
     
     @allTableNames ||= []
-    if( @allTableNames.empty? )
+    if @allTableNames.empty?
       result = executeSql("SHOW TABLES;")
       result.each do |row|
         @allTableNames << row.first
@@ -481,7 +479,7 @@ SQL
       
       logging(oldestNumber, "oldestNumber")
       
-      executeSql("UPDATE #{tableName} SET text=?,time=? WHERE (number=#{oldestNumber})", text, time);
+      executeSql("UPDATE #{tableName} SET text=?,time=? WHERE (number=#{oldestNumber})", text, time)
                  
     end
     
@@ -499,19 +497,19 @@ SQL
     
     (0 ... numberLimit).each do |number|
       
-      count = executeCountSql("SELECT count(*) FROM #{tableName} WHERE (number=?)", number);
+      count = executeCountSql("SELECT count(*) FROM #{tableName} WHERE (number=?)", number)
       next if( count == 0 )
       
       text = ""
       unless( saveDataForChat.nil? )
         chatData = saveDataForChat[number]
-        unless( chatData.nil? )
+        unless chatData.nil?
           text = DodontoFServer.build_json(chatData)
         end
       end
       
       time = getCurrentTime
-      executeSql("UPDATE #{tableName} SET text=?,time=? WHERE (number=?)", text, time, number);
+      executeSql("UPDATE #{tableName} SET text=?,time=? WHERE (number=?)", text, time, number)
     end
     
     logging("loadSaveFileDataForChatType end")
@@ -600,8 +598,8 @@ class SaveDirInfoMySql < SaveDirInfo
       full_fileName = File.join(dirName, fileName)
       logging(full_fileName, "getExistFileNames full_fileName")
       
-      if( @@saveDataManager.isExistDir?(full_fileName) or
-            @@saveDataManager.isExist?(full_fileName) )
+      if @@saveDataManager.isExistDir?(full_fileName) or
+            @@saveDataManager.isExist?(full_fileName)
         
         logging(full_fileName, "getExistFileNames full_fileName exist")
         existFileNames << full_fileName
@@ -609,8 +607,8 @@ class SaveDirInfoMySql < SaveDirInfo
     end
     
     logging(existFileNames, "getExistFileNames existFileNames")
-    
-    return existFileNames
+
+    existFileNames
   end
   
   def getSaveDataLastAccessTimes(fileNames, roomNumberRange)
@@ -674,8 +672,8 @@ class DodontoFServer_MySql < DodontoFServer
     
     text = getDataAccesser().getSaveFileText(fileName)
     return "{}" if( text.nil? )
-    
-    return text
+
+    text
   end
   
   def getSaveFileLock(fileName, isReadOnly = false)
@@ -684,7 +682,7 @@ class DodontoFServer_MySql < DodontoFServer
     begin
       return FileLockMySql.new(fileName, isReadOnly)
     rescue => e
-      loggingForce(@savedir_info.inspect, "when getSaveFileLock error : @saveDirInfo.inspect");
+      loggingForce(@savedir_info.inspect, "when getSaveFileLock error : @saveDirInfo.inspect")
       raise
     end
   end
@@ -714,7 +712,6 @@ class DodontoFServer_MySql < DodontoFServer
     
     saveData = getSaveTextOnFileLocked(fileName)
     lines = saveData.split(/\n/)
-    return lines
   end
   
   
@@ -723,11 +720,11 @@ class DodontoFServer_MySql < DodontoFServer
   end
   
   def loadSaveFile(typeName, saveFileName)
-    if( chat_file?(typeName) )
+    if chat_file?(typeName)
       return loadSaveFileForChat(typeName, saveFileName)
     end
-    
-    return super
+
+    super
   end
   
   
@@ -739,7 +736,7 @@ class DodontoFServer_MySql < DodontoFServer
   
   
   def loadSaveFileDataForEachType(fileTypeName, trueSaveFileName, saveDataForType)
-    if( chat_file?(fileTypeName) )
+    if chat_file?(fileTypeName)
       getDataAccesser().loadSaveFileDataForChatType(trueSaveFileName, saveDataForType[fileTypeName])
       return
     end
@@ -752,7 +749,7 @@ class DodontoFServer_MySql < DodontoFServer
   end
   
   def getTestResponseText
-    "「どどんとふ（MySQL）」の動作環境は正常に起動しています。";
+    "「どどんとふ（MySQL）」の動作環境は正常に起動しています。"
   end
   
 end
@@ -777,8 +774,8 @@ end
 
 
 
-if( $0 === __FILE__ )
-  initLog();
+if $0 === __FILE__
+  initLog()
   
   cgiParams = extract_params_in_cgi()
   

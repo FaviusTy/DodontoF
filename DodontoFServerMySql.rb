@@ -557,7 +557,7 @@ class MySqlAccesser
   end
   
   def sendChatMessage(chatMessageData, saveFileName)
-    @@saveDataManager.sendChatMessage(chatMessageData, saveFileName)
+    @@saveDataManager.send_chat_message(chatMessageData, saveFileName)
   end
   
   def loadSaveFileForChat(typeName, fileName, lastUpdateTimes)
@@ -569,7 +569,7 @@ class MySqlAccesser
   end
   
   def deleteChatLogBySaveFile(trueSaveFileName)
-    @@saveDataManager.deleteChatLogBySaveFile(trueSaveFileName)
+    @@saveDataManager.delete_chat_log_by_savefile(trueSaveFileName)
   end
 end
 

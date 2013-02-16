@@ -1138,7 +1138,7 @@ class DodontoFServer
     game_type = request_text_for_webif('bot')
     logging(game_type, 'gameType')
 
-    roll_result, is_secret, rand_results = rollDice(message, game_type, false)
+    roll_result, is_secret, rand_results = dice_roll(message, game_type, false)
 
     message = message + roll_result
     logging(message, "diceRolled message")
@@ -1152,7 +1152,7 @@ class DodontoFServer
     }
     logging("sendWebIfChatText chatData", chat_data)
 
-    sendChatMessageByChatData(chat_data)
+    send_chat_message_by_chat_data(chat_data)
 
     result           = {}
     result['result'] = 'OK'
@@ -1240,11 +1240,11 @@ class DodontoFServer
         "color"     => 16777215,
         "draggable" => true,
         "type"      => "Memo",
-        "imgId"     => createCharacterImgId(),
+        "imgId"     => create_character_img_id(),
     }
 
     logging(result_context, 'sendWebIfAddMemo jsonData')
-    addResult = addCharacterData([result_context]) #TODO:WAHT? addResultはここで始めて宣言されているように見える
+    addResult = add_character_data([result_context]) #TODO:WAHT? addResultはここで始めて宣言されているように見える
 
     result
   end
@@ -1271,7 +1271,7 @@ class DodontoFServer
         "draggable"   => request_boolean_for_webif("draggable", true),
         "isHide"      => request_boolean_for_webif("isHide", false),
         "type"        => "characterData",
-        "imgId"       => createCharacterImgId(),
+        "imgId"       => create_character_img_id(),
     }
 
     logging(character_data, 'sendWebIfAddCharacter jsonData')
@@ -1283,7 +1283,7 @@ class DodontoFServer
     end
 
 
-    add_result            = addCharacterData([character_data])
+    add_result            = add_character_data([character_data])
     add_failed_char_names = add_result["addFailedCharacterNames"]
     logging(add_failed_char_names, 'addFailedCharacterNames')
 
@@ -1353,7 +1353,7 @@ class DodontoFServer
       logging(name, "name")
 
       if character_data['name'] != name
-        failed_name = isAlreadyExistCharacterInRoom?(saveData, { 'name' => name })
+        failed_name = already_exist_character_in_room?(saveData, { 'name' => name })
         if failed_name
           raise "「#{name}」という名前のキャラクターはすでに存在しています"
         end
@@ -2251,7 +2251,7 @@ class DodontoFServer
 
     require 'cgiDiceBot.rb'
     bot = CgiDiceBot.new
-    dir = getDiceBotExtraTableDirName
+    dir = dicebot_extra_table_dir_name
     logging(dir, 'dir')
 
     command_infos = bot.getGameCommandInfos(dir, @dicebot_table_prefix)
@@ -2362,7 +2362,7 @@ class DodontoFServer
         "channel"    => 0,
     }
 
-    sendChatMessageByChatData(chat_data)
+    send_chat_message_by_chat_data(chat_data)
   end
 
 
@@ -2929,7 +2929,7 @@ class DodontoFServer
         next if (diff < $oldSaveFileDelteSeconds)
 
         begin
-          deleteFile(saveFileName)
+          delete_file(saveFileName)
         rescue => e
           logging_exception(e)
         end
@@ -3124,7 +3124,7 @@ class DodontoFServer
         "resultText" => "OK",
     }
 
-    dir                  = getDiceBotExtraTableDirName
+    dir                  = dicebot_extra_table_dir_name
     result["tableInfos"] = get_bot_table_infos_from_dir(dir)
 
     logging(result, "result")
@@ -3170,7 +3170,7 @@ class DodontoFServer
   def add_bot_table_main()
     logging("addBotTableMain Begin")
 
-    dir = getDiceBotExtraTableDirName
+    dir = dicebot_extra_table_dir_name
     make_dir(dir)
     params = extract_params_in_request()
 
@@ -3205,7 +3205,7 @@ class DodontoFServer
   def change_bot_table_main()
     logging("changeBotTableMain Begin")
 
-    dir    = getDiceBotExtraTableDirName
+    dir    = dicebot_extra_table_dir_name
     params = extract_params_in_request()
 
     require 'TableFileData'
@@ -3236,7 +3236,7 @@ class DodontoFServer
     params  = extract_params_in_request()
     command = params["command"]
 
-    dir = getDiceBotExtraTableDirName
+    dir = dicebot_extra_table_dir_name
 
     require 'TableFileData'
 
@@ -3314,7 +3314,7 @@ class DodontoFServer
   end
 
 
-  #getImageInfoFileName() ) do |saveData|
+  #image_info_file_name() ) do |saveData|
   def set_replay_data_info(file_name, title, url)
 
     replay_data_info = {
@@ -3352,7 +3352,7 @@ class DodontoFServer
 
         replay_data_list.delete_if do |i|
           if (i['url'] == replay_data['url']) and (i['title'] == replay_data['title'])
-            deleteFile(i['fileName'])
+            delete_file(i['fileName'])
             true
           else
             false
@@ -3785,7 +3785,7 @@ class DodontoFServer
     logging(characterDataList, "characterDataList")
 
     characterDataList = characterDataList.delete_if { |i| (i["type"] != type) }
-    addCharacterData(characterDataList)
+    add_character_data(characterDataList)
   end
 
   def loadSaveFileDataFilterByTargets(saveDataAll, targets)
@@ -3795,8 +3795,8 @@ class DodontoFServer
       case target
         when "map"
           mapData = getLoadData(saveDataAll, 'map', 'mapData', {})
-          changeMapSaveData(mapData)
-        when "characterData", "mapMask", "mapMarker", "magicRangeMarker", "magicRangeMarkerDD4th", "Memo", getCardType()
+          change_map_savedata(mapData)
+        when "characterData", "mapMask", "mapMarker", "magicRangeMarker", "magicRangeMarkerDD4th", "Memo", card_type()
           loadCharacterDataList(saveDataAll, target)
         when "characterWaitingRoom"
           logging("characterWaitingRoom called")
@@ -3806,11 +3806,11 @@ class DodontoFServer
           effects = getLoadData(saveDataAll, 'effects', 'effects', [])
           effects = effects.delete_if { |i| (i["type"] != target) }
           logging(effects, "standingGraphicInfos effects");
-          addEffectData(effects)
+          add_effect_data(effects)
         when "cutIn"
           effects = getLoadData(saveDataAll, 'effects', 'effects', [])
           effects = effects.delete_if { |i| (i["type"] != nil) }
-          addEffectData(effects)
+          add_effect_data(effects)
         when "initiative"
           roundTimeData = getLoadData(saveDataAll, 'time', 'roundTimeData', {})
           change_initiative_data(roundTimeData)
@@ -3894,14 +3894,14 @@ class DodontoFServer
 
     margeTagInfo(tagInfo, uploadImageFileName)
     logging(tagInfo, "saveSmallImage margeTagInfo tagInfo")
-    changeImageTagsLocal(uploadImageFileName, tagInfo)
+    change_image_tags_local(uploadImageFileName, tagInfo)
 
     logging("saveSmallImage end")
   end
 
   def margeTagInfo(tagInfo, source)
     logging(source, "margeTagInfo source")
-    imageTags   = getImageTags()
+    imageTags   = image_tags()
     tagInfo_old = imageTags[source]
     logging(tagInfo_old, "margeTagInfo tagInfo_old")
     return if (tagInfo_old.nil?)
@@ -3987,7 +3987,7 @@ class DodontoFServer
     imageUrlList = imageData['imageUrlList']
     logging(imageUrlList, "imageUrlList")
 
-    imageFiles = getAllImageFileNameFromTagInfoFile()
+    imageFiles = all_image_file_name_from_tag_info_file()
     addLocalImageToList(imageFiles)
     logging(imageFiles, "imageFiles")
 
@@ -4003,7 +4003,7 @@ class DodontoFServer
       end
 
       imageUrl.untaint
-      deleteResult1 = deleteImageTags(imageUrl)
+      deleteResult1 = delete_image_tags(imageUrl)
       deleteResult2 = deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
       deleteResult  = (deleteResult1 or deleteResult2)
 
@@ -4038,7 +4038,7 @@ class DodontoFServer
     logging(imageUrl, "deleteTargetImageUrl(imageUrl)")
 
     if imageFiles.include?(imageUrl) && exist?(imageUrl)
-      deleteFile(imageUrl)
+      delete_file(imageUrl)
       return true
     end
 
@@ -4093,7 +4093,7 @@ class DodontoFServer
 
     tagInfo = imageData['tagInfo']
     logging(tagInfo, 'uploadImageUrl.tagInfo')
-    changeImageTagsLocal(imageUrl, tagInfo)
+    change_image_tags_local(imageUrl, tagInfo)
 
     logging("uploadImageUrl end")
 
@@ -4137,7 +4137,7 @@ class DodontoFServer
   def getImageList()
     logging("getImageList start.")
 
-    imageList = getAllImageFileNameFromTagInfoFile()
+    imageList = all_image_file_name_from_tag_info_file()
     logging(imageList, "imageList all result")
 
     addTextsCharacterImageList(imageList, $imageUrlText)
@@ -4195,7 +4195,7 @@ class DodontoFServer
 
     params = extract_params_in_request()
 
-    repeatCount = getDiceBotRepeatCount(params)
+    repeatCount = dicebot_repeat_count(params)
 
     message = params['message']
 
@@ -4208,7 +4208,7 @@ class DodontoFServer
       end
 
       logging(oneMessage, "sendDiceBotChatMessage oneMessage")
-      result = sendDiceBotChatMessageOnece(params, oneMessage)
+      result = send_dicebot_chat_message_onece(params, oneMessage)
       logging(result, "sendDiceBotChatMessageOnece result")
 
       next if (result.nil?)
@@ -4220,48 +4220,48 @@ class DodontoFServer
     results
   end
 
-  def getDiceBotRepeatCount(params)
-    repeatCountLimit = 20
+  def dicebot_repeat_count(params)
+    repeat_count_limit = 20
 
-    repeatCount = params['repeatCount']
+    repeat_count = params['repeatCount']
 
-    repeatCount ||= 1
-    repeatCount = 1 if (repeatCount < 1)
-    repeatCount = repeatCountLimit if (repeatCount > repeatCountLimit)
+    repeat_count ||= 1
+    repeat_count = 1 if (repeat_count < 1)
+    repeat_count = repeat_count_limit if (repeat_count > repeat_count_limit)
 
-    repeatCount
+    repeat_count
   end
 
-  def sendDiceBotChatMessageOnece(params, message)
+  def send_dicebot_chat_message_onece(params, message)
     params       = params.clone
     name         = params['name']
     state        = params['state']
     color        = params['color']
     channel      = params['channel']
     sendto       = params['sendto']
-    gameType     = params['gameType']
-    isNeedResult = params['isNeedResult']
+    game_type     = params['gameType']
+    is_need_result = params['isNeedResult']
 
-    rollResult, isSecret, randResults = rollDice(message, gameType, isNeedResult)
+    roll_result, is_secret, rand_results = dice_roll(message, game_type, is_need_result)
 
-    logging(rollResult, 'rollResult')
-    logging(isSecret, 'isSecret')
-    logging(randResults, "randResults")
+    logging(roll_result, 'rollResult')
+    logging(is_secret, 'isSecret')
+    logging(rand_results, "randResults")
 
-    secretResult = ""
-    if isSecret
-      secretResult = message + rollResult
+    secret_result = ""
+    if is_secret
+      secret_result = message + roll_result
     else
-      message = message + rollResult
+      message = message + roll_result
     end
 
-    message = getChatRolledMessage(message, isSecret, randResults, params)
+    message = chat_rolled_message(message, is_secret, rand_results, params)
 
-    senderName = name
-    senderName << ("\t" + state) unless (state.empty?)
+    sender_name = name
+    sender_name << ("\t" + state) unless (state.empty?)
 
-    chatData = {
-        "senderName" => senderName,
+    chat_data = {
+        "senderName" => sender_name,
         "message"    => message,
         "color"      => color,
         "uniqueId"   => '0',
@@ -4269,59 +4269,59 @@ class DodontoFServer
     }
 
     unless sendto.nil?
-      chatData['sendto'] = sendto
+      chat_data['sendto'] = sendto
     end
 
-    logging(chatData, 'sendDiceBotChatMessage chatData')
+    logging(chat_data, 'sendDiceBotChatMessage chatData')
 
-    sendChatMessageByChatData(chatData)
+    send_chat_message_by_chat_data(chat_data)
 
 
     result = nil
-    if isSecret
-      params['isSecret'] = isSecret
-      params['message']  = secretResult
+    if is_secret
+      params['isSecret'] = is_secret
+      params['message']  = secret_result
       result             = params
     end
 
     result
   end
 
-  def rollDice(message, gameType, isNeedResult)
+  def dice_roll(message, game_type, is_need_result)
     logging(message, 'rollDice message')
-    logging(gameType, 'rollDice gameType')
+    logging(game_type, 'rollDice gameType')
 
     require 'cgiDiceBot.rb'
     bot                 = CgiDiceBot.new
-    dir                 = getDiceBotExtraTableDirName
-    result, randResults = bot.roll(message, gameType, dir, @dicebot_table_prefix, isNeedResult)
+    dir                 = dicebot_extra_table_dir_name
+    result, rand_results = bot.roll(message, game_type, dir, @dicebot_table_prefix, is_need_result)
 
     result.gsub!(/＞/, '→')
     result.sub!(/\r?\n?\Z/, '')
 
     logging(result, 'rollDice result')
 
-    return result, bot.isSecret, randResults
+    return result, bot.isSecret, rand_results
   end
 
-  def getDiceBotExtraTableDirName
+  def dicebot_extra_table_dir_name
     room_local_space_dir_name
   end
 
 
-  def getChatRolledMessage(message, isSecret, randResults, params)
+  def chat_rolled_message(message, is_secret, rand_results, params)
     logging("getChatRolledMessage Begin")
     logging(message, "message")
-    logging(isSecret, "isSecret")
-    logging(randResults, "randResults")
+    logging(is_secret, "isSecret")
+    logging(rand_results, "randResults")
 
-    if isSecret
+    if is_secret
       message = "シークレットダイス"
     end
 
-    randResults = getRandResults(randResults, isSecret)
+    rand_results = rand_results(rand_results, is_secret)
 
-    if randResults.nil?
+    if rand_results.nil?
       logging("randResults is nil")
       return message
     end
@@ -4329,7 +4329,7 @@ class DodontoFServer
 
     data = {
         "chatMessage" => message,
-        "randResults" => randResults,
+        "randResults" => rand_results,
         "uniqueId"    => params['uniqueId'],
     }
 
@@ -4339,29 +4339,29 @@ class DodontoFServer
     text
   end
 
-  def getRandResults(randResults, isSecret)
-    logging(randResults, 'getRandResults randResults')
-    logging(isSecret, 'getRandResults isSecret')
+  def rand_results(rand_results, is_secret)
+    logging(rand_results, 'getRandResults randResults')
+    logging(is_secret, 'getRandResults isSecret')
 
-    if isSecret
-      randResults = randResults.collect { |value, max| [0, 0] }
+    if is_secret
+      rand_results = rand_results.collect { |value, max| [0, 0] }
     end
 
-    logging(randResults, 'getRandResults result')
+    logging(rand_results, 'getRandResults result')
 
-    randResults
+    rand_results
   end
 
 
-  def sendChatMessageAll
+  def send_chat_message_all
     logging("sendChatMessageAll Begin")
 
     result = { 'result' => "NG" }
 
     return result if ($mentenanceModePassword.nil?)
-    chatData = extract_params_in_request()
+    chat_data = extract_params_in_request()
 
-    password = chatData["password"]
+    password = chat_data["password"]
     logging(password, "password check...")
     return result unless (password == $mentenanceModePassword)
 
@@ -4374,11 +4374,11 @@ class DodontoFServer
 
       init_savefiles(roomNumber)
 
-      trueSaveFileName = @savedir_info.real_savefile_name($playRoomInfo)
-      next unless (exist?(trueSaveFileName))
+      true_savefile_name = @savedir_info.real_savefile_name($playRoomInfo)
+      next unless (exist?(true_savefile_name))
 
       logging(roomNumber, "sendChatMessageAll to No.")
-      sendChatMessageByChatData(chatData)
+      send_chat_message_by_chat_data(chat_data)
 
       rooms << roomNumber
     end
@@ -4390,64 +4390,64 @@ class DodontoFServer
     result
   end
 
-  def sendChatMessage
-    chatData = extract_params_in_request()
-    sendChatMessageByChatData(chatData)
+  def send_chat_message
+    chat_data = extract_params_in_request()
+    send_chat_message_by_chat_data(chat_data)
   end
 
-  def sendChatMessageByChatData(chatData)
+  def send_chat_message_by_chat_data(chat_data)
 
-    chatMessageData = nil
+    chat_message_data = nil
 
     change_save_data(@savefiles['chatMessageDataLog']) do |saveData|
-      chatMessageDataLog = getChatMessageDataLog(saveData)
+      chat_message_data_log = chat_message_data_log(saveData)
 
-      deleteOldChatMessageData(chatMessageDataLog)
+      delete_old_chat_message_data(chat_message_data_log)
 
       now             = Time.now.to_f
-      chatMessageData = [now, chatData]
+      chat_message_data = [now, chat_data]
 
-      chatMessageDataLog.push(chatMessageData)
-      chatMessageDataLog.sort!
+      chat_message_data_log.push(chat_message_data)
+      chat_message_data_log.sort!
 
-      logging(chatMessageDataLog, "chatMessageDataLog")
+      logging(chat_message_data_log, "chatMessageDataLog")
       logging(saveData['chatMessageDataLog'], "saveData['chatMessageDataLog']")
     end
 
     if $IS_SAVE_LONG_CHAT_LOG
-      saveAllChatMessage(chatMessageData)
+      save_all_chat_message(chat_message_data)
     end
   end
 
-  def deleteOldChatMessageData(chatMessageDataLog)
+  def delete_old_chat_message_data(chat_message_data_log)
     now = Time.now.to_f
 
-    chatMessageDataLog.delete_if do |chatMessageData|
-      writtenTime, chatMessage, *dummy = chatMessageData
-      timeDiff                         = now - writtenTime
+    chat_message_data_log.delete_if do |chatMessageData|
+      written_time, chat_message, *dummy = chatMessageData
+      time_diff                         = now - written_time
 
-      (timeDiff > ($oldMessageTimeout))
+      (time_diff > ($oldMessageTimeout))
     end
   end
 
 
-  def deleteChatLog
-    trueSaveFileName = @savefiles['chatMessageDataLog']
-    deleteChatLogBySaveFile(trueSaveFileName)
+  def delete_chat_log
+    true_savefile_name = @savefiles['chatMessageDataLog']
+    delete_chat_log_by_savefile(true_savefile_name)
 
     { 'result' => "OK" }
   end
 
-  def deleteChatLogBySaveFile(trueSaveFileName)
-    change_save_data(trueSaveFileName) do |saveData|
-      chatMessageDataLog = getChatMessageDataLog(saveData)
-      chatMessageDataLog.clear
+  def delete_chat_log_by_savefile(true_savefile_name)
+    change_save_data(true_savefile_name) do |saveData|
+      chat_message_data_log = chat_message_data_log(saveData)
+      chat_message_data_log.clear
     end
 
-    deleteChatLogAll()
+    delete_chat_log_all
   end
 
-  def deleteChatLogAll()
+  def delete_chat_log_all
     logging("deleteChatLogAll Begin")
 
     file = @savedir_info.real_savefile_name($chatMessageDataLogAll)
@@ -4464,69 +4464,69 @@ class DodontoFServer
   end
 
 
-  def getChatMessageDataLog(saveData)
-    array_info(saveData, 'chatMessageDataLog')
+  def chat_message_data_log(save_data)
+    array_info(save_data, 'chatMessageDataLog')
   end
 
 
-  def saveAllChatMessage(chatMessageData)
-    logging(chatMessageData, 'saveAllChatMessage chatMessageData')
+  def save_all_chat_message(chat_message_data)
+    logging(chat_message_data, 'saveAllChatMessage chatMessageData')
 
-    if chatMessageData.nil?
+    if chat_message_data.nil?
       return
     end
 
-    saveFileName = @savedir_info.real_savefile_name($chatMessageDataLogAll)
+    savefile_name = @savedir_info.real_savefile_name($chatMessageDataLogAll)
 
-    locker = savefile_lock(saveFileName)
+    locker = savefile_lock(savefile_name)
     locker.lock do
 
       lines = []
-      if exist?(saveFileName)
-        lines = readlines(saveFileName)
+      if exist?(savefile_name)
+        lines = readlines(savefile_name)
       end
-      lines << build_json(chatMessageData)
+      lines << build_json(chat_message_data)
       lines << "\n"
 
       while lines.size > $chatMessageDataLogAllLineMax
         lines.shift
       end
 
-      create_file(saveFileName, lines.join())
+      create_file(savefile_name, lines.join())
     end
 
   end
 
-  def changeMap()
-    mapData = extract_params_in_request()
-    logging(mapData, "mapData")
+  def change_map
+    map_data = extract_params_in_request()
+    logging(map_data, "mapData")
 
-    changeMapSaveData(mapData)
+    change_map_savedata(map_data)
   end
 
-  def changeMapSaveData(mapData)
+  def change_map_savedata(map_data)
     logging("changeMap start.")
 
     change_save_data(@savefiles['map']) do |saveData|
-      draws = getDraws(saveData)
-      setMapData(saveData, mapData)
-      draws.each { |i| setDraws(saveData, i) }
+      draws = draws(saveData)
+      set_map_data(saveData, map_data)
+      draws.each { |i| set_draws(saveData, i) }
     end
   end
 
 
-  def setMapData(saveData, mapData)
-    saveData['mapData'] ||= {}
-    saveData['mapData'] = mapData
+  def set_map_data(save_data, map_data)
+    save_data['mapData'] ||= {}
+    save_data['mapData'] = map_data
   end
 
-  def getMapData(saveData)
-    saveData['mapData'] ||= {}
-    saveData['mapData']
+  def map_data(save_data)
+    save_data['mapData'] ||= {}
+    save_data['mapData']
   end
 
 
-  def drawOnMap
+  def draw_on_map
     logging('drawOnMap Begin')
 
     params = extract_params_in_request()
@@ -4534,45 +4534,45 @@ class DodontoFServer
     logging(data, 'data')
 
     change_save_data(@savefiles['map']) do |saveData|
-      setDraws(saveData, data)
+      set_draws(saveData, data)
     end
 
     logging('drawOnMap End')
   end
 
-  def setDraws(saveData, data)
+  def set_draws(save_data, data)
     return if (data.nil?)
     return if (data.empty?)
 
     info = data.first
     if info['imgId'].nil?
-      info['imgId'] = createCharacterImgId('draw_')
+      info['imgId'] = create_character_img_id('draw_')
     end
 
-    draws = getDraws(saveData)
+    draws = draws(save_data)
     draws << data
   end
 
-  def getDraws(saveData)
-    mapData          = getMapData(saveData)
-    mapData['draws'] ||= []
-    mapData['draws']
+  def draws(save_data)
+    map_data          = map_data(save_data)
+    map_data['draws'] ||= []
+    map_data['draws']
   end
 
-  def clearDrawOnMap
+  def clear_draw_on_map
     change_save_data(@savefiles['map']) do |saveData|
-      draws = getDraws(saveData)
+      draws = draws(saveData)
       draws.clear
     end
   end
 
-  def undoDrawOnMap
+  def undo_draw_on_map
     result = {
         'data' => nil
     }
 
     change_save_data(@savefiles['map']) do |saveData|
-      draws          = getDraws(saveData)
+      draws          = draws(saveData)
       result['data'] = draws.pop
     end
 
@@ -4580,26 +4580,26 @@ class DodontoFServer
   end
 
 
-  def addEffect()
-    effectData     = extract_params_in_request()
-    effectDataList = [effectData]
-    addEffectData(effectDataList)
+  def add_effect
+    effect_data     = extract_params_in_request()
+    effect_data_list = [effect_data]
+    add_effect_data(effect_data_list)
   end
 
-  def findEffect(effects, keys, data)
+  def find_effect(effects, keys, data)
     found = nil
 
     effects.find do |effect|
-      allMatched = true
+      all_matched = true
 
       keys.each do |key|
         if effect[key] != data[key]
-          allMatched = false
+          all_matched = false
           break
         end
       end
 
-      if allMatched
+      if all_matched
         found = effect
         break
       end
@@ -4608,17 +4608,17 @@ class DodontoFServer
     found
   end
 
-  def addEffectData(effectDataList)
+  def add_effect_data(effect_data_list)
     change_save_data(@savefiles['effects']) do |saveData|
       saveData['effects'] ||= []
       effects             = saveData['effects']
 
-      effectDataList.each do |effectData|
+      effect_data_list.each do |effectData|
         logging(effectData, "addEffectData target effectData")
 
         if effectData['type'] == 'standingGraphicInfos'
           keys  = ['type', 'name', 'state']
-          found = findEffect(effects, keys, effectData)
+          found = find_effect(effects, keys, effectData)
 
           if found
             logging(found, "addEffectData is already exist, found data is => ")
@@ -4626,105 +4626,105 @@ class DodontoFServer
           end
         end
 
-        effectData['effectId'] = createCharacterImgId("effects_")
+        effectData['effectId'] = create_character_img_id("effects_")
         effects << effectData
       end
     end
   end
 
-  def changeEffect
+  def change_effect
     change_save_data(@savefiles['effects']) do |saveData|
-      effectData    = extract_params_in_request()
-      targetCutInId = effectData['effectId']
+      effect_data    = extract_params_in_request()
+      target_cutin_id = effect_data['effectId']
 
       saveData['effects'] ||= []
       effects             = saveData['effects']
 
-      findIndex = -1
+      find_index = -1
       effects.each_with_index do |i, index|
-        if targetCutInId == i['effectId']
-          findIndex = index
+        if target_cutin_id == i['effectId']
+          find_index = index
         end
       end
 
-      if findIndex == -1
+      if find_index == -1
         return
       end
 
-      effects[findIndex] = effectData
+      effects[find_index] = effect_data
     end
   end
 
-  def removeEffect()
+  def remove_effect
     logging('removeEffect Begin')
 
     change_save_data(@savefiles['effects']) do |saveData|
       params   = extract_params_in_request()
-      effectId = params['effectId']
-      logging(effectId, 'effectId')
+      effect_id = params['effectId']
+      logging(effect_id, 'effectId')
 
       saveData['effects'] ||= []
       effects             = saveData['effects']
-      effects.delete_if { |i| (effectId == i['effectId']) }
+      effects.delete_if { |i| (effect_id == i['effectId']) }
     end
 
     logging('removeEffect End')
   end
 
 
-  def getImageInfoFileName
-    imageInfoFileName = file_join($imageUploadDir, 'imageInfo.json')
+  def image_info_file_name
+    image_info_file_name = file_join($imageUploadDir, 'imageInfo.json')
 
-    logging(imageInfoFileName, 'imageInfoFileName')
+    logging(image_info_file_name, 'imageInfoFileName')
 
-    imageInfoFileName
+    image_info_file_name
   end
 
-  def changeImageTags()
-    effectData = extract_params_in_request()
-    source     = effectData['source']
-    tagInfo    = effectData['tagInfo']
+  def change_image_tags
+    effect_data = extract_params_in_request()
+    source     = effect_data['source']
+    tag_info    = effect_data['tagInfo']
 
-    changeImageTagsLocal(source, tagInfo)
+    change_image_tags_local(source, tag_info)
   end
 
-  def getAllImageFileNameFromTagInfoFile()
-    imageFileNames = []
+  def all_image_file_name_from_tag_info_file
+    image_file_names = []
 
-    save_data(getImageInfoFileName()) do |saveData|
-      imageTags      = saveData['imageTags']
-      imageTags      ||= {}
-      imageFileNames = imageTags.keys
+    save_data(image_info_file_name()) do |saveData|
+      image_tags      = saveData['imageTags']
+      image_tags      ||= {}
+      image_file_names = image_tags.keys
     end
 
-    imageFileNames
+    image_file_names
   end
 
-  def changeImageTagsLocal(source, tagInfo)
-    return if (tagInfo.nil?)
+  def change_image_tags_local(source, tag_info)
+    return if (tag_info.nil?)
 
-    change_save_data(getImageInfoFileName()) do |saveData|
+    change_save_data(image_info_file_name()) do |saveData|
       saveData['imageTags'] ||= {}
-      imageTags             = saveData['imageTags']
+      image_tags             = saveData['imageTags']
 
-      imageTags[source] = tagInfo
+      image_tags[source] = tag_info
     end
   end
 
-  def deleteImageTags(source)
+  def delete_image_tags(source)
 
-    change_save_data(getImageInfoFileName()) do |saveData|
+    change_save_data(image_info_file_name()) do |saveData|
 
-      imageTags = saveData['imageTags']
+      image_tags = saveData['imageTags']
 
-      tagInfo = imageTags.delete(source)
-      return false if (tagInfo.nil?)
+      tag_info = image_tags.delete(source)
+      return false if (tag_info.nil?)
 
-      smallImage = tagInfo["smallImage"]
+      small_image = tag_info["smallImage"]
       begin
-        deleteFile(smallImage)
+        delete_file(small_image)
       rescue => e
-        errorMessage = error_response_body(e)
+        error_message = error_response_body(e)
         logging_exception(e)
       end
     end
@@ -4732,14 +4732,14 @@ class DodontoFServer
     true
   end
 
-  def deleteFile(file)
+  def delete_file(file)
     File.delete(file)
   end
 
-  def getImageTagsAndImageList
+  def image_tags_and_image_list
     result = {}
 
-    result['tagInfos']  = getImageTags()
+    result['tagInfos']  = image_tags()
     result['imageList'] = getImageList()
     result['imageDir']  = $imageUploadDir
 
@@ -4748,21 +4748,21 @@ class DodontoFServer
     result
   end
 
-  def getImageTags()
+  def image_tags
     logging('getImageTags start')
-    imageTags = nil
+    image_tags = nil
 
-    save_data(getImageInfoFileName()) do |saveData|
-      imageTags = saveData['imageTags']
+    save_data(image_info_file_name()) do |saveData|
+      image_tags = saveData['imageTags']
     end
 
-    imageTags ||= {}
-    logging(imageTags, 'getImageTags imageTags')
+    image_tags ||= {}
+    logging(image_tags, 'getImageTags imageTags')
 
-    imageTags
+    image_tags
   end
 
-  def createCharacterImgId(prefix = "character_")
+  def create_character_img_id(prefix = "character_")
     @imgIdIndex ||= 0
     @imgIdIndex += 1
 
@@ -4771,30 +4771,30 @@ class DodontoFServer
   end
 
 
-  def addCharacter()
-    characterData     = extract_params_in_request()
-    characterDataList = [characterData]
+  def add_character
+    character_data     = extract_params_in_request()
+    character_data_list = [character_data]
 
-    addCharacterData(characterDataList)
+    add_character_data(character_data_list)
   end
 
 
-  def isAlreadyExistCharacter?(characters, characterData)
-    return false if (characterData['name'].nil?)
-    return false if (characterData['name'].empty?)
+  def already_exist_character?(characters, character_data)
+    return false if (character_data['name'].nil?)
+    return false if (character_data['name'].empty?)
 
-    alreadyExist = characters.find do |i|
-      (i['imgId'] == characterData['imgId']) or
-          (i['name'] == characterData['name'])
+    already_exist = characters.find do |i|
+      (i['imgId'] == character_data['imgId']) or
+          (i['name'] == character_data['name'])
     end
 
-    return false if (alreadyExist.nil?)
+    return false if (already_exist.nil?)
 
     logging("target characterData is already exist. no creation.", "isAlreadyExistCharacter?")
-    characterData['name']
+    character_data['name']
   end
 
-  def addCharacterData(characterDataList)
+  def add_character_data(character_data_list)
     result = {
         "addFailedCharacterNames" => []
     }
@@ -4803,15 +4803,15 @@ class DodontoFServer
       saveData['characters'] ||= []
       characters             = characters(saveData)
 
-      characterDataList.each do |characterData|
+      character_data_list.each do |characterData|
         logging(characterData, "characterData")
 
-        characterData['imgId'] = createCharacterImgId()
+        characterData['imgId'] = create_character_img_id()
 
-        failedName = isAlreadyExistCharacterInRoom?(saveData, characterData)
+        failed_name = already_exist_character_in_room?(saveData, characterData)
 
-        if failedName
-          result["addFailedCharacterNames"] << failedName
+        if failed_name
+          result["addFailedCharacterNames"] << failed_name
           next
         end
 
@@ -4823,24 +4823,23 @@ class DodontoFServer
     result
   end
 
-  def isAlreadyExistCharacterInRoom?(saveData, characterData)
-    characters    = characters(saveData)
-    waitingRoom   = waiting_room(saveData)
-    allCharacters = (characters + waitingRoom)
+  def already_exist_character_in_room?(save_data, character_data)
+    characters    = characters(save_data)
+    waiting_room   = waiting_room(save_data)
+    all_characters = (characters + waiting_room)
 
-    failedName = isAlreadyExistCharacter?(allCharacters, characterData)
-    failedName
+    failed_name = already_exist_character?(all_characters, character_data)
   end
 
 
-  def changeCharacter()
-    characterData = extract_params_in_request()
-    logging(characterData.inspect, "characterData")
+  def change_character
+    character_data = extract_params_in_request
+    logging(character_data.inspect, "characterData")
 
-    changeCharacterData(characterData)
+    change_character_data(character_data)
   end
 
-  def changeCharacterData(characterData)
+  def change_character_data(character_data)
     change_save_data(@savefiles['characters']) do |saveData|
       logging("changeCharacterData called")
 
@@ -4848,9 +4847,9 @@ class DodontoFServer
 
       index = nil
       characters.each_with_index do |item, targetIndex|
-        if item['imgId'] == characterData['imgId']
+        if item['imgId'] == character_data['imgId']
           index = targetIndex
-          break;
+          break
         end
       end
 
@@ -4859,81 +4858,80 @@ class DodontoFServer
         return
       end
 
-      unless characterData['name'].nil? or characterData['name'].empty?
-        alreadyExist = characters.find do |character|
-          ((character['name'] == characterData['name']) and
-              (character['imgId'] != characterData['imgId']))
+      unless character_data['name'].nil? or character_data['name'].empty?
+        already_exist = characters.find do |character|
+          ((character['name'] == character_data['name']) and
+              (character['imgId'] != character_data['imgId']))
         end
 
-        if alreadyExist
+        if already_exist
           logging("same name character alread exist")
           return
         end
       end
 
-      logging(characterData.inspect, "character data change")
-      characters[index] = characterData
+      logging(character_data.inspect, "character data change")
+      characters[index] = character_data
     end
   end
 
-  def getCardType
+  def card_type
     "Card"
   end
 
-  def getCardMountType
+  def card_mount_type
     "CardMount"
   end
 
-  def getRandomDungeonCardMountType
+  def random_dungeon_card_mount_type
     "RandomDungeonCardMount"
   end
 
-  def getCardTrushMountType
+  def card_trash_mount_type
     "CardTrushMount"
   end
 
-  def getRandomDungeonCardTrushMountType
+  def random_dungeon_card_trash_mount_type
     "RandomDungeonCardTrushMount"
   end
 
-  def getRotation(isUpDown)
+  def rotation(is_up_down)
     rotation = 0
 
-    if isUpDown && rand(2) == 0
+    if is_up_down && rand(2) == 0
       rotation = 180
     end
 
     rotation
   end
 
-  def getCardData(isText, imageName, imageNameBack, mountName, isUpDown = false, canDelete = false)
+  def card_data(is_text, image_name, image_name_back, mount_name, is_up_down = false, can_delete = false)
 
-    cardData = {
-        "imageName"     => imageName,
-        "imageNameBack" => imageNameBack,
+    card_data = {
+        "imageName"     => image_name,
+        "imageNameBack" => image_name_back,
         "isBack"        => true,
-        "rotation"      => getRotation(isUpDown),
-        "isUpDown"      => isUpDown,
-        "isText"        => isText,
+        "rotation"      => rotation(is_up_down),
+        "isUpDown"      => is_up_down,
+        "isText"        => is_text,
         "isOpen"        => false,
         "owner"         => "",
         "ownerName"     => "",
-        "mountName"     => mountName,
-        "canDelete"     => canDelete,
+        "mountName"     => mount_name,
+        "canDelete"     => can_delete,
 
         "name"          => "",
-        "imgId"         => createCharacterImgId(),
-        "type"          => getCardType(),
+        "imgId"         => create_character_img_id(),
+        "type"          => card_type(),
         "x"             => 0,
         "y"             => 0,
         "draggable"     => true,
     }
 
-    cardData
   end
 
 
-  def addCardZone()
+  def add_card_zone
     logging("addCardZone Begin")
 
     data = extract_params_in_request()
@@ -4941,163 +4939,163 @@ class DodontoFServer
     x         = data['x']
     y         = data['y']
     owner     = data['owner']
-    ownerName = data['ownerName']
+    owner_name = data['ownerName']
 
     change_save_data(@savefiles['characters']) do |saveData|
       characters = characters(saveData)
       logging(characters, "addCardZone characters")
 
-      cardData = getCardZoneData(owner, ownerName, x, y)
-      characters << cardData
+      card_data = getCardZoneData(owner, owner_name, x, y)
+      characters << card_data
     end
 
     logging("addCardZone End")
   end
 
 
-  def initCards
+  def init_cards
     logging("initCards Begin")
 
     set_record_empty
 
-    clear_character_by_type_local(getCardType)
-    clear_character_by_type_local(getCardMountType)
-    clear_character_by_type_local(getRandomDungeonCardMountType)
+    clear_character_by_type_local(card_type)
+    clear_character_by_type_local(card_mount_type)
+    clear_character_by_type_local(random_dungeon_card_mount_type)
     clear_character_by_type_local(getCardZoneType)
-    clear_character_by_type_local(getCardTrushMountType)
-    clear_character_by_type_local(getRandomDungeonCardTrushMountType)
+    clear_character_by_type_local(card_trash_mount_type)
+    clear_character_by_type_local(random_dungeon_card_trash_mount_type)
 
 
     params        = extract_params_in_request()
-    cardTypeInfos = params['cardTypeInfos']
-    logging(cardTypeInfos, "cardTypeInfos")
+    card_type_infos = params['cardTypeInfos']
+    logging(card_type_infos, "cardTypeInfos")
 
     change_save_data(@savefiles['characters']) do |saveData|
       saveData['cardTrushMount'] = {}
 
       saveData['cardMount'] = {}
-      cardMounts            = saveData['cardMount']
+      card_mounts            = saveData['cardMount']
 
       characters = characters(saveData)
       logging(characters, "initCards saveData.characters")
 
-      cardTypeInfos.each_with_index do |cardTypeInfo, index|
-        mountName = cardTypeInfo['mountName']
-        logging(mountName, "initCards mountName")
+      card_type_infos.each_with_index do |cardTypeInfo, index|
+        mount_name = cardTypeInfo['mountName']
+        logging(mount_name, "initCards mountName")
 
-        cardsListFileName = cards_info.getCardFileName(mountName)
-        logging(cardsListFileName, "initCards cardsListFileName")
+        cards_list_file_name = cards_info.getCardFileName(mount_name)
+        logging(cards_list_file_name, "initCards cardsListFileName")
 
-        cardsList = []
-        readlines(cardsListFileName).each_with_index do |i, lineIndex|
-          cardsList << i.chomp.toutf8
+        cards_list = []
+        readlines(cards_list_file_name).each_with_index do |i, lineIndex|
+          cards_list << i.chomp.toutf8
         end
 
-        logging(cardsList, "initCards cardsList")
+        logging(cards_list, "initCards cardsList")
 
-        cardData = cardsList.shift.split(/,/)
-        isText   = (cardData.shift == "text")
-        isUpDown = (cardData.shift == "upDown")
-        logging("isUpDown", isUpDown)
-        imageNameBack = cardsList.shift
+        card_data = cards_list.shift.split(/,/)
+        is_text   = (card_data.shift == "text")
+        is_up_down = (card_data.shift == "upDown")
+        logging("isUpDown", is_up_down)
+        image_name_back = cards_list.shift
 
-        cardsList, isSorted   = getInitCardSet(cardsList, cardTypeInfo)
-        cardMounts[mountName] = getInitedCardMount(cardsList, mountName, isText, isUpDown, imageNameBack, isSorted)
+        cards_list, is_sorted   = initialize_card_set(cards_list, cardTypeInfo)
+        card_mounts[mount_name] = initialized_card_mount(cards_list, mount_name, is_text, is_up_down, image_name_back, is_sorted)
 
-        cardMountData = createCardMountData(cardMounts, isText, imageNameBack, mountName, index, isUpDown, cardTypeInfo, cardsList)
-        characters << cardMountData
+        card_mount_data = createCardMountData(card_mounts, is_text, image_name_back, mount_name, index, is_up_down, cardTypeInfo, cards_list)
+        characters << card_mount_data
 
-        cardTrushMountData = card_trash_mount_data(isText, mountName, index, cardTypeInfo)
-        characters << cardTrushMountData
+        card_trash_mount_data = card_trash_mount_data(is_text, mount_name, index, cardTypeInfo)
+        characters << card_trash_mount_data
       end
 
-      waitForRefresh = 0.2
-      sleep(waitForRefresh)
+      wait_for_refresh = 0.2
+      sleep(wait_for_refresh)
     end
 
     logging("initCards End")
 
-    cardExist = (not cardTypeInfos.empty?)
-    { "result" => "OK", "cardExist" => cardExist }
+    card_exist = (not card_type_infos.empty?)
+    { "result" => "OK", "cardExist" => card_exist }
   end
 
 
-  def getInitedCardMount(cardsList, mountName, isText, isUpDown, imageNameBack, isSorted)
-    cardMount = []
+  def initialized_card_mount(cards_list, mount_name, is_text, is_up_down, image_name_back, is_sorted)
+    card_mount = []
 
-    cardsList.each do |imageName|
+    cards_list.each do |imageName|
       if /^###Back###(.+)/ === imageName
-        imageNameBack = $1
+        image_name_back = $1
         next
       end
 
       logging(imageName, "initCards imageName")
-      cardData = getCardData(isText, imageName, imageNameBack, mountName, isUpDown)
-      cardMount << cardData
+      card_data = card_data(is_text, imageName, image_name_back, mount_name, is_up_down)
+      card_mount << card_data
     end
 
-    if isSorted
-      cardMount = cardMount.reverse
+    if is_sorted
+      card_mount = card_mount.reverse
     else
-      cardMount = cardMount.sort_by { rand }
+      card_mount = card_mount.sort_by { rand }
     end
 
-    cardMount
+    card_mount
   end
 
 
-  def addCard()
+  def add_card
     logging("addCard begin")
 
-    addCardData = extract_params_in_request()
+    add_card_data = extract_params_in_request()
 
-    isText        = addCardData['isText']
-    imageName     = addCardData['imageName']
-    imageNameBack = addCardData['imageNameBack']
-    mountName     = addCardData['mountName']
-    isUpDown      = addCardData['isUpDown']
-    canDelete     = addCardData['canDelete']
-    isOpen        = addCardData['isOpen']
-    isBack        = addCardData['isBack']
+    is_text        = add_card_data['isText']
+    image_name     = add_card_data['imageName']
+    image_name_back = add_card_data['imageNameBack']
+    mount_name     = add_card_data['mountName']
+    is_up_down      = add_card_data['isUpDown']
+    can_delete     = add_card_data['canDelete']
+    is_open        = add_card_data['isOpen']
+    is_back        = add_card_data['isBack']
 
     change_save_data(@savefiles['characters']) do |saveData|
-      cardData      = getCardData(isText, imageName, imageNameBack, mountName, isUpDown, canDelete)
-      cardData["x"] = addCardData['x']
-      cardData["y"] = addCardData['y']
-      cardData["isOpen"] = isOpen unless (isOpen.nil?)
-      cardData["isBack"] = isBack unless (isBack.nil?)
+      card_data      = card_data(is_text, image_name, image_name_back, mount_name, is_up_down, can_delete)
+      card_data["x"] = add_card_data['x']
+      card_data["y"] = add_card_data['y']
+      card_data["isOpen"] = is_open unless (is_open.nil?)
+      card_data["isBack"] = is_back unless (is_back.nil?)
 
       characters = characters(saveData)
-      characters << cardData
+      characters << card_data
     end
 
     logging("addCard end")
   end
 
   #トランプのジョーカー枚数、使用デッキ数の指定
-  def getInitCardSet(cardsList, cardTypeInfo)
-    if (random_dungeon_trump?(cardTypeInfo))
-      cardsListTmp = getInitCardSetForRandomDungenTrump(cardsList, cardTypeInfo)
-      return cardsListTmp, true
+  def initialize_card_set(cards_list, card_type_info)
+    if random_dungeon_trump?(card_type_info)
+      cards_list_tmp = init_card_set_for_random_dungen_trump(cards_list, card_type_info)
+      return cards_list_tmp, true
     end
 
-    useLineCount = cardTypeInfo['useLineCount']
-    useLineCount ||= cardsList.size
-    logging(useLineCount, 'useLineCount')
+    use_line_count = card_type_info['useLineCount']
+    use_line_count ||= cards_list.size
+    logging(use_line_count, 'useLineCount')
 
-    deckCount = cardTypeInfo['deckCount']
-    deckCount ||= 1
-    logging(deckCount, 'deckCount')
+    deck_count = card_type_info['deckCount']
+    deck_count ||= 1
+    logging(deck_count, 'deckCount')
 
-    cardsListTmp = []
-    deckCount.to_i.times do
-      cardsListTmp += cardsList[0...useLineCount]
+    cards_list_tmp = []
+    deck_count.to_i.times do
+      cards_list_tmp += cards_list[0...use_line_count]
     end
 
-    return cardsListTmp, false
+    return cards_list_tmp, false
   end
 
-  def getInitCardSetForRandomDungenTrump(cardList, cardTypeInfo)
+  def init_card_set_for_random_dungen_trump(cardList, cardTypeInfo)
     logging("getInitCardSetForRandomDungenTrump start")
 
     logging(cardList.length, "cardList.length")
@@ -5168,7 +5166,7 @@ class DodontoFServer
     # cardMount, isText, imageNameBack, mountName, index, isUpDown)
     isText        = true
     cardText      = ""
-    cardMountData = getCardData(isText, cardText, cardText, "noneMountName")
+    cardMountData = card_data(isText, cardText, cardText, "noneMountName")
 
     cardMountData['type']      = getCardZoneType
     cardMountData['owner']     = owner
@@ -5181,9 +5179,9 @@ class DodontoFServer
 
 
   def createCardMountData(cardMount, isText, imageNameBack, mountName, index, isUpDown, cardTypeInfo, cards)
-    cardMountData = getCardData(isText, imageNameBack, imageNameBack, mountName)
+    cardMountData = card_data(isText, imageNameBack, imageNameBack, mountName)
 
-    cardMountData['type'] = getCardMountType
+    cardMountData['type'] = card_mount_type
     set_card_count_and_back_image(cardMountData, cardMount[mountName])
     cardMountData['mountName'] = mountName
     cardMountData['isUpDown']  = isUpDown
@@ -5196,7 +5194,7 @@ class DodontoFServer
 
     if random_dungeon_trump?(cardTypeInfo)
       cardCount                             = cardTypeInfo['cardCount']
-      cardMountData['type']                 = getRandomDungeonCardMountType
+      cardMountData['type']                 = random_dungeon_card_mount_type
       cardMountData['cardCountDisplayDiff'] = cards.length - cardCount
       cardMountData['useCount']             = cardCount
       cardMountData['aceList']              = cardTypeInfo['aceList']
@@ -5219,7 +5217,7 @@ class DodontoFServer
 
   def card_trash_mount_data(is_text, mount_name, index, card_type_info)
     image_name, image_name_back, is_text = card_trash_mount_image_name(mount_name)
-    card_trash_mount_data                = getCardData(is_text, image_name, image_name_back, mount_name)
+    card_trash_mount_data                = card_data(is_text, image_name, image_name_back, mount_name)
 
     card_trash_mount_data['type']      = card_trash_mount_type_from_card_type_info(card_type_info)
     card_trash_mount_data['cardCount'] = 0
@@ -5237,7 +5235,7 @@ class DodontoFServer
 
     image_name, image_name_back, is_text = card_trash_mount_image_name(mount_name, cards)
 
-    card_mount_image_data = find_card_mount_data_by_type(characters, mount_name, getCardTrushMountType)
+    card_mount_image_data = find_card_mount_data_by_type(characters, mount_name, card_trash_mount_type)
     return if (card_mount_image_data.nil?)
 
     card_mount_image_data['cardCount']     = cards.size
@@ -5274,10 +5272,10 @@ class DodontoFServer
 
   def card_trash_mount_type_from_card_type_info(card_type_info)
     if random_dungeon_trump?(card_type_info)
-      return getRandomDungeonCardTrushMountType
+      return random_dungeon_card_trash_mount_type
     end
 
-    getCardTrushMountType
+    card_trash_mount_type
   end
 
 
@@ -5578,7 +5576,7 @@ class DodontoFServer
       return if (trash_mount_data.nil?)
       set_trash_mount_data_cards_info(saveData, trash_mount_data, trash_cards)
 
-      card_mount_data = find_card_mount_data_by_type(characters, mount_name, getCardMountType)
+      card_mount_data = find_card_mount_data_by_type(characters, mount_name, card_mount_type)
       return if (card_mount_data.nil?)
 
       if is_shuffle
@@ -5619,7 +5617,7 @@ class DodontoFServer
       mount_cards            = card_mount[mount_name]
 
       characters      = characters(saveData)
-      card_mount_data = find_card_mount_data_by_type(characters, mount_name, getRandomDungeonCardMountType)
+      card_mount_data = find_card_mount_data_by_type(characters, mount_name, random_dungeon_card_mount_type)
       return if (card_mount_data.nil?)
 
       ace_list = card_mount_data['aceList']
@@ -5687,14 +5685,12 @@ class DodontoFServer
     card_mount_data = characters.find do |i|
       ((i['type'] === card_mount_type) && (i['mountName'] == mount_name))
     end
-
-    card_mount_data
   end
 
   def shuffle_mount(mount_cards, is_up_down)
     mount_cards = mount_cards.sort_by { rand }
     mount_cards.each do |i|
-      i["rotation"] = getRotation(is_up_down)
+      i["rotation"] = rotation(is_up_down)
     end
 
     mount_cards
@@ -6182,7 +6178,7 @@ def print_response(server)
 end
 
 
-def extract_params_in_cgi()
+def extract_params_in_cgi
   logging("getCgiParams Begin")
 
   length = ENV['CONTENT_LENGTH'].to_i
@@ -6205,10 +6201,11 @@ def extract_params_in_cgi()
 end
 
 
-def execute_server()
-  initLog()
+def execute_server
 
-  params = extract_params_in_cgi()
+  initLog
+
+  params = extract_params_in_cgi
 
   case $dbType
     when "mysql"
@@ -6223,5 +6220,5 @@ def execute_server()
 end
 
 if $0 === __FILE__
-  execute_server()
+  execute_server
 end

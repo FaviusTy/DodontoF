@@ -242,7 +242,7 @@ SQL
   
   def insertNewData(dirName)
     sourceDir = 'saveData_forNewCreation'
-    saveFileNames = $saveFiles.values
+    saveFileNames = $save_files_name_set.values
     
     saveFileNames.each do |saveFileName|
       

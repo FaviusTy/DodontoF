@@ -6200,8 +6200,7 @@ def extract_params_in_cgi
   params
 end
 
-
-def execute_server
+if $0 === __FILE__
 
   initLog
 
@@ -6217,8 +6216,4 @@ def execute_server
       main(params)
   end
 
-end
-
-if $0 === __FILE__
-  execute_server
 end

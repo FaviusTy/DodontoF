@@ -6047,12 +6047,10 @@ class DodontoFServer
   end
 
   def response_body
-    response = execute_command
-
     if isJsonResult
-      build_json(response)
+      build_json(execute_command)
     else
-      build_msgpack(response)
+      build_msgpack(execute_command)
     end
   end
 end

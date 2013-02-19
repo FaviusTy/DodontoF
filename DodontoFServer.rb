@@ -402,7 +402,7 @@ class DodontoFServer
         yield(save_data)
       end
 
-      text_data = build_json(save_data)
+      text_data = DodontoFServer::build_json(save_data)
       create_file(savefile_name, text_data)
     end
   end
@@ -569,10 +569,6 @@ class DodontoFServer
       logging_exception(e)
       raise e
     end
-  end
-
-  def build_json(source_data)
-    self.class.build_json(source_data)
   end
 
   def self.build_json(source_data)
@@ -2838,7 +2834,7 @@ class DodontoFServer
     save_data                = {}
     save_data['saveDataAll'] = all_savedata
 
-    text          = build_json(save_data)
+    text          = DodontoFServer::build_json(save_data)
     savefile_name = get_new_savefile_name(extension)
     create_savefile(savefile_name, text)
 
@@ -4332,7 +4328,7 @@ class DodontoFServer
         "uniqueId"    => params['uniqueId'],
     }
 
-    text = "###CutInCommand:rollVisualDice###" + build_json(data)
+    text = "###CutInCommand:rollVisualDice###" + DodontoFServer::build_json(data)
     logging(text, "getChatRolledMessage End text")
 
     text
@@ -4484,7 +4480,7 @@ class DodontoFServer
       if exist?(savefile_name)
         lines = readlines(savefile_name)
       end
-      lines << build_json(chat_message_data)
+      lines << DodontoFServer::build_json(chat_message_data)
       lines << "\n"
 
       while lines.size > $chatMessageDataLogAllLineMax
@@ -6048,7 +6044,7 @@ class DodontoFServer
 
   def response_body
     if isJsonResult
-      build_json(execute_command)
+      DodontoFServer::build_json(execute_command)
     else
       build_msgpack(execute_command)
     end

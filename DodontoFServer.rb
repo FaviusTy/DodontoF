@@ -575,10 +575,6 @@ class DodontoFServer
     return JsonBuilder.new.build(source_data)
   end
 
-  def build_msgpack(data)
-    self.class.build_msgpack(data)
-  end
-
   def self.build_msgpack(data)
     if $isMessagePackInstalled
       MessagePack.pack(data)
@@ -6046,7 +6042,7 @@ class DodontoFServer
     if isJsonResult
       DodontoFServer::build_json(execute_command)
     else
-      build_msgpack(execute_command)
+      DodontoFsServer::build_msgpack(execute_command)
     end
   end
 end

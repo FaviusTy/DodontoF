@@ -17,7 +17,7 @@
     <file path="/a.xml" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360858154241" ignored="false" />
     <file path="/temp.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361291426394" ignored="false" />
     <file path="/a.dummy" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360941000229" ignored="false" />
-    <file path="/DodontoFServer.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361291042840" ignored="false" />
+    <file path="/DodontoFServer.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361293308841" ignored="false" />
     <file path="/README.md" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361038795277" ignored="false" />
     <file path="$USER_HOME$/RubymineProjects/kickstart/my_script.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361287654188" ignored="false" />
     <file path="/my_script.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361287641708" ignored="false" />
@@ -41,7 +41,7 @@
       <file leaf-file-name="DodontoFServer.rb" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DodontoFServer.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="862" column="14" selection-start="20711" selection-end="20711" vertical-scroll-proportion="2.3228476">
+            <state line="690" column="5" selection-start="15717" selection-end="15717" vertical-scroll-proportion="-3.9945848">
               <folding />
             </state>
           </provider>
@@ -534,7 +534,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DodontoFServer.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="862" column="14" selection-start="20711" selection-end="20711" vertical-scroll-proportion="2.3228476">
+        <state line="690" column="5" selection-start="15717" selection-end="15717" vertical-scroll-proportion="-3.9945848">
           <folding />
         </state>
       </provider>

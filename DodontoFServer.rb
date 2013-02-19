@@ -686,6 +686,79 @@ class DodontoFServer
     text
   end
 
+  # DodontoFServerで定義されているCommandList
+  # ['key_name', 'method_name']
+  #
+  self.COMMAND_REFERENCE = [
+      ['refresh', has_return],
+      ['getGraveyardCharacterData', has_return],
+      ['resurrectCharacter', has_return],
+      ['clearGraveyard', has_return],
+      ['getLoginInfo', has_return],
+      ['getPlayRoomStates', has_return],
+      ['getPlayRoomStatesByCount', has_return],
+      ['deleteImage', has_return],
+      ['uploadImageUrl', has_return],
+      ['save', has_return],
+      ['saveMap', has_return],
+      ['saveScenario', has_return],
+      ['load', has_return],
+      ['loadScenario', has_return],
+      ['getDiceBotInfos', has_return],
+      ['getBotTableInfos', has_return],
+      ['addBotTable', has_return],
+      ['changeBotTable', has_return],
+      ['removeBotTable', has_return],
+      ['requestReplayDataList', has_return],
+      ['uploadReplayData', has_return],
+      ['removeReplayData', has_return],
+      ['checkRoomStatus', has_return],
+      ['loginPassword', has_return],
+      ['uploadFile', has_return],
+      ['uploadImageData', has_return],
+      ['createPlayRoom', has_return],
+      ['changePlayRoom', has_return],
+      ['removePlayRoom', has_return],
+      ['removeOldPlayRoom', has_return],
+      ['getImageTagsAndImageList', has_return],
+      ['addCharacter', has_return],
+      ['getWaitingRoomInfo', has_return],
+      ['exitWaitingRoomCharacter', has_return],
+      ['enterWaitingRoomCharacter', has_return],
+      ['sendDiceBotChatMessage', has_return],
+      ['deleteChatLog', has_return],
+      ['sendChatMessageAll', has_return],
+      ['undoDrawOnMap', has_return],
+      ['logout', no_return],
+      ['changeCharacter', no_return],
+      ['removeCharacter', no_return],
+      # Card Command Get
+      ['getMountCardInfos', has_return],
+      ['getTrushMountCardInfos', has_return],
+      # Card Command Set
+      ['drawTargetCard', has_return],
+      ['drawTargetTrushCard', has_return],
+      ['drawCard', has_return],
+      ['addCard', no_return],
+      ['addCardZone', no_return],
+      ['initCards', has_return],
+      ['returnCard', no_return],
+      ['shuffleCards', no_return],
+      ['shuffleForNextRandomDungeon', no_return],
+      ['dumpTrushCards', no_return],
+      ['clearCharacterByType', no_return],
+      ['moveCharacter', no_return],
+      ['changeMap', no_return],
+      ['drawOnMap', no_return],
+      ['clearDrawOnMap', no_return],
+      ['sendChatMessage', no_return],
+      ['changeRoundTime', no_return],
+      ['addEffect', no_return],
+      ['changeEffect', no_return],
+      ['removeEffect', no_return],
+      ['changeImageTags', no_return],
+  ]
+
   def execute_command
     current_command = request_data('cmd') || ''
 
@@ -3055,8 +3128,8 @@ class DodontoFServer
   end
 
 
-  def logout()
-    logout_data = extract_params_in_request()
+  def logout
+    logout_data = extract_params_in_request
     logging(logout_data, 'logoutData')
 
     unique_id = logout_data['uniqueId']
@@ -3075,6 +3148,8 @@ class DodontoFServer
 
       logging(saveData, 'saveData in logout')
     end
+
+    return nil
   end
 
 
@@ -4370,6 +4445,8 @@ class DodontoFServer
   def send_chat_message
     chat_data = extract_params_in_request()
     send_chat_message_by_chat_data(chat_data)
+
+    return nil
   end
 
   def send_chat_message_by_chat_data(chat_data)
@@ -4479,6 +4556,8 @@ class DodontoFServer
     logging(map_data, "mapData")
 
     change_map_savedata(map_data)
+
+    return nil
   end
 
   def change_map_savedata(map_data)
@@ -4506,7 +4585,7 @@ class DodontoFServer
   def draw_on_map
     logging('drawOnMap Begin')
 
-    params = extract_params_in_request()
+    params = extract_params_in_request
     data   = params['data']
     logging(data, 'data')
 
@@ -4515,6 +4594,8 @@ class DodontoFServer
     end
 
     logging('drawOnMap End')
+
+    return nil
   end
 
   def set_draws(save_data, data)
@@ -4541,6 +4622,8 @@ class DodontoFServer
       draws = draws(saveData)
       draws.clear
     end
+
+    return nil
   end
 
   def undo_draw_on_map
@@ -4558,9 +4641,11 @@ class DodontoFServer
 
 
   def add_effect
-    effect_data      = extract_params_in_request()
+    effect_data      = extract_params_in_request
     effect_data_list = [effect_data]
     add_effect_data(effect_data_list)
+
+    return nil
   end
 
   def find_effect(effects, keys, data)
@@ -4630,6 +4715,8 @@ class DodontoFServer
 
       effects[find_index] = effect_data
     end
+
+    return nil
   end
 
   def remove_effect
@@ -4646,6 +4733,8 @@ class DodontoFServer
     end
 
     logging('removeEffect End')
+
+    return nil
   end
 
 
@@ -4658,11 +4747,13 @@ class DodontoFServer
   end
 
   def change_image_tags
-    effect_data = extract_params_in_request()
+    effect_data = extract_params_in_request
     source      = effect_data['source']
     tag_info    = effect_data['tagInfo']
 
     change_image_tags_local(source, tag_info)
+
+    return nil
   end
 
   def all_image_file_name_from_tag_info_file
@@ -4814,6 +4905,8 @@ class DodontoFServer
     logging(character_data.inspect, "characterData")
 
     change_character_data(character_data)
+
+    return nil
   end
 
   def change_character_data(character_data)
@@ -4927,6 +5020,7 @@ class DodontoFServer
     end
 
     logging("addCardZone End")
+    return nil
   end
 
 
@@ -5047,6 +5141,8 @@ class DodontoFServer
     end
 
     logging("addCard end")
+
+    return nil
   end
 
   #トランプのジョーカー枚数、使用デッキ数の指定
@@ -5293,6 +5389,8 @@ class DodontoFServer
     end
 
     logging("returnCard End")
+
+    return nil
   end
 
   def draw_card
@@ -5461,7 +5559,7 @@ class DodontoFServer
     card_mount_data["imageNameBack"] = image
   end
 
-  def dump_trash_cards()
+  def dump_trash_cards
     logging("dumpTrushCards Begin")
 
     set_no_body_sender
@@ -5500,6 +5598,7 @@ class DodontoFServer
     end
 
     logging("dumpTrushCards End")
+    return nil
   end
 
   def delete_find_one(array)
@@ -5568,6 +5667,7 @@ class DodontoFServer
     end
 
     logging("shuffleCard End")
+    return nil
   end
 
 
@@ -5645,6 +5745,8 @@ class DodontoFServer
     end
 
     logging("shuffleForNextRandomDungeon End")
+
+    return nil
   end
 
   def delete_ace_from_cards(cards, ace_list)
@@ -5741,12 +5843,12 @@ class DodontoFServer
   end
 
 
-  def clear_character_by_type()
-    logging("clearCharacterByType Begin")
+  def clear_character_by_type
+    logging "clearCharacterByType Begin"
 
     set_record_empty
 
-    clear_data = extract_params_in_request()
+    clear_data = extract_params_in_request
     logging(clear_data, 'clearData')
 
     target_types = clear_data['types']
@@ -5756,7 +5858,9 @@ class DodontoFServer
       clear_character_by_type_local(targetType)
     end
 
-    logging("clearCharacterByType End")
+    logging "clearCharacterByType End"
+
+    return nil
   end
 
   def clear_character_by_type_local(target_type)
@@ -5777,6 +5881,8 @@ class DodontoFServer
   def remove_character
     remove_character_list = extract_params_in_request()
     remove_character_by_remove_character_data_list(remove_character_list)
+
+    return nil
   end
 
 
@@ -5963,8 +6069,10 @@ class DodontoFServer
 
 
   def change_round_time
-    round_time_data = extract_params_in_request()
+    round_time_data = extract_params_in_request
     change_initiative_data(round_time_data)
+
+    return nil
   end
 
   def change_initiative_data(round_time_data)
@@ -5996,6 +6104,8 @@ class DodontoFServer
       logging(characters, "after moved characters")
 
     end
+
+    return nil
   end
 
   #override

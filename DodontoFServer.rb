@@ -786,21 +786,15 @@ class DodontoFServer
   def response_for_none_command
     logging "getResponseTextWhenNoCommandName Begin"
 
-    response = analyze_webif_command
-
-    if response.nil?
-      response = test_response
-    end
-
-    response
+    execute_webif_command || test_response
   end
 
-  def analyze_webif_command
+  def execute_webif_command
     result = { 'result' => 'NG' }
 
     begin
       result = routing_webif_command
-      logging("analyzeWebInterfaceCatched end result", result)
+      logging("analyzeWebInterfaceCatches end result", result)
       set_jsonp_callback
     rescue => e
       result['result'] = e.to_s
@@ -810,7 +804,7 @@ class DodontoFServer
   end
 
   def routing_webif_command
-    logging("analyzeWebInterfaceCatched begin")
+    logging "analyzeWebInterfaceCatches begin"
 
     @is_web_interface = true
     @is_json_result   = true

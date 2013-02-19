@@ -11,10 +11,10 @@ end
 
 def getLogMessageProc(obj, *options)
   message = obj.inspect.tosjis
-  if( obj.instance_of?(String) )
+  if obj.instance_of?(String)
     message = obj
   end
-  return message = "#{options.join(',')}:#{message}"
+  message = "#{options.join(',')}:#{message}"
 end
 
 def logging(obj, *options)

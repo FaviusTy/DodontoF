@@ -694,7 +694,7 @@ class DodontoFServer
     text
   end
 
-  def analyze_command
+  def excute_command
     current_command = request_data('cmd')
 
     logging(current_command, "commandName")
@@ -6047,7 +6047,7 @@ class DodontoFServer
   end
 
   def response_body
-    response = analyze_command
+    response = excute_command
 
     if isJsonResult
       build_json(response)

@@ -1639,7 +1639,7 @@ class DodontoFServer
 
 
   def params
-    @params ||= request_data('params')
+    request_data('params')
   end
 
 

@@ -1590,7 +1590,7 @@ class DodontoFServer
       return save_data
     end
 
-    params = extract_params_in_request()
+    params = params()
     logging(params, "params")
 
     @last_update_times = params['times']
@@ -1638,10 +1638,8 @@ class DodontoFServer
   end
 
 
-  def extract_params_in_request()
-    params = request_data('params')
-    logging(params, "params")
-    params
+  def params
+    @params ||= request_data('params')
   end
 
 
@@ -1891,7 +1889,7 @@ class DodontoFServer
   end
 
   def play_room_states()
-    params = extract_params_in_request()
+    params = params()
     logging(params, "params")
 
     min_room         = min_room(params)
@@ -2022,7 +2020,7 @@ class DodontoFServer
 
 
   def play_room_states_by_count()
-    params = extract_params_in_request()
+    params = params()
     logging(params, "params")
 
     min_room         = min_room(params)
@@ -2124,7 +2122,7 @@ class DodontoFServer
   def login_info()
     logging("getLoginInfo begin")
 
-    params = extract_params_in_request()
+    params = params()
 
     unique_id = params['uniqueId']
     unique_id ||= create_unique_id()
@@ -2322,7 +2320,7 @@ class DodontoFServer
     result_text     = "OK"
     play_room_index = -1
     begin
-      params = extract_params_in_request()
+      params = params()
       logging(params, "params")
 
       check_create_play_room_password(params['createPassword'])
@@ -2434,7 +2432,7 @@ class DodontoFServer
     result_text = "OK"
 
     begin
-      params = extract_params_in_request()
+      params = params()
       logging(params, "params")
 
       play_room_password = params['playRoomPassword']
@@ -2572,7 +2570,7 @@ class DodontoFServer
 
 
   def remove_play_room
-    params = extract_params_in_request()
+    params = params()
 
     room_numbers      = params['roomNumbers']
     ignore_login_user = params['ignoreLoginUser']
@@ -2636,7 +2634,7 @@ class DodontoFServer
     dir = room_local_space_dir_name
     make_dir(dir)
 
-    params                       = extract_params_in_request()
+    params                       = params()
     @save_scenario_base_url      = params['baseUrl']
     chat_palette_savedata_string = params['chatPaletteSaveData']
 
@@ -3014,7 +3012,7 @@ class DodontoFServer
   def check_room_status()
     delete_old_upload_file()
 
-    check_room_status_data = extract_params_in_request()
+    check_room_status_data = params()
     logging(check_room_status_data, 'checkRoomStatusData')
 
     room_number = check_room_status_data['roomNumber']
@@ -3073,7 +3071,7 @@ class DodontoFServer
   end
 
   def login_password()
-    login_data = extract_params_in_request()
+    login_data = params()
     logging(login_data, 'loginData')
 
     room_number  = login_data['roomNumber']
@@ -3129,7 +3127,7 @@ class DodontoFServer
 
 
   def logout
-    logout_data = extract_params_in_request
+    logout_data = params
     logging(logout_data, 'logoutData')
 
     unique_id = logout_data['uniqueId']
@@ -3224,7 +3222,7 @@ class DodontoFServer
 
     dir = dicebot_extra_table_dir_name
     make_dir(dir)
-    params = extract_params_in_request()
+    params = params()
 
     require 'TableFileData'
 
@@ -3258,7 +3256,7 @@ class DodontoFServer
     logging("changeBotTableMain Begin")
 
     dir    = dicebot_extra_table_dir_name
-    params = extract_params_in_request()
+    params = params()
 
     require 'TableFileData'
 
@@ -3285,7 +3283,7 @@ class DodontoFServer
   def remove_bot_table_main()
     logging("removeBotTableMain Begin")
 
-    params  = extract_params_in_request()
+    params  = params()
     command = params["command"]
 
     dir = dicebot_extra_table_dir_name
@@ -3335,7 +3333,7 @@ class DodontoFServer
     upload_base_file($replayDataUploadDir, $UPLOAD_REPALY_DATA_MAX_SIZE) do |fileNameFullPath, fileNameOriginal, result|
       logging("uploadReplayData yield Begin")
 
-      params = extract_params_in_request()
+      params = params()
 
       own_url    = params['ownUrl']
       replay_url = own_url + "?replay=" + CGI.escape(fileNameFullPath)
@@ -3393,7 +3391,7 @@ class DodontoFServer
     }
 
     begin
-      replay_data = extract_params_in_request()
+      replay_data = params()
 
       logging(replay_data, "replayData")
 
@@ -3429,7 +3427,7 @@ class DodontoFServer
 
       delete_old_upload_file()
 
-      params   = extract_params_in_request()
+      params   = params()
       base_url = params['baseUrl']
       logging(base_url, "baseUrl")
 
@@ -3480,7 +3478,7 @@ class DodontoFServer
         return result
       end
 
-      params = extract_params_in_request()
+      params = params()
 
       file_data = params['fileData']
 
@@ -3737,7 +3735,7 @@ class DodontoFServer
 
       set_record_empty
 
-      params = extract_params_in_request()
+      params = params()
       logging(params, 'load params')
 
       jsonDataString = params['fileData']
@@ -3791,7 +3789,7 @@ class DodontoFServer
     logging(jsonData, 'loadFromJsonData jsonData')
 
     saveDataAll = getSaveDataAllFromSaveData(jsonData)
-    params      = extract_params_in_request()
+    params      = params()
 
     removeCharacterDataList = params['removeCharacterDataList']
     if removeCharacterDataList != nil
@@ -3937,7 +3935,7 @@ class DodontoFServer
     end
     logging("small image create successed.")
 
-    params  = extract_params_in_request()
+    params  = params()
     tagInfo = params['tagInfo']
     logging(tagInfo, "uploadImageData tagInfo")
 
@@ -3973,7 +3971,7 @@ class DodontoFServer
     }
 
     begin
-      params = extract_params_in_request()
+      params = params()
 
       imageFileName = params["imageFileName"]
       logging(imageFileName, "imageFileName")
@@ -4033,7 +4031,7 @@ class DodontoFServer
   def deleteImage()
     logging("deleteImage begin")
 
-    imageData = extract_params_in_request()
+    imageData = params()
     logging(imageData, "imageData")
 
     imageUrlList = imageData['imageUrlList']
@@ -4122,7 +4120,7 @@ class DodontoFServer
   def uploadImageUrl()
     logging("uploadImageUrl begin")
 
-    imageData = extract_params_in_request()
+    imageData = params()
     logging(imageData, "imageData")
 
     imageUrl = imageData['imageUrl']
@@ -4245,7 +4243,7 @@ class DodontoFServer
   def sendDiceBotChatMessage
     logging('sendDiceBotChatMessage')
 
-    params = extract_params_in_request()
+    params = params()
 
     repeatCount = dicebot_repeat_count(params)
 
@@ -4411,7 +4409,7 @@ class DodontoFServer
     result = { 'result' => "NG" }
 
     return result if ($mentenanceModePassword.nil?)
-    chat_data = extract_params_in_request()
+    chat_data = params()
 
     password = chat_data["password"]
     logging(password, "password check...")
@@ -4443,7 +4441,7 @@ class DodontoFServer
   end
 
   def send_chat_message
-    chat_data = extract_params_in_request()
+    chat_data = params()
     send_chat_message_by_chat_data(chat_data)
 
     return nil
@@ -4552,7 +4550,7 @@ class DodontoFServer
   end
 
   def change_map
-    map_data = extract_params_in_request()
+    map_data = params()
     logging(map_data, "mapData")
 
     change_map_savedata(map_data)
@@ -4585,7 +4583,7 @@ class DodontoFServer
   def draw_on_map
     logging('drawOnMap Begin')
 
-    params = extract_params_in_request
+    params = params
     data   = params['data']
     logging(data, 'data')
 
@@ -4641,7 +4639,7 @@ class DodontoFServer
 
 
   def add_effect
-    effect_data      = extract_params_in_request
+    effect_data      = params
     effect_data_list = [effect_data]
     add_effect_data(effect_data_list)
 
@@ -4696,7 +4694,7 @@ class DodontoFServer
 
   def change_effect
     change_save_data(@savefiles['effects']) do |saveData|
-      effect_data     = extract_params_in_request()
+      effect_data     = params()
       target_cutin_id = effect_data['effectId']
 
       saveData['effects'] ||= []
@@ -4723,7 +4721,7 @@ class DodontoFServer
     logging('removeEffect Begin')
 
     change_save_data(@savefiles['effects']) do |saveData|
-      params    = extract_params_in_request()
+      params    = params()
       effect_id = params['effectId']
       logging(effect_id, 'effectId')
 
@@ -4747,7 +4745,7 @@ class DodontoFServer
   end
 
   def change_image_tags
-    effect_data = extract_params_in_request
+    effect_data = params
     source      = effect_data['source']
     tag_info    = effect_data['tagInfo']
 
@@ -4840,7 +4838,7 @@ class DodontoFServer
 
 
   def add_character
-    character_data      = extract_params_in_request()
+    character_data      = params()
     character_data_list = [character_data]
 
     add_character_data(character_data_list)
@@ -4901,7 +4899,7 @@ class DodontoFServer
 
 
   def change_character
-    character_data = extract_params_in_request
+    character_data = params
     logging(character_data.inspect, "characterData")
 
     change_character_data(character_data)
@@ -5004,7 +5002,7 @@ class DodontoFServer
   def add_card_zone
     logging("addCardZone Begin")
 
-    data = extract_params_in_request()
+    data = params()
 
     x          = data['x']
     y          = data['y']
@@ -5037,7 +5035,7 @@ class DodontoFServer
     clear_character_by_type_local(random_dungeon_card_trash_mount_type)
 
 
-    params          = extract_params_in_request()
+    params          = params()
     card_type_infos = params['cardTypeInfos']
     logging(card_type_infos, "cardTypeInfos")
 
@@ -5118,7 +5116,7 @@ class DodontoFServer
   def add_card
     logging("addCard begin")
 
-    add_card_data = extract_params_in_request()
+    add_card_data = params()
 
     is_text         = add_card_data['isText']
     image_name      = add_card_data['imageName']
@@ -5357,7 +5355,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = extract_params_in_request()
+    params = params()
 
     mount_name = params['mountName']
     logging(mount_name, "mountName")
@@ -5398,7 +5396,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = extract_params_in_request()
+    params = params()
     logging(params, 'params')
 
     result = {
@@ -5459,7 +5457,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = extract_params_in_request()
+    params = params()
 
     mount_name = params['mountName']
     logging(mount_name, "mountName")
@@ -5496,7 +5494,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = extract_params_in_request()
+    params = params()
     logging(params, 'params')
 
     mount_name = params['mountName']
@@ -5564,7 +5562,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    dump_trash_cards = extract_params_in_request()
+    dump_trash_cards = params()
     logging(dump_trash_cards, 'dumpTrushCardsData')
 
     mount_name = dump_trash_cards['mountName']
@@ -5625,7 +5623,7 @@ class DodontoFServer
 
     set_record_empty
 
-    params         = extract_params_in_request()
+    params         = params()
     mount_name     = params['mountName']
     trash_mount_id = params['mountId']
     is_shuffle     = params['isShuffle']
@@ -5676,7 +5674,7 @@ class DodontoFServer
 
     set_record_empty
 
-    params         = extract_params_in_request()
+    params         = params()
     mount_name     = params['mountName']
     trash_mount_id = params['mountId']
 
@@ -5794,7 +5792,7 @@ class DodontoFServer
   end
 
   def mount_card_infos
-    params = extract_params_in_request()
+    params = params()
     logging(params, 'getTrushMountCardInfos params')
 
     mount_name = params['mountName']
@@ -5826,7 +5824,7 @@ class DodontoFServer
   end
 
   def trash_mount_card_infos
-    params = extract_params_in_request()
+    params = params()
     logging(params, 'getTrushMountCardInfos params')
 
     mount_name = params['mountName']
@@ -5848,7 +5846,7 @@ class DodontoFServer
 
     set_record_empty
 
-    clear_data = extract_params_in_request
+    clear_data = params
     logging(clear_data, 'clearData')
 
     target_types = clear_data['types']
@@ -5879,7 +5877,7 @@ class DodontoFServer
 
 
   def remove_character
-    remove_character_list = extract_params_in_request()
+    remove_character_list = params()
     remove_character_by_remove_character_data_list(remove_character_list)
 
     return nil
@@ -5931,7 +5929,7 @@ class DodontoFServer
 
     set_record_empty
 
-    params       = extract_params_in_request()
+    params       = params()
     character_id = params['characterId']
 
     logging(character_id, "enterWaitingRoomCharacter characterId")
@@ -5953,7 +5951,7 @@ class DodontoFServer
 
 
   def resurrect_character
-    params = extract_params_in_request()
+    params = params()
     img_id = params['imgId']
     logging(img_id, "resurrectCharacterId")
 
@@ -6021,7 +6019,7 @@ class DodontoFServer
 
     set_record_empty
 
-    params       = extract_params_in_request()
+    params       = params()
     character_id = params['characterId']
     x            = params['x']
     y            = params['y']
@@ -6069,7 +6067,7 @@ class DodontoFServer
 
 
   def change_round_time
-    round_time_data = extract_params_in_request
+    round_time_data = params
     change_initiative_data(round_time_data)
 
     return nil
@@ -6085,7 +6083,7 @@ class DodontoFServer
   def move_character
     change_save_data(@savefiles['characters']) do |saveData|
 
-      character_move_data = extract_params_in_request()
+      character_move_data = params()
       logging(character_move_data, "moveCharacter() characterMoveData")
 
       logging(character_move_data['imgId'], "character.imgId")

@@ -687,20 +687,17 @@ class DodontoFServer
   end
 
   def execute_command
-    current_command = request_data('cmd')
+    current_command = request_data('cmd') || ''
 
     logging(current_command, "commandName")
 
-    if current_command.nil? or current_command.empty?
-      return response_for_none_command
-    end
+    return response_for_none_command if current_command.empty?
 
     has_return = "hasReturn"
     no_return  = "hasNoReturn"
 
     commands = [
         ['refresh', has_return],
-
         ['getGraveyardCharacterData', has_return],
         ['resurrectCharacter', has_return],
         ['clearGraveyard', has_return],
@@ -739,15 +736,12 @@ class DodontoFServer
         ['deleteChatLog', has_return],
         ['sendChatMessageAll', has_return],
         ['undoDrawOnMap', has_return],
-
         ['logout', no_return],
         ['changeCharacter', no_return],
         ['removeCharacter', no_return],
-
         # Card Command Get
         ['getMountCardInfos', has_return],
         ['getTrushMountCardInfos', has_return],
-
         # Card Command Set
         ['drawTargetCard', has_return],
         ['drawTargetTrushCard', has_return],
@@ -759,7 +753,6 @@ class DodontoFServer
         ['shuffleCards', no_return],
         ['shuffleForNextRandomDungeon', no_return],
         ['dumpTrushCards', no_return],
-
         ['clearCharacterByType', no_return],
         ['moveCharacter', no_return],
         ['changeMap', no_return],
@@ -787,12 +780,11 @@ class DodontoFServer
       end
     end
 
-    throw Exception.new("\"" + current_command.untaint + "\" is invalid command")
-
+    throw Exception.new("\"#{current_command.untaint}\" is invalid command")
   end
 
   def response_for_none_command
-    logging("getResponseTextWhenNoCommandName Begin")
+    logging "getResponseTextWhenNoCommandName Begin"
 
     response = analyze_webif_command
 

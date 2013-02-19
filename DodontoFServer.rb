@@ -6074,7 +6074,7 @@ def compress?(result, server)
   return false if ($gzipTargetSize <= 0)
   return false if (server.jsonp_callback)
 
-  ((/gzip/ =~ ENV["HTTP_ACCEPT_ENCODING"]) and (result.length > $gzipTargetSize))
+  (/gzip/ =~ ENV["HTTP_ACCEPT_ENCODING"]) and (result.length > $gzipTargetSize)
 end
 
 def compress_response(result)
@@ -6131,14 +6131,8 @@ def print_response(server)
 
   begin
     result = server.response_body
-
-    if server.is_add_marker
-      result = "#D@EM>#" + result + "#<D@EM#"
-    end
-
-    if server.jsonp_callback
-      result = "#{server.jsonpCallBack}(" + result + ");"
-    end
+    result = "#D@EM>#" + result + "#<D@EM#" if server.is_add_marker
+    result = "#{server.jsonpCallBack}(#{result})" if server.json_callback
 
     logging(result.length.to_s, "CGI response original length")
 
@@ -6147,12 +6141,8 @@ def print_response(server)
         Apache.request.content_encoding = 'gzip'
       else
         header << "Content-Encoding: gzip\n"
-
-        if server.jsonpCallBack
-          header << "Access-Control-Allow-Origin: *\n"
-        end
+        header << "Access-Control-Allow-Origin: *\n" if server.jsonpCallBack
       end
-
       text = compress_response(result)
     else
       text = result
@@ -6161,7 +6151,8 @@ def print_response(server)
     error_message = error_response_body(e)
     loggingForce(error_message, "errorMessage")
 
-    text = "\n= ERROR ====================\n"
+    text =  "\n"
+    text << "= ERROR ====================\n"
     text << error_message
     text << "============================\n"
   end
@@ -6170,12 +6161,10 @@ def print_response(server)
 
   output = $stdout
   output.binmode if (defined?(output.binmode))
-
   output.print(header + "\n")
-
   output.print(text)
 
-  logging("========================================>CGI end.")
+  logging "========================================>CGI end."
 end
 
 
@@ -6206,16 +6195,14 @@ if $0 === __FILE__
 
   initLog
 
-  params = extract_params_in_cgi
-
   case $dbType
     when "mysql"
       #mod_ruby でも再読み込みするようにloadに
       require 'DodontoFServerMySql.rb'
-      mainMySql(params)
+      mainMySql(extract_params_in_cgi)
     else
       #通常のテキストファイル形式
-      main(params)
+      main(extract_params_in_cgi)
   end
 
 end

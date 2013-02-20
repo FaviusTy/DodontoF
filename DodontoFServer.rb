@@ -170,12 +170,6 @@ class DodontoFServer
       raise
     end
   end
-
-  #override
-  def exist?(file_name)
-    File.exist?(file_name)
-  end
-
   #override
   def exist_dir?(dir_name)
     File.exist?(dir_name)
@@ -192,7 +186,7 @@ class DodontoFServer
 
     lines = []
     lockfile.lock do
-      if exist?(savefile_name)
+      if File.exist?(savefile_name)
         lines = readlines(savefile_name)
       end
 
@@ -672,7 +666,7 @@ class DodontoFServer
   def extract_safed_file_text(savefile_name)
     empty = "{}"
 
-    return empty unless (exist?(savefile_name))
+    return empty unless (File.exist?(savefile_name))
 
     text = ''
     open(savefile_name, 'r') do |file|
@@ -1788,7 +1782,7 @@ class DodontoFServer
       @savedir_info.setSaveDataDirIndex(roomNumber)
       real_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
 
-      next if (exist?(real_savefile_name))
+      next if (File.exist?(real_savefile_name))
 
       empty_room_number = roomNumber
       break
@@ -1860,7 +1854,7 @@ class DodontoFServer
   def play_room_state_local(room_no, play_room_state)
     play_room_info_file = @savedir_info.real_savefile_name($play_room_info_file_name)
 
-    return play_room_state unless (exist?(play_room_info_file))
+    return play_room_state unless (File.exist?(play_room_info_file))
 
     play_room_data = nil
     save_data(play_room_info_file) do |playRoomDataTmp|
@@ -1899,7 +1893,7 @@ class DodontoFServer
     real_savefile_name = @savedir_info.real_savefile_name($login_user_info_file_name)
     logging(real_savefile_name, "getLoginUserNames real_savefile_name")
 
-    unless exist?(real_savefile_name)
+    unless File.exist?(real_savefile_name)
       return user_names
     end
 
@@ -2456,7 +2450,7 @@ class DodontoFServer
 
     @savedir_info.setSaveDataDirIndex(room_number)
     real_savefile_name   = @savedir_info.real_savefile_name($play_room_info_file_name)
-    exist_play_room_info = (exist?(real_savefile_name))
+    exist_play_room_info = (File.exist?(real_savefile_name))
 
     return true unless (exist_play_room_info)
 
@@ -2927,7 +2921,7 @@ class DodontoFServer
     can_visit              = false
     is_password_locked     = false
     true_savefile_name     = @savedir_info.real_savefile_name($play_room_info_file_name)
-    is_exist_playroom_info = (exist?(true_savefile_name))
+    is_exist_playroom_info = (File.exist?(true_savefile_name))
 
     if is_exist_playroom_info
       save_data(true_savefile_name) do |saveData|
@@ -3967,7 +3961,7 @@ class DodontoFServer
   def delete_target_image_url(image_url, image_files, image_url_file_name)
     logging(image_url, "deleteTargetImageUrl(imageUrl)")
 
-    if image_files.include?(image_url) && exist?(image_url)
+    if image_files.include?(image_url) && File.exist?(image_url)
       delete_file(image_url)
       return true
     end
@@ -4082,7 +4076,7 @@ class DodontoFServer
 
   def add_texts_character_image_list(image_list, *texts)
     texts.each do |text|
-      next unless (exist?(text))
+      next unless (File.exist?(text))
 
       lines = readlines(text)
       lines.each do |line|
@@ -4303,7 +4297,7 @@ class DodontoFServer
       init_savefiles(roomNumber)
 
       true_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
-      next unless (exist?(true_savefile_name))
+      next unless (File.exist?(true_savefile_name))
 
       logging(roomNumber, "sendChatMessageAll to No.")
       send_chat_message_by_chat_data(chat_data)
@@ -4412,7 +4406,7 @@ class DodontoFServer
     locker.lock do
 
       lines = []
-      if exist?(savefile_name)
+      if File.exist?(savefile_name)
         lines = readlines(savefile_name)
       end
       lines << DodontoFServer::build_json(chat_message_data)
@@ -5971,7 +5965,7 @@ class DodontoFServer
 
   #override
   def savefile_timestamp(savefile_name)
-    unless exist?(savefile_name)
+    unless File.exist?(savefile_name)
       return 0
     end
 

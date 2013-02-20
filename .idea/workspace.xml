@@ -3,12 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DodontoFServer.rb" afterPath="$PROJECT_DIR$/DodontoFServer.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sketch.rb" afterPath="$PROJECT_DIR$/sketch.rb" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="DodontoF.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361368157604" ignored="false" />
+    <file path="/Dummy.txt" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361380963156" ignored="false" />
     <file path="/a.rxml" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360953211531" ignored="false" />
     <file path="/a.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360951898604" ignored="false" />
     <file path="/a.coffee" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360858031237" ignored="false" />
@@ -42,7 +41,7 @@
       <file leaf-file-name="DodontoFServer.rb" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DodontoFServer.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="752" column="176" selection-start="18545" selection-end="18545" vertical-scroll-proportion="0.27887788">
+            <state line="171" column="5" selection-start="4144" selection-end="4144" vertical-scroll-proportion="0.25289255">
               <folding />
             </state>
           </provider>
@@ -187,15 +186,15 @@
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
     <property name="last_opened_file_path" value="$USER_HOME$/RubymineProjects/kickstart" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth2" value="291" />
-    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="968" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth3" value="964" />
+    <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth3" value="968" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth2" value="286" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_treeWidth1" value="286" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder2" value="2" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder3" value="3" />
-    <property name="options.searchVisible" value="true" />
     <property name="options.splitter.details.proportions" value="0.2" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RunManager" selected="Ruby.sketch">
     <configuration default="false" name="sketch" type="RubyRunConfigurationType" factoryName="Ruby" temporary="true">
@@ -324,7 +323,11 @@
       <created>1361288598120</created>
       <updated>1361288598120</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="&quot;をエスケープしている文字列リテラルを%Q記法に修正">
+      <created>1361380281263</created>
+      <updated>1361380281263</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -352,7 +355,7 @@
     <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32977587" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32765958" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3276414" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Mongo Runner" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -362,8 +365,8 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32870865" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.18470149" sideWeight="0.67048347" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Mongo Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14872068" sideWeight="0.67127657" order="1" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3287234" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14872068" sideWeight="0.6723586" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287234" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -411,7 +414,7 @@
     <option name="MAXIMUM_HISTORY_ROWS" value="1000" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="analyze_commandをexecute_commandにrename" />
+    <option name="LAST_COMMIT_MESSAGE" value="&quot;をエスケープしている文字列リテラルを%Q記法に修正" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -429,6 +432,7 @@
     <MESSAGE value="下処理　一段落" />
     <MESSAGE value="execute_serverメソッドを if $0 === __FILE__ 直下に移行" />
     <MESSAGE value="analyze_commandをexecute_commandにrename" />
+    <MESSAGE value="&quot;をエスケープしている文字列リテラルを%Q記法に修正" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -529,7 +533,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DodontoFServer.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="752" column="176" selection-start="18545" selection-end="18545" vertical-scroll-proportion="0.27887788">
+        <state line="171" column="5" selection-start="4144" selection-end="4144" vertical-scroll-proportion="0.25289255">
           <folding />
         </state>
       </provider>

@@ -687,75 +687,75 @@ class DodontoFServer
   # DodontoFServerで定義されているCommandList
   # ['key_name', 'method_name']
   #
-  self.COMMAND_REFERENCE = [
-      ['refresh', has_return],
-      ['getGraveyardCharacterData', has_return],
-      ['resurrectCharacter', has_return],
-      ['clearGraveyard', has_return],
-      ['getLoginInfo', has_return],
-      ['getPlayRoomStates', has_return],
-      ['getPlayRoomStatesByCount', has_return],
-      ['deleteImage', has_return],
-      ['uploadImageUrl', has_return],
-      ['save', has_return],
-      ['saveMap', has_return],
-      ['saveScenario', has_return],
-      ['load', has_return],
-      ['loadScenario', has_return],
-      ['getDiceBotInfos', has_return],
-      ['getBotTableInfos', has_return],
-      ['addBotTable', has_return],
-      ['changeBotTable', has_return],
-      ['removeBotTable', has_return],
-      ['requestReplayDataList', has_return],
-      ['uploadReplayData', has_return],
-      ['removeReplayData', has_return],
-      ['checkRoomStatus', has_return],
-      ['loginPassword', has_return],
-      ['uploadFile', has_return],
-      ['uploadImageData', has_return],
-      ['createPlayRoom', has_return],
-      ['changePlayRoom', has_return],
-      ['removePlayRoom', has_return],
-      ['removeOldPlayRoom', has_return],
-      ['getImageTagsAndImageList', has_return],
-      ['addCharacter', has_return],
-      ['getWaitingRoomInfo', has_return],
-      ['exitWaitingRoomCharacter', has_return],
-      ['enterWaitingRoomCharacter', has_return],
-      ['sendDiceBotChatMessage', has_return],
-      ['deleteChatLog', has_return],
-      ['sendChatMessageAll', has_return],
-      ['undoDrawOnMap', has_return],
-      ['logout', no_return],
-      ['changeCharacter', no_return],
-      ['removeCharacter', no_return],
+  self.COMMAND_REFERENCE = {
+      :refresh => :refresh,
+      :getGraveyardCharacterData => :character_data_in_graveyard,
+      :resurrectCharacter => :resurrect_character,
+      :clearGraveyard => :clear_graveyard,
+      :getLoginInfo => :login_info,
+      :getPlayRoomStates => :play_room_states,
+      :getPlayRoomStatesByCount => :play_room_states_by_count,
+      :deleteImage => :delete_image,
+      :uploadImageUrl => :upload_image_url,
+      :save => :save,
+      :saveMap => :save_map,
+      :saveScenario => :save_scenario,
+      :load => :load,
+      :loadScenario => :load_scenario,
+      :getDiceBotInfos => :dicebot_infos,
+      :getBotTableInfos => :bot_table_infos,
+      :addBotTable => :add_bot_table,
+      :changeBotTable => :change_bot_table,
+      :removeBotTable => :remove_bot_table,
+      :requestReplayDataList => :request_replay_data_list,
+      :uploadReplayData => :upload_replay_data,
+      :removeReplayData => :remove_replay_data,
+      :checkRoomStatus => :check_room_status,
+      :loginPassword => :login_password,
+      :uploadFile => :upload_file,
+      :uploadImageData => :upload_image_data,
+      :createPlayRoom => :create_play_room,
+      :changePlayRoom => :change_play_room,
+      :removePlayRoom => :remove_play_room,
+      :removeOldPlayRoom => :remove_old_play_room,
+      :getImageTagsAndImageList => :image_tags_and_image_list,
+      :addCharacter => :add_character,
+      :getWaitingRoomInfo => :waiting_room_info,
+      :exitWaitingRoomCharacter => :exit_waiting_room_character,
+      :enterWaitingRoomCharacter => :enter_waiting_room_character,
+      :sendDiceBotChatMessage => :send_dicebot_chat_message,
+      :deleteChatLog => :delete_chat_log,
+      :sendChatMessageAll => :send_chat_message_all,
+      :undoDrawOnMap => :undo_draw_on_map,
+      :logout => :logout,
+      :changeCharacter => :change_character,
+      :removeCharacter => :remove_character,
       # Card Command Get
-      ['getMountCardInfos', has_return],
-      ['getTrushMountCardInfos', has_return],
+      :getMountCardInfos => :mount_card_infos,
+      :getTrushMountCardInfos => :trash_mount_card_infos,
       # Card Command Set
-      ['drawTargetCard', has_return],
-      ['drawTargetTrushCard', has_return],
-      ['drawCard', has_return],
-      ['addCard', no_return],
-      ['addCardZone', no_return],
-      ['initCards', has_return],
-      ['returnCard', no_return],
-      ['shuffleCards', no_return],
-      ['shuffleForNextRandomDungeon', no_return],
-      ['dumpTrushCards', no_return],
-      ['clearCharacterByType', no_return],
-      ['moveCharacter', no_return],
-      ['changeMap', no_return],
-      ['drawOnMap', no_return],
-      ['clearDrawOnMap', no_return],
-      ['sendChatMessage', no_return],
-      ['changeRoundTime', no_return],
-      ['addEffect', no_return],
-      ['changeEffect', no_return],
-      ['removeEffect', no_return],
-      ['changeImageTags', no_return],
-  ]
+      :drawTargetCard => :draw_target_card,
+      :drawTargetTrushCard => :draw_target_trash_card,
+      :drawCard => :draw_card,
+      :addCard => :add_card,
+      :addCardZone => :add_card_zone,
+      :initCards => :init_cards,
+      :returnCard => :return_card,
+      :shuffleCards => :shuffle_cards,
+      :shuffleForNextRandomDungeon => :shuffle_next_random_dungeon,
+      :dumpTrushCards => :dump_trash_cards,
+      :clearCharacterByType => :clear_character_by_type,
+      :moveCharacter => :move_character,
+      :changeMap => :change_map,
+      :drawOnMap => :draw_on_map,
+      :clearDrawOnMap => :clear_draw_on_map,
+      :sendChatMessage => :send_chat_message,
+      :changeRoundTime => :change_round_time,
+      :addEffect => :add_effect,
+      :changeEffect => :change_effect,
+      :removeEffect => :remove_effect,
+      :changeImageTags => :change_image_tags,
+  }
 
   def execute_command
     current_command = request_data('cmd') || ''
@@ -764,94 +764,12 @@ class DodontoFServer
 
     return response_for_none_command if current_command.empty?
 
-    has_return = "hasReturn"
-    no_return  = "hasNoReturn"
-
-    commands = [
-        ['refresh', has_return],
-        ['getGraveyardCharacterData', has_return],
-        ['resurrectCharacter', has_return],
-        ['clearGraveyard', has_return],
-        ['getLoginInfo', has_return],
-        ['getPlayRoomStates', has_return],
-        ['getPlayRoomStatesByCount', has_return],
-        ['deleteImage', has_return],
-        ['uploadImageUrl', has_return],
-        ['save', has_return],
-        ['saveMap', has_return],
-        ['saveScenario', has_return],
-        ['load', has_return],
-        ['loadScenario', has_return],
-        ['getDiceBotInfos', has_return],
-        ['getBotTableInfos', has_return],
-        ['addBotTable', has_return],
-        ['changeBotTable', has_return],
-        ['removeBotTable', has_return],
-        ['requestReplayDataList', has_return],
-        ['uploadReplayData', has_return],
-        ['removeReplayData', has_return],
-        ['checkRoomStatus', has_return],
-        ['loginPassword', has_return],
-        ['uploadFile', has_return],
-        ['uploadImageData', has_return],
-        ['createPlayRoom', has_return],
-        ['changePlayRoom', has_return],
-        ['removePlayRoom', has_return],
-        ['removeOldPlayRoom', has_return],
-        ['getImageTagsAndImageList', has_return],
-        ['addCharacter', has_return],
-        ['getWaitingRoomInfo', has_return],
-        ['exitWaitingRoomCharacter', has_return],
-        ['enterWaitingRoomCharacter', has_return],
-        ['sendDiceBotChatMessage', has_return],
-        ['deleteChatLog', has_return],
-        ['sendChatMessageAll', has_return],
-        ['undoDrawOnMap', has_return],
-        ['logout', no_return],
-        ['changeCharacter', no_return],
-        ['removeCharacter', no_return],
-        # Card Command Get
-        ['getMountCardInfos', has_return],
-        ['getTrushMountCardInfos', has_return],
-        # Card Command Set
-        ['drawTargetCard', has_return],
-        ['drawTargetTrushCard', has_return],
-        ['drawCard', has_return],
-        ['addCard', no_return],
-        ['addCardZone', no_return],
-        ['initCards', has_return],
-        ['returnCard', no_return],
-        ['shuffleCards', no_return],
-        ['shuffleForNextRandomDungeon', no_return],
-        ['dumpTrushCards', no_return],
-        ['clearCharacterByType', no_return],
-        ['moveCharacter', no_return],
-        ['changeMap', no_return],
-        ['drawOnMap', no_return],
-        ['clearDrawOnMap', no_return],
-        ['sendChatMessage', no_return],
-        ['changeRoundTime', no_return],
-        ['addEffect', no_return],
-        ['changeEffect', no_return],
-        ['removeEffect', no_return],
-        ['changeImageTags', no_return],
-    ]
-
-    commands.each do |command, type|
-      next unless (command == current_command)
-      logging(type, "commandType")
-
-      case type
-        when has_return
-          return eval(command) #TODO:WHAT? 以前はsendだった気がするが、なぜevalなのか
-        when no_return
-          eval(command)
-          return nil
-        else
-      end
+    #TODO 最終的にはmethod_missing内部でThrowするように修正した方が良い
+    begin
+      return send(DodontoFServer::COMMAND_REFERENCE[:"#{current_command}"])
+    rescue
+      throw Exception.new("\"#{current_command.untaint}\" is invalid command")
     end
-
-    throw Exception.new("\"#{current_command.untaint}\" is invalid command")
   end
 
   def response_for_none_command
@@ -1810,7 +1728,7 @@ class DodontoFServer
   end
 
 
-  def remove_old_play_room()
+  def remove_old_play_room
     all_ange     = (0 .. $saveDataMaxCount)
     access_times = save_data_lastaccess_times(all_ange)
     remove_old_room_for_access_times(access_times)
@@ -1880,7 +1798,7 @@ class DodontoFServer
     empty_room_number
   end
 
-  def play_room_states()
+  def play_room_states
     params = params()
     logging(params, "params")
 
@@ -2011,7 +1929,7 @@ class DodontoFServer
   end
 
 
-  def play_room_states_by_count()
+  def play_room_states_by_count
     params = params()
     logging(params, "params")
 
@@ -2111,7 +2029,7 @@ class DodontoFServer
     [[params['max_room'], ($saveDataMaxCount - 1)].min, 0].max
   end
 
-  def login_info()
+  def login_info
     logging("getLoginInfo begin")
 
     params = params()
@@ -2234,7 +2152,7 @@ class DodontoFServer
     login_message
   end
 
-  def dicebot_infos()
+  def dicebot_infos
     logging("getDiceBotInfos() Begin")
 
     require 'diceBotInfos'
@@ -2418,13 +2336,12 @@ class DodontoFServer
     pass.crypt(salt)
   end
 
-  def change_play_room()
-    logging("changePlayRoom begin")
+  def change_play_room
+    logging "changePlayRoom begin"
 
     result_text = "OK"
 
     begin
-      params = params()
       logging(params, "params")
 
       play_room_password = params['playRoomPassword']
@@ -2562,7 +2479,6 @@ class DodontoFServer
 
 
   def remove_play_room
-    params = params()
 
     room_numbers      = params['roomNumbers']
     ignore_login_user = params['ignoreLoginUser']
@@ -2633,7 +2549,7 @@ class DodontoFServer
     all_save_data = savedata_all_for_scenario
     all_save_data = move_all_images_to_dir(dir, all_save_data)
     make_chat_pallet_savefile(dir, chat_palette_savedata_string)
-    make_scenari_default_savefile(dir, all_save_data)
+    make_scenario_default_savefile(dir, all_save_data)
 
     remove_old_scenario_file(dir)
     base_name     = get_new_savefile_base_name(@full_backup_base_name)
@@ -2796,7 +2712,7 @@ class DodontoFServer
     logging("makeChatPalletSaveFile End")
   end
 
-  def make_scenari_default_savefile(dir, all_savedata)
+  def make_scenario_default_savefile(dir, all_savedata)
     logging("makeScenariDefaultSaveFile Begin")
     logging(dir, "makeScenariDefaultSaveFile dir")
 
@@ -2847,13 +2763,13 @@ class DodontoFServer
   end
 
 
-  def save()
+  def save
     is_add_playroom_info = true
     extension            = request_data('extension')
     save_select_files($save_files_name_set.keys, extension, is_add_playroom_info)
   end
 
-  def save_map()
+  def save_map
     extension    = request_data('extension')
     select_types = ['map', 'characters']
     save_select_files(select_types, extension)
@@ -3001,8 +2917,8 @@ class DodontoFServer
   end
 
 
-  def check_room_status()
-    delete_old_upload_file()
+  def check_room_status
+    delete_old_upload_file
 
     check_room_status_data = params()
     logging(check_room_status_data, 'checkRoomStatusData')
@@ -3062,15 +2978,15 @@ class DodontoFServer
     result
   end
 
-  def login_password()
-    login_data = params()
+  def login_password
+    login_data = params
     logging(login_data, 'loginData')
 
     room_number  = login_data['roomNumber']
     password     = login_data['password']
-    visiter_mode = login_data['visiterMode']
+    visitor_mode = login_data['visiterMode']
 
-    check_login_password(room_number, password, visiter_mode)
+    check_login_password(room_number, password, visitor_mode)
   end
 
   def check_login_password(room_number, password, visitor_mode)
@@ -3160,7 +3076,7 @@ class DodontoFServer
   end
 
 
-  def get_bot_table_infos()
+  def bot_table_infos
     logging("getBotTableInfos Begin")
     result = {
         "resultText" => "OK",
@@ -3193,7 +3109,7 @@ class DodontoFServer
   end
 
 
-  def add_bot_table()
+  def add_bot_table
     result               = {}
     result['resultText'] = add_bot_table_main()
 
@@ -3203,7 +3119,7 @@ class DodontoFServer
 
     logging("addBotTableMain called")
 
-    result = get_bot_table_infos()
+    result = bot_table_infos()
     logging(result, "addBotTable result")
 
     result
@@ -3233,7 +3149,7 @@ class DodontoFServer
   end
 
 
-  def change_bot_table()
+  def change_bot_table
     result               = {}
     result['resultText'] = change_bot_table_main()
 
@@ -3241,10 +3157,10 @@ class DodontoFServer
       return result
     end
 
-    get_bot_table_infos()
+    bot_table_infos()
   end
 
-  def change_bot_table_main()
+  def change_bot_table_main
     logging("changeBotTableMain Begin")
 
     dir    = dicebot_extra_table_dir_name
@@ -3267,12 +3183,12 @@ class DodontoFServer
   end
 
 
-  def remove_bot_table()
+  def remove_bot_table
     remove_bot_table_main
-    get_bot_table_infos
+    bot_table_infos
   end
 
-  def remove_bot_table_main()
+  def remove_bot_table_main
     logging("removeBotTableMain Begin")
 
     params  = params()
@@ -3308,7 +3224,7 @@ class DodontoFServer
   end
 
 
-  def request_replay_data_list()
+  def request_replay_data_list
     logging("requestReplayDataList begin")
     result = {
         "resultText" => "OK",
@@ -3321,7 +3237,7 @@ class DodontoFServer
     result
   end
 
-  def upload_replay_data()
+  def upload_replay_data
     upload_base_file($replayDataUploadDir, $UPLOAD_REPALY_DATA_MAX_SIZE) do |fileNameFullPath, fileNameOriginal, result|
       logging("uploadReplayData yield Begin")
 
@@ -3375,7 +3291,7 @@ class DodontoFServer
   end
 
 
-  def remove_replay_data()
+  def remove_replay_data
     logging("removeReplayData begin")
 
     result = {
@@ -3383,7 +3299,7 @@ class DodontoFServer
     }
 
     begin
-      replay_data = params()
+      replay_data = params
 
       logging(replay_data, "replayData")
 
@@ -3414,7 +3330,7 @@ class DodontoFServer
   end
 
 
-  def upload_file()
+  def upload_file
     upload_base_file($fileUploadDir, $UPLOAD_FILE_MAX_SIZE) do |fileNameFullPath, fileNameOriginal, result|
 
       delete_old_upload_file()
@@ -3511,9 +3427,9 @@ class DodontoFServer
   end
 
 
-  def load_scenario()
+  def load_scenario
     logging("loadScenario() Begin")
-    checkLoad()
+    checkLoad
 
     set_record_empty
 
@@ -3955,41 +3871,40 @@ class DodontoFServer
     logging(tagInfo, "margeTagInfo tagInfo")
   end
 
-  def uploadImageData()
-    logging("uploadImageData load Begin")
+  def upload_image_data
+    logging "uploadImageData load Begin"
 
     result = {
         "resultText" => "OK"
     }
 
     begin
-      params = params()
 
-      imageFileName = params["imageFileName"]
-      logging(imageFileName, "imageFileName")
+      image_file_name = params["imageFileName"]
+      logging(image_file_name, "imageFileName")
 
-      imageData      = getImageDataFromParams(params, "imageData")
-      smallImageData = getImageDataFromParams(params, "smallImageData")
+      image_data      = getImageDataFromParams(params, "imageData")
+      small_image_data = getImageDataFromParams(params, "smallImageData")
 
-      if imageData.nil?
+      if image_data.nil?
         logging("createSmallImage is here")
-        imageFileNameBase = File.basename(imageFileName)
-        saveSmallImage(smallImageData, imageFileNameBase, imageFileName)
+        image_file_base_name = File.basename(image_file_name)
+        saveSmallImage(small_image_data, image_file_base_name, image_file_name)
         return result
       end
 
-      saveDir           = $imageUploadDir
-      imageFileNameBase = getNewFileName(imageFileName, "img")
-      logging(imageFileNameBase, "imageFileNameBase")
+      save_dir           = $imageUploadDir
+      image_file_base_name = getNewFileName(image_file_name, "img")
+      logging(image_file_base_name, "imageFileNameBase")
 
-      uploadImageFileName = file_join(saveDir, imageFileNameBase)
-      logging(uploadImageFileName, "uploadImageFileName")
+      upload_image_file_name = file_join(save_dir, image_file_base_name)
+      logging(upload_image_file_name, "uploadImageFileName")
 
-      open(uploadImageFileName, "wb+") do |file|
-        file.write(imageData)
+      open(upload_image_file_name, "wb+") do |file|
+        file.write(image_data)
       end
 
-      saveSmallImage(smallImageData, imageFileNameBase, uploadImageFileName)
+      saveSmallImage(small_image_data, image_file_base_name, upload_image_file_name)
     rescue => e
       result["resultText"] = e.to_s
     end
@@ -4020,46 +3935,46 @@ class DodontoFServer
     result.untaint
   end
 
-  def deleteImage()
+  def delete_image
     logging("deleteImage begin")
 
-    imageData = params()
-    logging(imageData, "imageData")
+    image_data = params
+    logging(image_data, "imageData")
 
-    imageUrlList = imageData['imageUrlList']
-    logging(imageUrlList, "imageUrlList")
+    url_list = image_data['imageUrlList']
+    logging(url_list, "imageUrlList")
 
-    imageFiles = all_image_file_name_from_tag_info_file()
-    addLocalImageToList(imageFiles)
-    logging(imageFiles, "imageFiles")
+    image_files = all_image_file_name_from_tag_info_file
+    addLocalImageToList(image_files)
+    logging(image_files, "imageFiles")
 
-    imageUrlFileName = $image_url_text
-    logging(imageUrlFileName, "imageUrlFileName")
+    url_file_name = $image_url_text
+    logging(url_file_name, "imageUrlFileName")
 
-    deleteCount = 0
-    resultText  = ""
-    imageUrlList.each do |imageUrl|
+    complete_count = 0
+    result_text  = ""
+    url_list.each do |imageUrl|
       if isProtectedImage(imageUrl)
-        warningMessage = "#{imageUrl}は削除できない画像です。"
+        warning_message = "#{imageUrl}は削除できない画像です。"
         next
       end
 
       imageUrl.untaint
-      deleteResult1 = delete_image_tags(imageUrl)
-      deleteResult2 = deleteTargetImageUrl(imageUrl, imageFiles, imageUrlFileName)
-      deleteResult  = (deleteResult1 or deleteResult2)
+      result_delete_tags = delete_image_tags(imageUrl)
+      result_delete_url = deleteTargetImageUrl(imageUrl, image_files, url_file_name)
+      result  = (result_delete_tags or result_delete_url)
 
-      if deleteResult
-        deleteCount += 1
+      if result
+        complete_count += 1
       else
-        warningMessage = "不正な操作です。あなたが削除しようとしたファイル(#{imageUrl})はイメージファイルではありません。"
-        loggingForce(warningMessage)
-        resultText += warningMessage
+        warning_message = "不正な操作です。あなたが削除しようとしたファイル(#{imageUrl})はイメージファイルではありません。"
+        loggingForce(warning_message)
+        result_text += warning_message
       end
     end
 
-    resultText += "#{deleteCount}個のファイルを削除しました。"
-    result     = { "resultText" => resultText }
+    result_text += "#{complete_count}個のファイルを削除しました。"
+    result     = { "resultText" => result_text }
     logging(result, "result")
 
     logging("deleteImage end")
@@ -4109,41 +4024,41 @@ class DodontoFServer
     end
   end
 
-  def uploadImageUrl()
+  def upload_image_url
     logging("uploadImageUrl begin")
 
-    imageData = params()
-    logging(imageData, "imageData")
+    image_data = params()
+    logging(image_data, "imageData")
 
-    imageUrl = imageData['imageUrl']
-    logging(imageUrl, "imageUrl")
+    image_url = image_data['imageUrl']
+    logging(image_url, "imageUrl")
 
-    imageUrlFileName = $image_url_text
-    logging(imageUrlFileName, "imageUrlFileName")
+    image_url_text = $image_url_text
+    logging(image_url_text, "imageUrlFileName")
 
-    resultText = "画像URLのアップロードに失敗しました。"
-    locker     = savefile_lock(imageUrlFileName)
+    result_text = "画像URLのアップロードに失敗しました。"
+    locker     = savefile_lock(image_url_text)
     locker.lock do
-      alreadyExistUrls = readlines(imageUrlFileName).collect { |i| i.chomp }
-      if alreadyExistUrls.include?(imageUrl)
-        resultText = "すでに登録済みの画像URLです。"
+      exists_urls = readlines(image_url_text).collect { |i| i.chomp }
+      if exists_urls.include?(image_url)
+        result_text = "すでに登録済みの画像URLです。"
       else
-        addTextToFile(imageUrlFileName, (imageUrl + "\n"))
-        resultText = "画像URLのアップロードに成功しました。"
+        addTextToFile(image_url_text, (image_url + "\n"))
+        result_text = "画像URLのアップロードに成功しました。"
       end
     end
 
-    tagInfo = imageData['tagInfo']
-    logging(tagInfo, 'uploadImageUrl.tagInfo')
-    change_image_tags_local(imageUrl, tagInfo)
+    tag_info = image_data['tagInfo']
+    logging(tag_info, 'uploadImageUrl.tagInfo')
+    change_image_tags_local(image_url, tag_info)
 
     logging("uploadImageUrl end")
 
-    { "resultText" => resultText }
+    { "resultText" => result_text }
   end
 
 
-  def getGraveyardCharacterData()
+  def character_data_in_graveyard
     logging("getGraveyardCharacterData start.")
     result = []
 
@@ -4157,13 +4072,13 @@ class DodontoFServer
     result
   end
 
-  def getWaitingRoomInfo()
+  def waiting_room_info
     logging("getWaitingRoomInfo start.")
     result = []
 
     save_data(@savefiles['characters']) do |saveData|
-      waitingRoom = waiting_room(saveData)
-      result      = waitingRoom
+      waiting_room = waiting_room(saveData)
+      result      = waiting_room
     end
 
     result
@@ -4232,25 +4147,23 @@ class DodontoFServer
   end
 
 
-  def sendDiceBotChatMessage
-    logging('sendDiceBotChatMessage')
+  def send_dicebot_chat_message
+    logging 'sendDiceBotChatMessage'
 
-    params = params()
-
-    repeatCount = dicebot_repeat_count(params)
+    repeat_count = dicebot_repeat_count(params)
 
     message = params['message']
 
     results = []
-    repeatCount.times do |i|
-      oneMessage = message
+    repeat_count.times do |i|
+      message_once = message
 
-      if repeatCount > 1
-        oneMessage = message + " #" + (i + 1).to_s
+      if repeat_count > 1
+        message_once = message + " #" + (i + 1).to_s
       end
 
-      logging(oneMessage, "sendDiceBotChatMessage oneMessage")
-      result = send_dicebot_chat_message_onece(params, oneMessage)
+      logging(message_once, "sendDiceBotChatMessage oneMessage")
+      result = send_dicebot_chat_message_once(params, message_once)
       logging(result, "sendDiceBotChatMessageOnece result")
 
       next if (result.nil?)
@@ -4274,7 +4187,7 @@ class DodontoFServer
     repeat_count
   end
 
-  def send_dicebot_chat_message_onece(params, message)
+  def send_dicebot_chat_message_once(params, message)
     params         = params.clone
     name           = params['name']
     state          = params['state']
@@ -4433,7 +4346,7 @@ class DodontoFServer
   end
 
   def send_chat_message
-    chat_data = params()
+    chat_data = params
     send_chat_message_by_chat_data(chat_data)
 
     return nil
@@ -4542,7 +4455,7 @@ class DodontoFServer
   end
 
   def change_map
-    map_data = params()
+    map_data = params
     logging(map_data, "mapData")
 
     change_map_savedata(map_data)
@@ -4575,7 +4488,6 @@ class DodontoFServer
   def draw_on_map
     logging('drawOnMap Begin')
 
-    params = params
     data   = params['data']
     logging(data, 'data')
 
@@ -4686,7 +4598,7 @@ class DodontoFServer
 
   def change_effect
     change_save_data(@savefiles['effects']) do |saveData|
-      effect_data     = params()
+      effect_data     = params
       target_cutin_id = effect_data['effectId']
 
       saveData['effects'] ||= []
@@ -4830,7 +4742,7 @@ class DodontoFServer
 
 
   def add_character
-    character_data      = params()
+    character_data      = params
     character_data_list = [character_data]
 
     add_character_data(character_data_list)
@@ -4994,7 +4906,7 @@ class DodontoFServer
   def add_card_zone
     logging("addCardZone Begin")
 
-    data = params()
+    data = params
 
     x          = data['x']
     y          = data['y']
@@ -5026,8 +4938,6 @@ class DodontoFServer
     clear_character_by_type_local(card_trash_mount_type)
     clear_character_by_type_local(random_dungeon_card_trash_mount_type)
 
-
-    params          = params()
     card_type_infos = params['cardTypeInfos']
     logging(card_type_infos, "cardTypeInfos")
 
@@ -5108,7 +5018,7 @@ class DodontoFServer
   def add_card
     logging("addCard begin")
 
-    add_card_data = params()
+    add_card_data = params
 
     is_text         = add_card_data['isText']
     image_name      = add_card_data['imageName']
@@ -5347,8 +5257,6 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = params()
-
     mount_name = params['mountName']
     logging(mount_name, "mountName")
 
@@ -5388,7 +5296,6 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = params()
     logging(params, 'params')
 
     result = {
@@ -5444,21 +5351,19 @@ class DodontoFServer
   end
 
 
-  def draw_target_trush_card
+  def draw_target_trash_card
     logging("drawTargetTrushCard Begin")
 
     set_no_body_sender
-
-    params = params()
 
     mount_name = params['mountName']
     logging(mount_name, "mountName")
 
     change_save_data(@savefiles['characters']) do |saveData|
 
-      trush_mount, trush_cards = find_trash_mount_and_cards(saveData, mount_name)
+      trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
-      card_data = remove_from_array(trush_cards) { |i| i['imgId'] === params['targetCardId'] }
+      card_data = remove_from_array(trash_cards) { |i| i['imgId'] === params['targetCardId'] }
       logging(card_data, "cardData")
       return if (card_data.nil?)
 
@@ -5473,7 +5378,7 @@ class DodontoFServer
 
       return if (trash_mount_data.nil?)
 
-      set_trash_mount_data_cards_info(saveData, trash_mount_data, trush_cards)
+      set_trash_mount_data_cards_info(saveData, trash_mount_data, trash_cards)
     end
 
     logging("drawTargetTrushCard End")
@@ -5486,7 +5391,6 @@ class DodontoFServer
 
     set_no_body_sender
 
-    params = params()
     logging(params, 'params')
 
     mount_name = params['mountName']
@@ -5554,7 +5458,7 @@ class DodontoFServer
 
     set_no_body_sender
 
-    dump_trash_cards = params()
+    dump_trash_cards = params
     logging(dump_trash_cards, 'dumpTrushCardsData')
 
     mount_name = dump_trash_cards['mountName']
@@ -5615,7 +5519,6 @@ class DodontoFServer
 
     set_record_empty
 
-    params         = params()
     mount_name     = params['mountName']
     trash_mount_id = params['mountId']
     is_shuffle     = params['isShuffle']
@@ -5784,7 +5687,6 @@ class DodontoFServer
   end
 
   def mount_card_infos
-    params = params()
     logging(params, 'getTrushMountCardInfos params')
 
     mount_name = params['mountName']
@@ -5816,7 +5718,7 @@ class DodontoFServer
   end
 
   def trash_mount_card_infos
-    params = params()
+
     logging(params, 'getTrushMountCardInfos params')
 
     mount_name = params['mountName']
@@ -5917,7 +5819,7 @@ class DodontoFServer
   end
 
 
-  def enter_waitingroom_character
+  def enter_waiting_room_character
 
     set_record_empty
 
@@ -6075,7 +5977,7 @@ class DodontoFServer
   def move_character
     change_save_data(@savefiles['characters']) do |saveData|
 
-      character_move_data = params()
+      character_move_data = params
       logging(character_move_data, "moveCharacter() characterMoveData")
 
       logging(character_move_data['imgId'], "character.imgId")

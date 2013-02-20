@@ -5,4 +5,4 @@ def test
 end
 
 var = test || false
-p "#{var}"
+p :"#{var}"

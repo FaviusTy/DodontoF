@@ -110,8 +110,8 @@ class DodontoFServer
     # logging(value, "getRequestData value")
 
     if value.nil? and @is_web_interface
-        @cgi  ||= CGI.new
-        value = @cgi.request_params[key].first
+      @cgi  ||= CGI.new
+      value = @cgi.request_params[key].first
     end
 
     logging(value, "getRequestData result")
@@ -128,7 +128,7 @@ class DodontoFServer
 
     return @card unless (@card.nil?)
 
-    @card = Card.new()
+    @card = Card.new
   end
 
   def savefile_lock_readonly(file_name)
@@ -188,7 +188,7 @@ class DodontoFServer
       return {}
     end
 
-    log_data = lines.collect { |line| parse_json(line.chomp) }
+    log_data = lines.collect { |line| DodontoFServer::parse_json(line.chomp) }
 
     { "chatMessageDataLog" => log_data }
   end
@@ -352,7 +352,7 @@ class DodontoFServer
       text_data                     = extract_safed_file_text(file_name)
     end
 
-    parse_json(text_data)
+    DodontoFServer::parse_json(text_data)
   end
 
   def save_data(savefile_name)
@@ -363,7 +363,7 @@ class DodontoFServer
       text_data = extract_safed_file_text(savefile_name)
     end
 
-    save_data = parse_json(text_data)
+    save_data = DodontoFServer::parse_json(text_data)
     yield(save_data)
   end
 
@@ -375,7 +375,7 @@ class DodontoFServer
 
     lockfile.lock do
       text_data = extract_safed_file_text(savefile_name)
-      save_data = parse_json(text_data)
+      save_data = DodontoFServer::parse_json(text_data)
 
       if character_data
         save_character_history(save_data) do
@@ -566,10 +566,6 @@ class DodontoFServer
     end
   end
 
-  def parse_json(text)
-    self.class.parse_json(text)
-  end
-
   def self.parse_json(text)
     parsed_data = nil
     begin
@@ -588,10 +584,6 @@ class DodontoFServer
     end
 
     return parsed_data
-  end
-
-  def parse_msgpack(data)
-    self.class.parse_msgpack(data)
   end
 
   def self.parse_msgpack(data)
@@ -673,73 +665,73 @@ class DodontoFServer
   # ['key_name', 'method_name']
   #
   self.COMMAND_REFERENCE = {
-      :refresh => :refresh,
-      :getGraveyardCharacterData => :character_data_in_graveyard,
-      :resurrectCharacter => :resurrect_character,
-      :clearGraveyard => :clear_graveyard,
-      :getLoginInfo => :login_info,
-      :getPlayRoomStates => :play_room_states,
-      :getPlayRoomStatesByCount => :play_room_states_by_count,
-      :deleteImage => :delete_image,
-      :uploadImageUrl => :upload_image_url,
-      :save => :save,
-      :saveMap => :save_map,
-      :saveScenario => :save_scenario,
-      :load => :load,
-      :loadScenario => :load_scenario,
-      :getDiceBotInfos => :dicebot_infos,
-      :getBotTableInfos => :bot_table_infos,
-      :addBotTable => :add_bot_table,
-      :changeBotTable => :change_bot_table,
-      :removeBotTable => :remove_bot_table,
-      :requestReplayDataList => :request_replay_data_list,
-      :uploadReplayData => :upload_replay_data,
-      :removeReplayData => :remove_replay_data,
-      :checkRoomStatus => :check_room_status,
-      :loginPassword => :login_password,
-      :uploadFile => :upload_file,
-      :uploadImageData => :upload_image_data,
-      :createPlayRoom => :create_play_room,
-      :changePlayRoom => :change_play_room,
-      :removePlayRoom => :remove_play_room,
-      :removeOldPlayRoom => :remove_old_play_room,
-      :getImageTagsAndImageList => :image_tags_and_image_list,
-      :addCharacter => :add_character,
-      :getWaitingRoomInfo => :waiting_room_info,
-      :exitWaitingRoomCharacter => :exit_waiting_room_character,
-      :enterWaitingRoomCharacter => :enter_waiting_room_character,
-      :sendDiceBotChatMessage => :send_dicebot_chat_message,
-      :deleteChatLog => :delete_chat_log,
-      :sendChatMessageAll => :send_chat_message_all,
-      :undoDrawOnMap => :undo_draw_on_map,
-      :logout => :logout,
-      :changeCharacter => :change_character,
-      :removeCharacter => :remove_character,
+      :refresh                     => :refresh,
+      :getGraveyardCharacterData   => :character_data_in_graveyard,
+      :resurrectCharacter          => :resurrect_character,
+      :clearGraveyard              => :clear_graveyard,
+      :getLoginInfo                => :login_info,
+      :getPlayRoomStates           => :play_room_states,
+      :getPlayRoomStatesByCount    => :play_room_states_by_count,
+      :deleteImage                 => :delete_image,
+      :uploadImageUrl              => :upload_image_url,
+      :save                        => :save,
+      :saveMap                     => :save_map,
+      :saveScenario                => :save_scenario,
+      :load                        => :load,
+      :loadScenario                => :load_scenario,
+      :getDiceBotInfos             => :dicebot_infos,
+      :getBotTableInfos            => :bot_table_infos,
+      :addBotTable                 => :add_bot_table,
+      :changeBotTable              => :change_bot_table,
+      :removeBotTable              => :remove_bot_table,
+      :requestReplayDataList       => :request_replay_data_list,
+      :uploadReplayData            => :upload_replay_data,
+      :removeReplayData            => :remove_replay_data,
+      :checkRoomStatus             => :check_room_status,
+      :loginPassword               => :login_password,
+      :uploadFile                  => :upload_file,
+      :uploadImageData             => :upload_image_data,
+      :createPlayRoom              => :create_play_room,
+      :changePlayRoom              => :change_play_room,
+      :removePlayRoom              => :remove_play_room,
+      :removeOldPlayRoom           => :remove_old_play_room,
+      :getImageTagsAndImageList    => :image_tags_and_image_list,
+      :addCharacter                => :add_character,
+      :getWaitingRoomInfo          => :waiting_room_info,
+      :exitWaitingRoomCharacter    => :exit_waiting_room_character,
+      :enterWaitingRoomCharacter   => :enter_waiting_room_character,
+      :sendDiceBotChatMessage      => :send_dicebot_chat_message,
+      :deleteChatLog               => :delete_chat_log,
+      :sendChatMessageAll          => :send_chat_message_all,
+      :undoDrawOnMap               => :undo_draw_on_map,
+      :logout                      => :logout,
+      :changeCharacter             => :change_character,
+      :removeCharacter             => :remove_character,
       # Card Command Get
-      :getMountCardInfos => :mount_card_infos,
-      :getTrushMountCardInfos => :trash_mount_card_infos,
+      :getMountCardInfos           => :mount_card_infos,
+      :getTrushMountCardInfos      => :trash_mount_card_infos,
       # Card Command Set
-      :drawTargetCard => :draw_target_card,
-      :drawTargetTrushCard => :draw_target_trash_card,
-      :drawCard => :draw_card,
-      :addCard => :add_card,
-      :addCardZone => :add_card_zone,
-      :initCards => :init_cards,
-      :returnCard => :return_card,
-      :shuffleCards => :shuffle_cards,
+      :drawTargetCard              => :draw_target_card,
+      :drawTargetTrushCard         => :draw_target_trash_card,
+      :drawCard                    => :draw_card,
+      :addCard                     => :add_card,
+      :addCardZone                 => :add_card_zone,
+      :initCards                   => :init_cards,
+      :returnCard                  => :return_card,
+      :shuffleCards                => :shuffle_cards,
       :shuffleForNextRandomDungeon => :shuffle_next_random_dungeon,
-      :dumpTrushCards => :dump_trash_cards,
-      :clearCharacterByType => :clear_character_by_type,
-      :moveCharacter => :move_character,
-      :changeMap => :change_map,
-      :drawOnMap => :draw_on_map,
-      :clearDrawOnMap => :clear_draw_on_map,
-      :sendChatMessage => :send_chat_message,
-      :changeRoundTime => :change_round_time,
-      :addEffect => :add_effect,
-      :changeEffect => :change_effect,
-      :removeEffect => :remove_effect,
-      :changeImageTags => :change_image_tags,
+      :dumpTrushCards              => :dump_trash_cards,
+      :clearCharacterByType        => :clear_character_by_type,
+      :moveCharacter               => :move_character,
+      :changeMap                   => :change_map,
+      :drawOnMap                   => :draw_on_map,
+      :clearDrawOnMap              => :clear_draw_on_map,
+      :sendChatMessage             => :send_chat_message,
+      :changeRoundTime             => :change_round_time,
+      :addEffect                   => :add_effect,
+      :changeEffect                => :change_effect,
+      :removeEffect                => :remove_effect,
+      :changeImageTags             => :change_image_tags,
   }
 
   def execute_command
@@ -2020,7 +2012,7 @@ class DodontoFServer
     all_login_count, login_user_count_list = all_login_count()
     write_all_login_info(all_login_count)
 
-    card_infos    = cards_info.collectCardTypeAndTypeName
+    card_infos = cards_info.collectCardTypeAndTypeName
 
     result = {
         "loginMessage"               => login_message,
@@ -2917,7 +2909,7 @@ class DodontoFServer
     if is_exist_playroom_info
       save_data(true_savefile_name) do |saveData|
         play_room_name         = play_room_name(saveData, room_number)
-        changed_password        = saveData['playRoomChangedPassword']
+        changed_password       = saveData['playRoomChangedPassword']
         chat_channel_names     = saveData['chatChannelNames']
         can_use_external_image = saveData['canUseExternalImage']
         can_visit              = saveData['canVisit']
@@ -3138,7 +3130,7 @@ class DodontoFServer
   def change_bot_table_main
     logging("changeBotTableMain Begin")
 
-    dir    = dicebot_extra_table_dir_name
+    dir = dicebot_extra_table_dir_name
 
     require 'TableFileData'
 
@@ -3642,9 +3634,9 @@ class DodontoFServer
 
   def change_text_in_local_space_dir(text)
     #プレイルームにローカルなファイルを置く場合の特殊処理用ディレクトリ名変換
-    dir         = room_local_space_dir_name
+    dir           = room_local_space_dir_name
     dir_json_text = JsonBuilder.new.build(dir)
-    changed_dir  = dir_json_text[2...-2]
+    changed_dir   = dir_json_text[2...-2]
 
     logging(changed_dir, 'localSpace name')
 
@@ -3655,7 +3647,7 @@ class DodontoFServer
   def load_from_json_data_string(json_data_string)
     json_data_string = change_load_text(json_data_string)
 
-    json_data = parse_json(json_data_string)
+    json_data = DodontoFServer::parse_json(json_data_string)
     load_from_json_data(json_data)
   end
 
@@ -3759,7 +3751,7 @@ class DodontoFServer
 
     if all_save_data.include?($play_room_info_type_name)
       real_save_file_name = @savedir_info.real_savefile_name($play_room_info_file_name)
-      save_data_type  = all_save_data[$play_room_info_type_name]
+      save_data_type      = all_save_data[$play_room_info_type_name]
       load_savefile_data_each_type($play_room_info_type_name, real_save_file_name, save_data_type)
     end
 
@@ -3841,7 +3833,7 @@ class DodontoFServer
       image_file_name = params["imageFileName"]
       logging(image_file_name, "imageFileName")
 
-      image_data      = image_data_in_params(params, "imageData")
+      image_data       = image_data_in_params(params, "imageData")
       small_image_data = image_data_in_params(params, "smallImageData")
 
       if image_data.nil?
@@ -3851,7 +3843,7 @@ class DodontoFServer
         return result
       end
 
-      save_dir           = $imageUploadDir
+      save_dir             = $imageUploadDir
       image_file_base_name = new_file_name(image_file_name, "img")
       logging(image_file_base_name, "imageFileNameBase")
 
@@ -3910,7 +3902,7 @@ class DodontoFServer
     logging(url_file_name, "imageUrlFileName")
 
     complete_count = 0
-    result_text  = ""
+    result_text    = ""
     url_list.each do |imageUrl|
       if protected_image?(imageUrl)
         warning_message = "#{imageUrl}は削除できない画像です。"
@@ -3919,8 +3911,8 @@ class DodontoFServer
 
       imageUrl.untaint
       result_delete_tags = delete_image_tags(imageUrl)
-      result_delete_url = delete_target_image_url(imageUrl, image_files, url_file_name)
-      result  = (result_delete_tags or result_delete_url)
+      result_delete_url  = delete_target_image_url(imageUrl, image_files, url_file_name)
+      result             = (result_delete_tags or result_delete_url)
 
       if result
         complete_count += 1
@@ -3932,7 +3924,7 @@ class DodontoFServer
     end
 
     result_text += "#{complete_count}個のファイルを削除しました。"
-    result     = { "resultText" => result_text }
+    result      = { "resultText" => result_text }
     logging(result, "result")
 
     logging("deleteImage end")
@@ -3995,7 +3987,7 @@ class DodontoFServer
     logging(image_url_text, "imageUrlFileName")
 
     result_text = "画像URLのアップロードに失敗しました。"
-    locker     = savefile_lock(image_url_text)
+    locker      = savefile_lock(image_url_text)
     locker.lock do
       exists_urls = File.readlines(image_url_text).collect { |i| i.chomp }
       if exists_urls.include?(image_url)
@@ -4036,7 +4028,7 @@ class DodontoFServer
 
     save_data(@savefiles['characters']) do |saveData|
       waiting_room = waiting_room(saveData)
-      result      = waiting_room
+      result       = waiting_room
     end
 
     result
@@ -4146,12 +4138,12 @@ class DodontoFServer
   end
 
   def send_dicebot_chat_message_once(params, message)
-    params_         = params.clone
+    params_        = params.clone
     name           = params_['name']
     state          = params_['state']
     color          = params_['color']
     channel        = params_['channel']
-    send_to         = params_['sendto']
+    send_to        = params_['sendto']
     game_type      = params_['gameType']
     is_need_result = params_['isNeedResult']
 
@@ -4194,7 +4186,7 @@ class DodontoFServer
     if is_secret
       params_['isSecret'] = is_secret
       params_['message']  = secret_result
-      result             = params_
+      result              = params_
     end
 
     result
@@ -4446,7 +4438,7 @@ class DodontoFServer
   def draw_on_map
     logging('drawOnMap Begin')
 
-    data   = params['data']
+    data = params['data']
     logging(data, 'data')
 
     change_save_data(@savefiles['map']) do |saveData|
@@ -5036,10 +5028,10 @@ class DodontoFServer
     jorker_count = card_type_info['jorkerCount']
 
     use_line_count = 13 * 4 + jorker_count
-    card_list     = card_list[0...use_line_count]
+    card_list      = card_list[0...use_line_count]
     logging(card_list.length, "cardList.length")
 
-    ace_list   = []
+    ace_list    = []
     no_ace_list = []
 
     card_list.each_with_index do |card, index|
@@ -5095,8 +5087,8 @@ class DodontoFServer
 
   def card_zone_data(owner, owner_name, x, y)
     # cardMount, isText, imageNameBack, mountName, index, isUpDown)
-    is_text        = true
-    card_text      = ""
+    is_text         = true
+    card_text       = ""
     card_mount_data = card_data(is_text, card_text, card_text, "noneMountName")
 
     card_mount_data['type']      = card_zone_type
@@ -5124,7 +5116,7 @@ class DodontoFServer
     end
 
     if random_dungeon_trump?(card_type_info)
-      card_count                             = card_type_info['cardCount']
+      card_count                              = card_type_info['cardCount']
       card_mount_data['type']                 = random_dungeon_card_mount_type
       card_mount_data['cardCountDisplayDiff'] = cards.length - card_count
       card_mount_data['useCount']             = card_count
@@ -6083,7 +6075,7 @@ def print_response(server)
     error_message = error_response_body(e)
     loggingForce(error_message, "errorMessage")
 
-    text =  "\n"
+    text = "\n"
     text << "= ERROR ====================\n"
     text << error_message
     text << "============================\n"
@@ -6115,7 +6107,7 @@ def extract_params_in_cgi
   end
 
   logging input, "getCgiParams input"
-  params = DodontoFServer.parse_msgpack(input)
+  params = DodontoFServer::parse_msgpack(input)
 
   logging params, "messagePackedData"
   logging "getCgiParams End"

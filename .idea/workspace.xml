@@ -7,7 +7,7 @@
     </list>
     <ignored path="DodontoF.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361381399548" ignored="false" />
+    <file path="/Dummy.txt" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361381441953" ignored="false" />
     <file path="/a.rxml" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360953211531" ignored="false" />
     <file path="/a.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360951898604" ignored="false" />
     <file path="/a.coffee" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360858031237" ignored="false" />
@@ -41,7 +41,7 @@
       <file leaf-file-name="DodontoFServer.rb" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DodontoFServer.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="172" column="2" selection-start="4145" selection-end="4145" vertical-scroll-proportion="0.36033058">
+            <state line="588" column="19" selection-start="13843" selection-end="13856" vertical-scroll-proportion="0.75371903">
               <folding />
             </state>
           </provider>
@@ -335,7 +335,11 @@
       <created>1361381296707</created>
       <updated>1361381296707</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="readlinesメソッドを削除（参照元は直接File.readlinesを呼ぶように置換）">
+      <created>1361381454450</created>
+      <updated>1361381454450</updated>
+    </task>
+    <option name="localTasksCounter" value="12" />
     <servers />
   </component>
   <component name="TodoView" selected-index="0">
@@ -422,7 +426,7 @@
     <option name="MAXIMUM_HISTORY_ROWS" value="1000" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="exist_dir?メソッドを削除（参照元は直接File.exist?を呼ぶように置換）" />
+    <option name="LAST_COMMIT_MESSAGE" value="readlinesメソッドを削除（参照元は直接File.readlinesを呼ぶように置換）" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -443,6 +447,7 @@
     <MESSAGE value="&quot;をエスケープしている文字列リテラルを%Q記法に修正" />
     <MESSAGE value="exist?メソッドを削除（参照元は直接File.exist?を呼ぶように置換）" />
     <MESSAGE value="exist_dir?メソッドを削除（参照元は直接File.exist?を呼ぶように置換）" />
+    <MESSAGE value="readlinesメソッドを削除（参照元は直接File.readlinesを呼ぶように置換）" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -543,7 +548,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DodontoFServer.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="172" column="2" selection-start="4145" selection-end="4145" vertical-scroll-proportion="0.36033058">
+        <state line="588" column="19" selection-start="13843" selection-end="13856" vertical-scroll-proportion="0.75371903">
           <folding />
         </state>
       </provider>

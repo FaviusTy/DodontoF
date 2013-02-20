@@ -16,13 +16,13 @@
     <file path="/a.less" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360858063105" ignored="false" />
     <file path="/a.sql" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360858151155" ignored="false" />
     <file path="/a.xml" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360858154241" ignored="false" />
-    <file path="/temp.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361373947307" ignored="false" />
-    <file path="/a.dummy" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1360941000229" ignored="false" />
-    <file path="/DodontoFServer.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361375730389" ignored="false" />
+    <file path="/temp.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361378874486" ignored="false" />
+    <file path="/a.dummy" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361378227149" ignored="false" />
+    <file path="/DodontoFServer.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361376924114" ignored="false" />
     <file path="/README.md" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361294180179" ignored="false" />
     <file path="$USER_HOME$/RubymineProjects/kickstart/my_script.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361287654188" ignored="false" />
     <file path="/my_script.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361287641708" ignored="false" />
-    <file path="/sketch.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361295282081" ignored="false" />
+    <file path="/sketch.rb" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361377989313" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,7 +42,7 @@
       <file leaf-file-name="DodontoFServer.rb" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DodontoFServer.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="768" column="34" selection-start="18985" selection-end="18985" vertical-scroll-proportion="0.44884488">
+            <state line="5148" column="10" selection-start="132641" selection-end="132651" vertical-scroll-proportion="-27.642504">
               <folding />
             </state>
           </provider>
@@ -51,7 +51,7 @@
       <file leaf-file-name="sketch.rb" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/sketch.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="7" column="3" selection-start="61" selection-end="61" vertical-scroll-proportion="0.0">
+            <state line="12" column="11" selection-start="114" selection-end="114" vertical-scroll-proportion="0.0">
               <folding />
             </state>
           </provider>
@@ -352,7 +352,7 @@
     <editor active="true" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32977587" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32765958" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32765958" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Mongo Runner" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -362,8 +362,8 @@
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32870865" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.18470149" sideWeight="0.67048347" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Mongo Explorer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14872068" sideWeight="0.67127657" order="1" side_tool="false" content_ui="combo" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.3287234" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.14872068" sideWeight="0.67234045" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3287234" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -522,14 +522,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/sketch.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="7" column="3" selection-start="61" selection-end="61" vertical-scroll-proportion="0.0">
+        <state line="12" column="11" selection-start="114" selection-end="114" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/DodontoFServer.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="768" column="34" selection-start="18985" selection-end="18985" vertical-scroll-proportion="0.44884488">
+        <state line="5148" column="10" selection-start="132641" selection-end="132651" vertical-scroll-proportion="-27.642504">
           <folding />
         </state>
       </provider>

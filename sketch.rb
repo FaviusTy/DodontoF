@@ -11,4 +11,5 @@ end
 var = test || false
 puts :"#{var}"
 puts arr[1]
+puts %Q!"String is #{var}"!
 

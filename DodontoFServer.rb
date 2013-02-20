@@ -273,7 +273,7 @@ class DodontoFServer
     save_data
   end
 
-  def record_by_cache()
+  def record_by_cache
     record_index = @last_update_times['recordIndex']
 
     logging("getRecordSaveDataFromCash begin")
@@ -768,7 +768,7 @@ class DodontoFServer
     begin
       return send(DodontoFServer::COMMAND_REFERENCE[:"#{current_command}"])
     rescue
-      throw Exception.new("\"#{current_command.untaint}\" is invalid command")
+      throw Exception.new(%Q{"#{current_command.untaint}" is invalid command})
     end
   end
 

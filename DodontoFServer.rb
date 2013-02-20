@@ -170,10 +170,6 @@ class DodontoFServer
       raise
     end
   end
-  #override
-  def readlines(file_name)
-    lines = File.readlines(file_name)
-  end
 
   def load_long_chatlog(type_name, savefile_name)
     savefile_name = @savedir_info.real_savefile_name($chat_long_line_file_name)
@@ -182,7 +178,7 @@ class DodontoFServer
     lines = []
     lockfile.lock do
       if File.exist?(savefile_name)
-        lines = readlines(savefile_name)
+        lines = File.readlines(savefile_name)
       end
 
       @last_update_times[type_name] = savefile_timestamp_millisec(savefile_name)
@@ -3963,7 +3959,7 @@ class DodontoFServer
 
     locker = savefile_lock(image_url_file_name)
     locker.lock do
-      lines = readlines(image_url_file_name)
+      lines = File.readlines(image_url_file_name)
       logging(lines, "lines")
 
       delete_result = lines.reject! { |i| i.chomp == image_url }
@@ -4001,7 +3997,7 @@ class DodontoFServer
     result_text = "画像URLのアップロードに失敗しました。"
     locker     = savefile_lock(image_url_text)
     locker.lock do
-      exists_urls = readlines(image_url_text).collect { |i| i.chomp }
+      exists_urls = File.readlines(image_url_text).collect { |i| i.chomp }
       if exists_urls.include?(image_url)
         result_text = "すでに登録済みの画像URLです。"
       else
@@ -4073,7 +4069,7 @@ class DodontoFServer
     texts.each do |text|
       next unless (File.exist?(text))
 
-      lines = readlines(text)
+      lines = File.readlines(text)
       lines.each do |line|
         line.chomp!
 
@@ -4402,7 +4398,7 @@ class DodontoFServer
 
       lines = []
       if File.exist?(savefile_name)
-        lines = readlines(savefile_name)
+        lines = File.readlines(savefile_name)
       end
       lines << DodontoFServer::build_json(chat_message_data)
       lines << "\n"
@@ -4920,7 +4916,7 @@ class DodontoFServer
         logging(cards_list_file_name, "initCards cardsListFileName")
 
         cards_list = []
-        readlines(cards_list_file_name).each_with_index do |i, lineIndex|
+        File.readlines(cards_list_file_name).each_with_index do |i, lineIndex|
           cards_list << i.chomp.toutf8
         end
 

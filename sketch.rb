@@ -4,5 +4,5 @@ def test
   nil
 end
 
-var = test || "empty!"
+var = test || false
 p "#{var}"

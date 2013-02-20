@@ -101,6 +101,7 @@ class DodontoFServer
   end
 
 
+  #TODO:FIXME 1requestにつき1インスタンスでなければこの処理は成立しないので後々改修の余地があり.
   def request_data(key)
     logging(key, "getRequestData key")
 
@@ -108,13 +109,10 @@ class DodontoFServer
     logging(@request_params, "@cgiParams")
     # logging(value, "getRequestData value")
 
-    if value.nil?
-      if @is_web_interface
+    if value.nil? and @is_web_interface
         @cgi  ||= CGI.new
         value = @cgi.request_params[key].first
-      end
     end
-
 
     logging(value, "getRequestData result")
     value
@@ -1444,10 +1442,10 @@ class DodontoFServer
     result           = {}
     result['result'] = 'OK'
 
-    save_data(@savefiles['time']) do |saveData|
-      logging(saveData, "saveData")
-      round_time_data   = hash_value(saveData, 'roundTimeData', {})
-      result['counter'] = hash_value(round_time_data, "counterNames", [])
+    save_data(@savefiles['time']) do |data|
+      logging(data, "saveData")
+      round_time_data   = data['roundTimeData'] || {}
+      result['counter'] = data['counterNames'] || []
     end
 
     room_info = _room_info_for_webif
@@ -1463,21 +1461,15 @@ class DodontoFServer
 
     real_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
 
-    save_data(real_savefile_name) do |saveData|
-      result['roomName']   = hash_value(saveData, 'playRoomName', '')
-      result['chatTab']    = hash_value(saveData, 'chatChannelNames', [])
-      result['outerImage'] = hash_value(saveData, 'canUseExternalImage', false)
-      result['visit']      = hash_value(saveData, 'canVisit', false)
-      result['game']       = hash_value(saveData, 'gameType', '')
+    save_data(real_savefile_name) do |data|
+      result['roomName']   = data['playRoomName'] || ''
+      result['chatTab']    = data['chatChannelNames'] || []
+      result['outerImage'] = data['canUseExternalImage'] || false
+      result['visit']      = data['canVisit'] || false
+      result['game']       = data['gameType'] || ''
     end
 
     result
-  end
-
-  #TODO:FIXME 削除候補メソッド (デフォルト値の設定含め、現状ではメソッド抽出するほどの処理ではない)
-  def hash_value(hash, key, default)
-    value = hash[key]
-    value ||= default
   end
 
   def set_room_info_for_webif
@@ -1639,7 +1631,7 @@ class DodontoFServer
 
 
   def params
-    request_data('params')
+    @params || request_data('params') #TODO:FIXME 1requestにつき1インスタンスでなければ他のrequestに広がる危険性があるので後々改修の余地があり.
   end
 
 

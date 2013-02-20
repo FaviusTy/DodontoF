@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/DodontoFServer.rb" afterPath="$PROJECT_DIR$/DodontoFServer.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/sketch.rb" afterPath="$PROJECT_DIR$/sketch.rb" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" name="Default" comment="" />
     <ignored path="DodontoF.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/Dummy.txt" changelist="72bf0b64-17ce-4cc2-9adc-4f1ac06e0f12" time="1361368157604" ignored="false" />
@@ -42,7 +38,7 @@
       <file leaf-file-name="DodontoFServer.rb" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/DodontoFServer.rb">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="5148" column="10" selection-start="132641" selection-end="132651" vertical-scroll-proportion="-27.642504">
+            <state line="5745" column="36" selection-start="149048" selection-end="149056" vertical-scroll-proportion="0.33213645">
               <folding />
             </state>
           </provider>
@@ -529,7 +525,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/DodontoFServer.rb">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="5148" column="10" selection-start="132641" selection-end="132651" vertical-scroll-proportion="-27.642504">
+        <state line="5745" column="36" selection-start="149048" selection-end="149056" vertical-scroll-proportion="0.33213645">
           <folding />
         </state>
       </provider>

@@ -1500,7 +1500,6 @@ class DodontoFServer
       return save_data
     end
 
-    params = params()
     logging(params, "params")
 
     @last_update_times = params['times']
@@ -1799,7 +1798,6 @@ class DodontoFServer
   end
 
   def play_room_states
-    params = params()
     logging(params, "params")
 
     min_room         = min_room(params)
@@ -1930,7 +1928,6 @@ class DodontoFServer
 
 
   def play_room_states_by_count
-    params = params()
     logging(params, "params")
 
     min_room         = min_room(params)
@@ -2226,7 +2223,6 @@ class DodontoFServer
     result_text     = "OK"
     play_room_index = -1
     begin
-      params = params()
       logging(params, "params")
 
       check_create_play_room_password(params['createPassword'])
@@ -2915,7 +2911,7 @@ class DodontoFServer
   def check_room_status
     delete_old_upload_file
 
-    check_room_status_data = params()
+    check_room_status_data = params
     logging(check_room_status_data, 'checkRoomStatusData')
 
     room_number = check_room_status_data['roomNumber']
@@ -3125,7 +3121,6 @@ class DodontoFServer
 
     dir = dicebot_extra_table_dir_name
     make_dir(dir)
-    params = params()
 
     require 'TableFileData'
 
@@ -3159,7 +3154,6 @@ class DodontoFServer
     logging("changeBotTableMain Begin")
 
     dir    = dicebot_extra_table_dir_name
-    params = params()
 
     require 'TableFileData'
 
@@ -3186,7 +3180,6 @@ class DodontoFServer
   def remove_bot_table_main
     logging("removeBotTableMain Begin")
 
-    params  = params()
     command = params["command"]
 
     dir = dicebot_extra_table_dir_name
@@ -4605,7 +4598,7 @@ class DodontoFServer
     logging('removeEffect Begin')
 
     change_save_data(@savefiles['effects']) do |saveData|
-      params    = params()
+
       effect_id = params['effectId']
       logging(effect_id, 'effectId')
 
@@ -5549,7 +5542,6 @@ class DodontoFServer
 
     set_record_empty
 
-    params         = params()
     mount_name     = params['mountName']
     trash_mount_id = params['mountId']
 
@@ -5803,7 +5795,6 @@ class DodontoFServer
 
     set_record_empty
 
-    params       = params()
     character_id = params['characterId']
 
     logging(character_id, "enterWaitingRoomCharacter characterId")
@@ -5825,7 +5816,6 @@ class DodontoFServer
 
 
   def resurrect_character
-    params = params()
     img_id = params['imgId']
     logging(img_id, "resurrectCharacterId")
 
@@ -5893,7 +5883,6 @@ class DodontoFServer
 
     set_record_empty
 
-    params       = params()
     character_id = params['characterId']
     x            = params['x']
     y            = params['y']

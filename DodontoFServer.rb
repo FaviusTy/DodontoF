@@ -171,11 +171,6 @@ class DodontoFServer
     end
   end
   #override
-  def exist_dir?(dir_name)
-    File.exist?(dir_name)
-  end
-
-  #override
   def readlines(file_name)
     lines = File.readlines(file_name)
   end
@@ -2088,7 +2083,7 @@ class DodontoFServer
 
 
   def login_warning
-    unless exist_dir?(small_image_dir)
+    unless File.exist?(small_image_dir)
       return {
           "key"    => "noSmallImageDir",
           "params" => [small_image_dir],
@@ -2985,7 +2980,7 @@ class DodontoFServer
         'roomNumber'  => room_number,
     }
 
-    is_room_exist = (exist_dir?(dir_name))
+    is_room_exist = (File.exist?(dir_name))
 
     unless is_room_exist
       result['resultText'] = "プレイルームNo.#{room_number}は作成されていません"

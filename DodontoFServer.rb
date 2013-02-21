@@ -69,6 +69,10 @@ $record     = 'record.json'
 
 class DodontoFServer
 
+  attr :is_add_marker
+  attr :jsonp_callback
+  attr :is_json_result
+
   def initialize(savedir_info, request_params)
     @request_params = request_params
     @savedir_info   = savedir_info
@@ -117,11 +121,6 @@ class DodontoFServer
     logging(value, "getRequestData result")
     value
   end
-
-
-  attr :is_add_marker
-  attr :jsonp_callback
-  attr :is_json_result
 
   def cards_info
     require "card.rb"
@@ -775,17 +774,13 @@ class DodontoFServer
     @is_web_interface = true
     @is_json_result   = true
 
-    current_command = request_data('webif')
+    current_command = request_data('webif') || ''
     logging(current_command, 'commandName')
 
-    if invalid_param?(current_command)
-      return nil
-    end
+    return nil if current_command.empty?
 
-    marker = request_data('marker')
-    if invalid_param?(marker)
-      @is_add_marker = false
-    end
+    marker = request_data('marker') || ''
+    @is_add_marker = false if marker.empty?
 
     logging(current_command, "commandName")
 
@@ -831,17 +826,12 @@ class DodontoFServer
 
 
   def login_on_web_interface
-    text_room_index = request_data('room')
-    if invalid_param?(text_room_index)
-      raise "プレイルーム番号(room)を指定してください"
-    end
+    text_room_index = request_data('room') || ''
 
-    unless /^\d+$/ === text_room_index
-      raise "プレイルーム番号(room)には半角数字のみを指定してください"
-    end
+    raise "プレイルーム番号(room)を指定してください" if text_room_index.empty?
+    raise "プレイルーム番号(room)には半角数字のみを指定してください" unless /^\d+$/ === text_room_index
 
-    room_index = text_room_index.to_i
-
+    room_index   = text_room_index.to_i
     password     = request_data('password')
     visitor_mode = true
 
@@ -854,18 +844,11 @@ class DodontoFServer
     init_savefiles(room_index)
   end
 
-
-  def invalid_param?(param)
-    (param.nil? or param.empty?)
-  end
-
   def set_jsonp_callback
-    callback = request_data('callback')
+    callback = request_data('callback') || ''
 
     logging('callBack', callback)
-    if invalid_param?(callback)
-      return
-    end
+    return if callback.empty?
 
     @jsonp_callback = callback
   end
@@ -977,23 +960,17 @@ class DodontoFServer
 
 
   def chat_color
-    name = request_text_for_webif('name')
+    name = request_text_for_webif('name') || ''
     logging(name, "name")
-    if invalid_param?(name)
-      raise "対象ユーザー名(name)を指定してください"
-    end
+
+    raise "対象ユーザー名(name)を指定してください" if name.empty?
 
     color = chat_color_in_save_data(name)
-    # color ||= getTalkDefaultColor
-    if color.nil?
-      raise "指定ユーザー名の発言が見つかりません"
-    end
+    raise "指定ユーザー名の発言が見つかりません" if color.nil?
 
-    result           = {}
-    result['result'] = 'OK'
-    result['color']  = color
-
-    result
+    result = {
+        'result' => 'OK',
+        'color' => color }
   end
 
   def chat_color_in_save_data(name)
@@ -5983,14 +5960,12 @@ end
 
 
 def error_response_body(e)
-  error_message <<-ERR
-  e.to_s : #{e.to_s}
-  e.inspect : #{e.inspect}
-  $@ : #{$@.join("\n")}
-  $! : #{$!.to_s("\n")}
+  <<-ERR
+e.to_s : #{e.to_s}
+e.inspect : #{e.inspect}
+$@ : #{$@.join("\n")}
+$! : #{$!.to_s("\n")}
   ERR
-
-  error_message
 end
 
 
@@ -6049,14 +6024,13 @@ end
 def print_response(server)
   logging "========================================>CGI begin."
 
-  text = "empty"
-
+  body   = "empty"
   header = response_header(server)
 
   begin
     result = server.response_body
-    result = "#D@EM>#" + result + "#<D@EM#" if server.is_add_marker
-    result = "#{server.jsonpCallBack}(#{result})" if server.json_callback
+    result = "#D@EM>##{result}#<D@EM#" if server.is_add_marker
+    result = "#{server.jsonp_callback}(#{result})" if server.jsonp_callback
 
     logging(result.length.to_s, "CGI response original length")
 
@@ -6065,20 +6039,20 @@ def print_response(server)
         Apache.request.content_encoding = 'gzip'
       else
         header << "Content-Encoding: gzip\n"
-        header << "Access-Control-Allow-Origin: *\n" if server.jsonpCallBack
+        header << "Access-Control-Allow-Origin: *\n" if server.jsonp_callback
       end
-      text = compress_response(result)
+      body = compress_response(result)
     else
-      text = result
+      body = result
     end
   rescue Exception => e
     error_message = error_response_body(e)
     loggingForce(error_message, "errorMessage")
 
-    text = "\n"
-    text << "= ERROR ====================\n"
-    text << error_message
-    text << "============================\n"
+    body = "\n"
+    body << "= ERROR ====================\n"
+    body << error_message
+    body << "============================\n"
   end
 
   logging(header, "RESPONSE header")
@@ -6086,7 +6060,7 @@ def print_response(server)
   output = $stdout
   output.binmode if (defined?(output.binmode))
   output.print(header + "\n")
-  output.print(text)
+  output.print(body)
 
   logging "========================================>CGI end."
 end

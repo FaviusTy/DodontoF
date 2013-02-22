@@ -1,224 +1,210 @@
-#--*-coding:utf-8-*--
+# encoding: utf-8
 
 require 'fileutils'
 
 class SaveDirInfo
-  
-  def init(saveDataDirIndexObject, saveDataMaxCount = 0, subDir = '.')
-    @saveDataDirIndexObject = saveDataDirIndexObject
-    @saveDataDirIndex = nil
-    @subDir = subDir
-    @saveDataMaxCount = saveDataMaxCount
-    @sampleMode = false
+
+  attr_reader :max_number
+
+  def init(dir_index_obj, max_number = 0, sub_dir = '.')
+    @dir_index_obj = dir_index_obj
+    @dir_index     = nil
+    @sub_dir       = sub_dir
+    @max_number    = max_number
+    @sample_mode   = false
   end
-  
-  def setSampleMode
-    @sampleMode = true
+
+  def sample_mode_on #TODO:FIXME 参照先が1つも現存していない.削除候補
+    @sample_mode = true
   end
-  
-  def getMaxCount
-    @saveDataMaxCount
+
+  # saveDataのアクセスパスを返す => 通常は ./saveData
+  def save_date_dir_base_path
+    File.join(@sub_dir, "saveData")
   end
-  
-  def getSaveDataBaseDir()
-    return File.join(@subDir, "saveData")
-  end
-  
-  
-  def each_with_index(roomNumberRange, *fileNames)
-    saveDirs = getSaveDataDirs( roomNumberRange )
-    
-    saveDirs.each_with_index do |saveDir, index|
-      next unless( /data_(\d+)\Z/ === saveDir )
-      
-      dirIndex = $1.to_i
-      saveFiles = getExistFileNames(saveDir, fileNames)
-      yield(saveFiles, dirIndex)
+
+  def each_with_index(target_range, *file_names)
+    dirs = save_data_dirs(target_range)
+
+    dirs.each_with_index do |directory, index|
+      next unless (/data_(\d+)\Z/ === directory)
+
+      room_index = $1.to_i
+      savefiles  = names_exist_file(directory, file_names)
+      yield(savefiles, room_index)
     end
   end
-  
-  def getExistFileNames(dir, fileNames)
-    result = []
-    
-    fileNames.each do |fileName|
-      file = File.join(dir, fileName)
-      if( FileTest.exist?(file) )
-        result << file
+
+  # file_namesのうち、引数dir内に存在するファイルのファイル名のみをフィルタリングして返す
+  def names_exist_file(dir, file_names)
+
+    file_names.find_all do |file|
+      if FileTest.exist?(File.join(dir, file))
       end
     end
-    
-    return result
+
   end
-  
-  def getSaveDataDirs( roomNumberRange )
-    dir = getSaveDataBaseDir
-    dirNames = []
-    roomNumberRange.each{|i| dirNames << File.join("data_" + i.to_s)}
-    saveDirs = getExistFileNames(dir, dirNames)
-    
-    return saveDirs
+
+  def save_data_dirs(target_range)
+    dir       = save_date_dir_base_path
+    dir_names = []
+    target_range.each { |i| dir_names << File.join("data_" + i.to_s) }
+
+    save_dirs = names_exist_file(dir, dir_names) #TODO:FIXME ディレクトリ抽出にfileとあるメソッド名を使うのはちょっと微妙
   end
-  
-  def getSaveDataLastAccessTime(fileName, roomNo)
-    roomNumberRange = (roomNo .. roomNo )
-    return getSaveDataLastAccessTimes([fileName], roomNumberRange)
+
+  def save_data_last_access_time(file_name, room_index) #TODO:FIXME これと下記のtimesメソッドは委譲関係が逆
+    save_data_last_access_times([file_name], (room_index .. room_index))
   end
-  
-  def getSaveDataLastAccessTimes(fileNames, roomNumberRange)
-    logging(fileNames, "getSaveDataLastAccessTimes fileNames")
-    
-    saveDirs = getSaveDataDirs( roomNumberRange )
-    logging(saveDirs, "getSaveDataLastAccessTimes saveDirs")
-    
+
+  def save_data_last_access_times(file_names, target_range) #TODO:FIXME 委譲関係が逆.単体分の処理をtimeメソッドに委譲する方が自然
+    logging(file_names, "getSaveDataLastAccessTimes fileNames")
+
+    save_dirs = save_data_dirs(target_range)
+    logging(save_dirs, "getSaveDataLastAccessTimes saveDirs")
+
     result = {}
-    saveDirs.each do |saveDir|
-      next unless( /data_(\d+)\Z/ === saveDir )
-      
-      dirIndex = $1.to_i
-      next unless( roomNumberRange.include?(dirIndex) )
-      
-      saveFiles = getExistFileNames(saveDir, fileNames)
-      mtimes = saveFiles.collect{|i| File.mtime(i)}
-      result[dirIndex] = mtimes.max
+    save_dirs.each do |saveDir|
+      next unless (/data_(\d+)\Z/ === saveDir)
+
+      room_index = $1.to_i
+      next unless (target_range.include?(room_index))
+
+      save_files         = names_exist_file(saveDir, file_names)
+      m_times            = save_files.collect { |i| File.mtime(i) }
+      result[room_index] = m_times.max
     end
-    
+
     logging(result, "getSaveDataLastAccessTimes result")
-    
-    return result;
+
+    result
   end
-  
-  def setSaveDataDirIndex(index)
-    @saveDataDirIndex = index.to_i
+
+  def set_dir_index(index)
+    @dir_index = index.to_i
   end
-  
-  def getSaveDataDirIndex
-    if( @saveDataDirIndex )
-      return @saveDataDirIndex
-    end
-    
+
+  def save_data_dir_index
+
+    return @dir_index if @dir_index
+
     logging(@requestData.inspect, "requestData")
-    
-    logging(@saveDataDirIndexObject, "saveDataDirIndexObject")
-    
-    if( @saveDataDirIndexObject.instance_of?( StringIO ) )
-      logging("is StringIO")
-      @saveDataDirIndexObject = @saveDataDirIndexObject.string
+    logging(@dir_index_obj, "saveDataDirIndexObject")
+
+    if @dir_index_obj.instance_of?(StringIO)
+      logging "is StringIO"
+      @dir_index_obj = @dir_index_obj.string
     end
-    saveDataDirIndex = @saveDataDirIndexObject.to_i
-    
-    logging(saveDataDirIndex.inspect, "saveDataDirIndex")
-    
-    unless( @sampleMode )
-      if( saveDataDirIndex > @saveDataMaxCount )
-        raise "saveDataDirIndex:#{saveDataDirIndex} is over Limit:(#{@saveDataMaxCount}"
+    data_dir_index = @dir_index_obj.to_i
+
+    logging(data_dir_index.inspect, "saveDataDirIndex")
+
+    unless @sample_mode
+      if data_dir_index > @max_number
+        raise "saveDataDirIndex:#{data_dir_index} is over Limit:(#@max_number)"
       end
     end
-    
-    logging(saveDataDirIndex, "saveDataDirIndex")
-    
-    return saveDataDirIndex
+
+    logging(data_dir_index, "saveDataDirIndex")
+
+    data_dir_index
   end
-  
-  def getDirName()
+
+  def dir_name
     logging("getDirName begin..")
-    saveDataDirIndex = getSaveDataDirIndex()
-    return getDirNameByIndex(saveDataDirIndex)
+    dir_name_by_index(save_data_dir_index)
   end
-  
-  def getDirNameByIndex(saveDataDirIndex)
-    saveDataBaseDirName = getSaveDataBaseDir()
-    
-    saveDataDirName = ''
-    if( saveDataDirIndex >= 0 )
-      dataDirName = "data_" + saveDataDirIndex.to_s
-      saveDataDirName = File.join(saveDataBaseDirName, dataDirName)
-      logging(saveDataDirName, "saveDataDirName created")
+
+  def dir_name_by_index(dir_index)
+    dir_base_path = save_date_dir_base_path
+
+    save_data_dir_name = ''
+    if dir_index >= 0
+      dir_name           = "data_" + dir_index.to_s
+      save_data_dir_name = File.join(dir_base_path, dir_name)
+      logging(save_data_dir_name, "saveDataDirName created")
     end
-    
-    return saveDataDirName
+
+    save_data_dir_name
   end
-  
-  def createDir()
+
+  def create_dir
     logging('createDir begin')
-    
-    saveDataDirName = getDirName()
-    logging(saveDataDirName, 'createDir saveDataDirName')
-    
-    if( FileTest.directory?(saveDataDirName) )
+    logging(dir_name, 'createDir saveDataDirName')
+
+    if FileTest.directory?(dir_name)
       raise "このプレイルームはすでに作成済みです。"
     end
-    
+
     logging("cp_r new save data...")
-    
-    Dir::mkdir(saveDataDirName)
-    File.chmod(0777, saveDataDirName)
-    
+
+    Dir::mkdir(dir_name)
+    File.chmod(0777, dir_name)
+
     options = {
-      :preserve => true,
+        :preserve => true,
     }
-    
-    sourceDir = 'saveData_forNewCreation'
-    
-    fileNames = getSaveFileAllNames()
-    srcFiles = getExistFileNames(sourceDir, fileNames)
-    
-    FileUtils.cp_r(srcFiles, saveDataDirName, options);
+
+    source_dir = 'saveData_forNewCreation'
+
+    file_names = all_save_file_names
+    src_files  = names_exist_file(source_dir, file_names)
+
+    FileUtils.cp_r(src_files, dir_name, options)
     logging("cp_r new save data")
-    
     logging('createDir end')
   end
-  
-  def getSaveFileAllNames
-    fileNames = []
-    
-    saveFiles = $saveFiles.values + [
-      $loginUserInfo,
-      $playRoomInfo,
-      $chatMessageDataLogAll,
+
+  def all_save_file_names
+    file_names = []
+
+    save_files = $saveFiles.values + [
+        $loginUserInfo,
+        $playRoomInfo,
+        $chatMessageDataLogAll,
     ]
-    
-    saveFiles.each do |i|
-      fileNames << i
-      fileNames << i + ".lock"
+
+    save_files.each do |i|
+      file_names << i
+      file_names << i + ".lock"
     end
-    
-    return fileNames
+
+    file_names
   end
-  
-  def removeSaveDir(saveDataDirIndex)
-    dirName = getDirNameByIndex(saveDataDirIndex)
-    self.class.removeDir(dirName)
+
+  def remove_dir(save_data_dir_index)
+    dir_name = dir_name_by_index(save_data_dir_index)
+    SaveDirInfo::remove_dir(dir_name)
   end
-  
-  def self.removeDir(dirName)
-    return unless( FileTest.directory?(dirName) )
-    
+
+  def self.remove_dir(dir_name)
+    return unless (FileTest.directory?(dir_name))
+
     # force = true
     # FileUtils.remove_entry_secure(dirName, force)
     # 上記のメソッドは一部レンタルサーバ(さくらインターネット等）で禁止されているので、
     # この下の方法で対応しています。
 
-    files = Dir.glob( File.join(dirName, "*") )
-    
+    files = Dir.glob(File.join(dir_name, "*"))
+
     logging(files, "removeDir files")
     files.each do |fileName|
       File.delete(fileName.untaint)
     end
-    
-    Dir.delete(dirName)
+
+    Dir.delete(dir_name)
   end
-  
-  def getTrueSaveFileName(saveFileName)
+
+  def real_save_file_name(file_name)
     begin
-      saveDataDirName = getDirName()
-      logging(saveDataDirName, "saveDataDirName")
-      
-      return File.join(saveDataDirName, saveFileName)
+      logging(dir_name, "saveDataDirName")
+
+      return File.join(dir_name, file_name)
     rescue => e
-      loggingForce($!.inspect )
-      loggingForce(e.inspect )
+      loggingForce($!.inspect)
+      loggingForce(e.inspect)
       raise e
     end
   end
-  
+
 end

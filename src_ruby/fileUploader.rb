@@ -58,7 +58,7 @@ class FileUploader
   def createUploadFile(saveDataDirIndex, fileName, subDirName = ".")
     
     saveDirInfo = SaveDirInfo.new(saveDataDirIndex, $saveDataMaxCount, $SAVE_DATA_DIR)
-    saveDirName = saveDirInfo.getTrueSaveFileName(subDirName)
+    saveDirName = saveDirInfo.real_save_file_name(subDirName)
     logging(saveDirName, "saveDirName")
     
     unless(subDirName == ".")

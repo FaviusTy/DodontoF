@@ -582,13 +582,13 @@ class SaveDirInfoMySql < SaveDirInfo
   
   
   def createDir()
-    dirName = getDirName()
+    dirName = dir_name()
     @@saveDataManager.createTable(dirName)
   end
   
   def removeSaveDir(saveDataDirIndex)
-    dirName = getDirNameByIndex(saveDataDirIndex)
-    @@saveDataManager.removeSaveDir(dirName)
+    dirName = dir_name_by_index(saveDataDirIndex)
+    @@saveDataManager.remove_dir(dirName)
   end
   
   def getExistFileNames(dirName, fileNames)
@@ -612,8 +612,8 @@ class SaveDirInfoMySql < SaveDirInfo
   end
   
   def getSaveDataLastAccessTimes(fileNames, roomNumberRange)
-    saveDirs = getSaveDataDirs(roomNumberRange)
-    return @@saveDataManager.getSaveDataLastAccessTimes(saveDirs, roomNumberRange)
+    saveDirs = save_data_dirs(roomNumberRange)
+    return @@saveDataManager.save_data_last_access_times(saveDirs, roomNumberRange)
   end
   
 end

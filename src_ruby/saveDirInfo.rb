@@ -37,12 +37,8 @@ class SaveDirInfo
 
   # file_namesのうち、引数dir内に存在するファイルのファイル名のみをフィルタリングして返す
   def names_exist_file(dir, file_names)
-
-    file_names.find_all do |file|
-      if FileTest.exist?(File.join(dir, file))
-      end
-    end
-
+    file_names.map {|file_name| File.join(dir, file_name) }
+              .find_all {|file| FileTest.exist? file }
   end
 
   def save_data_dirs(target_range)
@@ -50,18 +46,14 @@ class SaveDirInfo
     names_exist_file(save_date_dir_base_path, dir_names) #TODO:FIXME ディレクトリ抽出にfileとあるメソッド名を使うのはちょっと微妙
   end
 
-  def save_data_last_access_time(file_name, room_index) #TODO:FIXME これと下記のtimesメソッドは委譲関係が逆
-    save_data_last_access_times([file_name], (room_index .. room_index))
-  end
-
   def save_data_last_access_times(file_names, target_range) #TODO:FIXME 委譲関係が逆.単体分の処理をtimeメソッドに委譲する方が自然
     logging(file_names, "getSaveDataLastAccessTimes fileNames")
 
-    save_dirs = save_data_dirs(target_range)
-    logging(save_dirs, "getSaveDataLastAccessTimes saveDirs")
+    exist_save_dirs = save_data_dirs(target_range)
+    logging(exist_save_dirs, "getSaveDataLastAccessTimes saveDirs")
 
     result = {}
-    save_dirs.each do |saveDir|
+    exist_save_dirs.each do |saveDir|
       next unless (/data_(\d+)\Z/ === saveDir)
 
       room_index = $1.to_i

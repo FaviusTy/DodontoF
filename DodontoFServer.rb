@@ -1676,14 +1676,14 @@ class DodontoFServer
   end
 
   def save_data_lastaccess_time(file_name, room_no)
-    data = @savedir_info.save_data_last_access_time(file_name, room_no)
+    data = @savedir_info.save_data_last_access_times([file_name], [room_no])
     time = data[room_no]
   end
 
 
   def remove_old_play_room
-    all_ange     = (0 .. $saveDataMaxCount)
-    access_times = save_data_lastaccess_times(all_ange)
+    all_range     = (0 .. $saveDataMaxCount)
+    access_times = save_data_lastaccess_times(all_range)
     remove_old_room_for_access_times(access_times)
   end
 

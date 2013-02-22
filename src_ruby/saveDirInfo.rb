@@ -46,11 +46,8 @@ class SaveDirInfo
   end
 
   def save_data_dirs(target_range)
-    dir       = save_date_dir_base_path
-    dir_names = []
-    target_range.each { |i| dir_names << File.join("data_" + i.to_s) }
-
-    save_dirs = names_exist_file(dir, dir_names) #TODO:FIXME ディレクトリ抽出にfileとあるメソッド名を使うのはちょっと微妙
+    dir_names = target_range.map { |i| "data_#{i}" }
+    names_exist_file(save_date_dir_base_path, dir_names) #TODO:FIXME ディレクトリ抽出にfileとあるメソッド名を使うのはちょっと微妙
   end
 
   def save_data_last_access_time(file_name, room_index) #TODO:FIXME これと下記のtimesメソッドは委譲関係が逆

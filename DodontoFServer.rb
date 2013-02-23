@@ -2937,7 +2937,7 @@ class DodontoFServer
   def check_login_password(room_number, password, visitor_mode)
     logging("checkLoginPassword roomNumber", room_number)
     @savedir_info.set_dir_index(room_number)
-    dir_name = @savedir_info.dir_name
+    dir_name = @savedir_info.data_dir_path
 
     result = {
         'resultText'  => '',

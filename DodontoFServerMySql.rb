@@ -582,7 +582,7 @@ class SaveDirInfoMySql < SaveDirInfo
   
   
   def createDir()
-    dirName = dir_name()
+    dirName = data_dir_path()
     @@saveDataManager.createTable(dirName)
   end
   

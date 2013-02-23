@@ -2,6 +2,7 @@
 
 require 'fileutils'
 
+
 class SaveDirInfo
 
   attr_reader :max_number
@@ -50,11 +51,11 @@ class SaveDirInfo
   def save_data_last_access_times(file_names, target_range) #TODO:FIXME 委譲関係が逆.単体分の処理をtimeメソッドに委譲する方が自然
     logging(file_names, "getSaveDataLastAccessTimes fileNames")
 
-    exist_save_dirs = exist_data_dirs(target_range)
-    logging(exist_save_dirs, "getSaveDataLastAccessTimes saveDirs")
+    data_dirs = exist_data_dirs(target_range)
+    logging(data_dirs, "getSaveDataLastAccessTimes saveDirs")
 
     result = {}
-    exist_save_dirs.each do |saveDir|
+    data_dirs.each do |saveDir|
       next unless (/data_(\d+)\Z/ === saveDir)
 
       room_index = $1.to_i
@@ -75,7 +76,6 @@ class SaveDirInfo
   end
 
   def save_data_dir_index
-
     return @dir_index if @dir_index
 
     logging(@requestData.inspect, "requestData")
@@ -100,7 +100,7 @@ class SaveDirInfo
     dir_index
   end
 
-  def dir_name
+  def data_dir_path
     logging("getDirName begin..")
     dir_name_by_index(save_data_dir_index)
   end
@@ -120,16 +120,16 @@ class SaveDirInfo
 
   def create_dir
     logging('createDir begin')
-    logging(dir_name, 'createDir saveDataDirName')
+    logging(data_dir_path, 'createDir saveDataDirName')
 
-    if FileTest.directory?(dir_name)
+    if FileTest.directory?(data_dir_path)
       raise "このプレイルームはすでに作成済みです。"
     end
 
     logging("cp_r new save data...")
 
-    Dir::mkdir(dir_name)
-    File.chmod(0777, dir_name)
+    Dir::mkdir(data_dir_path)
+    File.chmod(0777, data_dir_path)
 
     options = {
         :preserve => true,
@@ -140,7 +140,7 @@ class SaveDirInfo
     file_names = all_save_file_names
     src_files  = names_exist_file(source_dir, file_names)
 
-    FileUtils.cp_r(src_files, dir_name, options)
+    FileUtils.cp_r(src_files, data_dir_path, options)
     logging("cp_r new save data")
     logging('createDir end')
   end
@@ -187,9 +187,9 @@ class SaveDirInfo
 
   def real_save_file_name(file_name)
     begin
-      logging(dir_name, "saveDataDirName")
+      logging(data_dir_path, "saveDataDirName")
 
-      return File.join(dir_name, file_name)
+      return File.join(data_dir_path, file_name)
     rescue => e
       loggingForce($!.inspect)
       loggingForce(e.inspect)
@@ -200,6 +200,8 @@ class SaveDirInfo
 end
 
 if $0 === __FILE__
+  require './loggingFunction'
+  require 'stringio'
   # カレントディレクトリをDodontoFServer.rbの位置に変更
   Dir.chdir('../')
 
@@ -209,5 +211,6 @@ if $0 === __FILE__
   save_data.init(0)
   puts "init called"
   puts "root_dir_path : #{save_data.root_dir_path}"
-  puts "data_dirs : #{save_data.exist_data_dirs((0 .. 0))}"
+  puts "exist_data_dirs : #{save_data.exist_data_dirs((0 .. 0))}"
+  puts "data_dir_path : #{save_data.data_dir_path}"
 end

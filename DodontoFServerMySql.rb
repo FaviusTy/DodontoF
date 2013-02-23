@@ -612,7 +612,7 @@ class SaveDirInfoMySql < SaveDirInfo
   end
   
   def getSaveDataLastAccessTimes(fileNames, roomNumberRange)
-    saveDirs = save_data_dirs(roomNumberRange)
+    saveDirs = exist_data_dirs(roomNumberRange)
     return @@saveDataManager.save_data_last_access_times(saveDirs, roomNumberRange)
   end
   

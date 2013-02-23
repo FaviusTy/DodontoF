@@ -24,7 +24,7 @@ class SaveDirInfo
   end
 
   def each_with_index(target_range, *file_names)
-    dirs = save_data_dirs(target_range)
+    dirs = exist_data_dirs(target_range)
 
     dirs.each_with_index do |directory, index|
       next unless (/data_(\d+)\Z/ === directory)
@@ -41,7 +41,7 @@ class SaveDirInfo
               .find_all {|file| FileTest.exist? file }
   end
 
-  def save_data_dirs(target_range)
+  def exist_data_dirs(target_range)
     dir_names = target_range.map { |i| "data_#{i}" }
     names_exist_file(root_dir_path, dir_names) #TODO:FIXME ディレクトリ抽出にfileとあるメソッド名を使うのはちょっと微妙
   end
@@ -50,7 +50,7 @@ class SaveDirInfo
   def save_data_last_access_times(file_names, target_range) #TODO:FIXME 委譲関係が逆.単体分の処理をtimeメソッドに委譲する方が自然
     logging(file_names, "getSaveDataLastAccessTimes fileNames")
 
-    exist_save_dirs = save_data_dirs(target_range)
+    exist_save_dirs = exist_data_dirs(target_range)
     logging(exist_save_dirs, "getSaveDataLastAccessTimes saveDirs")
 
     result = {}
@@ -200,9 +200,14 @@ class SaveDirInfo
 end
 
 if $0 === __FILE__
+  # カレントディレクトリをDodontoFServer.rbの位置に変更
+  Dir.chdir('../')
+
+
   save_data = SaveDirInfo.new
   puts "saveData initialized : #{save_data}"
   save_data.init(0)
   puts "init called"
-  puts "save_data_dir_base_path : #{save_data.root_dir_path}"
+  puts "root_dir_path : #{save_data.root_dir_path}"
+  puts "data_dirs : #{save_data.exist_data_dirs((0 .. 0))}"
 end

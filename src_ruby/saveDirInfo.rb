@@ -19,7 +19,7 @@ class SaveDirInfo
   end
 
   # saveDataのアクセスパスを返す => 通常は ./saveData
-  def save_date_dir_base_path
+  def root_dir_path
     File.join(@sub_dir, "saveData")
   end
 
@@ -43,9 +43,10 @@ class SaveDirInfo
 
   def save_data_dirs(target_range)
     dir_names = target_range.map { |i| "data_#{i}" }
-    names_exist_file(save_date_dir_base_path, dir_names) #TODO:FIXME ディレクトリ抽出にfileとあるメソッド名を使うのはちょっと微妙
+    names_exist_file(root_dir_path, dir_names) #TODO:FIXME ディレクトリ抽出にfileとあるメソッド名を使うのはちょっと微妙
   end
 
+  # target_rangeの範囲内のdataディレクトリ別にfile_namesにあるファイル中で最新のtimestampを配列にして返す
   def save_data_last_access_times(file_names, target_range) #TODO:FIXME 委譲関係が逆.単体分の処理をtimeメソッドに委譲する方が自然
     logging(file_names, "getSaveDataLastAccessTimes fileNames")
 
@@ -84,19 +85,19 @@ class SaveDirInfo
       logging "is StringIO"
       @dir_index_obj = @dir_index_obj.string
     end
-    data_dir_index = @dir_index_obj.to_i
+    dir_index = @dir_index_obj.to_i
 
-    logging(data_dir_index.inspect, "saveDataDirIndex")
+    logging(dir_index.inspect, "saveDataDirIndex")
 
     unless @sample_mode
-      if data_dir_index > @max_number
-        raise "saveDataDirIndex:#{data_dir_index} is over Limit:(#@max_number)"
+      if dir_index > @max_number
+        raise "saveDataDirIndex:#{dir_index} is over Limit:(#@max_number)"
       end
     end
 
-    logging(data_dir_index, "saveDataDirIndex")
+    logging(dir_index, "saveDataDirIndex")
 
-    data_dir_index
+    dir_index
   end
 
   def dir_name
@@ -105,7 +106,7 @@ class SaveDirInfo
   end
 
   def dir_name_by_index(dir_index)
-    dir_base_path = save_date_dir_base_path
+    dir_base_path = root_dir_path
 
     save_data_dir_name = ''
     if dir_index >= 0
@@ -196,4 +197,12 @@ class SaveDirInfo
     end
   end
 
+end
+
+if $0 === __FILE__
+  save_data = SaveDirInfo.new
+  puts "saveData initialized : #{save_data}"
+  save_data.init(0)
+  puts "init called"
+  puts "save_data_dir_base_path : #{save_data.root_dir_path}"
 end

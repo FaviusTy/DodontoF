@@ -21,13 +21,13 @@ class SaveDirInfo
 
   # saveDataのアクセスパスを返す => 通常は ./saveData
   def root_dir_path
-    File.join(@sub_dir, "saveData")
+    File.join(@sub_dir, 'saveData')
   end
 
   def each_with_index(target_range, *file_names)
     dirs = exist_data_dirs(target_range)
 
-    dirs.each_with_index do |directory, index|
+    dirs.each_with_index do |directory, _|
       next unless (/data_(\d+)\Z/ === directory)
 
       room_index = $1.to_i
@@ -49,10 +49,10 @@ class SaveDirInfo
 
   # target_rangeの範囲内のdataディレクトリ別にfile_namesにあるファイル中で最新のtimestampを配列にして返す
   def save_data_last_access_times(file_names, target_range) #TODO:FIXME 委譲関係が逆.単体分の処理をtimeメソッドに委譲する方が自然
-    logging(file_names, "getSaveDataLastAccessTimes fileNames")
+    logging(file_names, 'getSaveDataLastAccessTimes fileNames')
 
     data_dirs = exist_data_dirs(target_range)
-    logging(data_dirs, "getSaveDataLastAccessTimes saveDirs")
+    logging(data_dirs, 'getSaveDataLastAccessTimes saveDirs')
 
     result = {}
     data_dirs.each do |saveDir|
@@ -66,7 +66,7 @@ class SaveDirInfo
       result[room_index] = m_times.max
     end
 
-    logging(result, "getSaveDataLastAccessTimes result")
+    logging(result, 'getSaveDataLastAccessTimes result')
 
     result
   end
@@ -78,16 +78,16 @@ class SaveDirInfo
   def save_data_dir_index
     return @dir_index if @dir_index
 
-    logging(@requestData.inspect, "requestData")
-    logging(@dir_index_obj, "saveDataDirIndexObject")
+    logging(@request_data.inspect, 'requestData')
+    logging(@dir_index_obj, 'saveDataDirIndexObject')
 
     if @dir_index_obj.instance_of?(StringIO)
-      logging "is StringIO"
+      logging 'is StringIO'
       @dir_index_obj = @dir_index_obj.string
     end
     dir_index = @dir_index_obj.to_i
 
-    logging(dir_index.inspect, "saveDataDirIndex")
+    logging(dir_index.inspect, 'saveDataDirIndex')
 
     unless @sample_mode
       if dir_index > @max_number
@@ -95,13 +95,13 @@ class SaveDirInfo
       end
     end
 
-    logging(dir_index, "saveDataDirIndex")
+    logging(dir_index, 'saveDataDirIndex')
 
     dir_index
   end
 
   def data_dir_path
-    logging("getDirName begin..")
+    logging 'getDirName begin..'
     dir_name_by_index(save_data_dir_index)
   end
 
@@ -110,9 +110,9 @@ class SaveDirInfo
 
     save_data_dir_name = ''
     if dir_index >= 0
-      dir_name           = "data_" + dir_index.to_s
+      dir_name           = 'data_' + dir_index.to_s
       save_data_dir_name = File.join(dir_base_path, dir_name)
-      logging(save_data_dir_name, "saveDataDirName created")
+      logging(save_data_dir_name, 'saveDataDirName created')
     end
 
     save_data_dir_name
@@ -123,10 +123,10 @@ class SaveDirInfo
     logging(data_dir_path, 'createDir saveDataDirName')
 
     if FileTest.directory?(data_dir_path)
-      raise "このプレイルームはすでに作成済みです。"
+      raise 'このプレイルームはすでに作成済みです。'
     end
 
-    logging("cp_r new save data...")
+    logging 'cp_r new save data...'
 
     Dir::mkdir(data_dir_path)
     File.chmod(0777, data_dir_path)
@@ -141,8 +141,8 @@ class SaveDirInfo
     src_files  = names_exist_file(source_dir, file_names)
 
     FileUtils.cp_r(src_files, data_dir_path, options)
-    logging("cp_r new save data")
-    logging('createDir end')
+    logging 'cp_r new save data'
+    logging 'createDir end'
   end
 
   def all_save_file_names
@@ -156,7 +156,7 @@ class SaveDirInfo
 
     save_files.each do |i|
       file_names << i
-      file_names << i + ".lock"
+      file_names << i + '.lock'
     end
 
     file_names
@@ -175,9 +175,9 @@ class SaveDirInfo
     # 上記のメソッドは一部レンタルサーバ(さくらインターネット等）で禁止されているので、
     # この下の方法で対応しています。
 
-    files = Dir.glob(File.join(dir_name, "*"))
+    files = Dir.glob(File.join(dir_name, '*'))
 
-    logging(files, "removeDir files")
+    logging(files, 'removeDir files')
     files.each do |fileName|
       File.delete(fileName.untaint)
     end
@@ -187,7 +187,7 @@ class SaveDirInfo
 
   def real_save_file_name(file_name)
     begin
-      logging(data_dir_path, "saveDataDirName")
+      logging(data_dir_path, 'saveDataDirName')
 
       return File.join(data_dir_path, file_name)
     rescue => e
@@ -209,7 +209,7 @@ if $0 === __FILE__
   save_data = SaveDirInfo.new
   puts "saveData initialized : #{save_data}"
   save_data.init(0)
-  puts "init called"
+  puts 'init called'
   puts "root_dir_path : #{save_data.root_dir_path}"
   puts "exist_data_dirs : #{save_data.exist_data_dirs((0 .. 0))}"
   puts "data_dir_path : #{save_data.data_dir_path}"

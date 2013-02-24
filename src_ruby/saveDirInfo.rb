@@ -78,7 +78,6 @@ class SaveDirInfo
   def save_data_dir_index
     return @dir_index if @dir_index
 
-    logging(@request_data.inspect, 'requestData')
     logging(@dir_index_obj, 'saveDataDirIndexObject')
 
     if @dir_index_obj.instance_of?(StringIO)

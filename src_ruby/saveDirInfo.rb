@@ -7,6 +7,9 @@ class SaveDirInfo
 
   attr_reader :max_number
 
+  # ディレクトリ名の共通プリフィクス
+  PREFIX_DIR_NAME = 'data_'
+
   def init(dir_index_obj, max_number = 0, sub_dir = '.')
     @dir_index_obj = dir_index_obj
     @dir_index     = nil
@@ -28,11 +31,12 @@ class SaveDirInfo
     dirs = exist_data_dirs(target_range)
 
     dirs.each_with_index do |directory, _|
-      next unless (/data_(\d+)\Z/ === directory)
+      next unless (/#{PREFIX_DIR_NAME}(\d+)\Z/ === directory)
 
       room_index = $1.to_i
-      savefiles  = names_exist_file(directory, file_names)
-      yield(savefiles, room_index)
+      save_files  = names_exist_file(directory, file_names)
+
+      yield(save_files, room_index)
     end
   end
 
@@ -42,8 +46,9 @@ class SaveDirInfo
               .find_all {|file| FileTest.exist? file }
   end
 
+  # target_range範囲内のindexのうち、ディレクトリが存在するものを返す
   def exist_data_dirs(target_range)
-    dir_names = target_range.map { |i| "data_#{i}" }
+    dir_names = target_range.map{|i| "data_#{i}" }
     names_exist_file(root_dir_path, dir_names) #TODO:FIXME ディレクトリ抽出にfileとあるメソッド名を使うのはちょっと微妙
   end
 
@@ -56,7 +61,7 @@ class SaveDirInfo
 
     result = {}
     data_dirs.each do |saveDir|
-      next unless (/data_(\d+)\Z/ === saveDir)
+      next unless (/#{PREFIX_DIR_NAME}(\d+)\Z/ === saveDir)
 
       room_index = $1.to_i
       next unless (target_range.include?(room_index))
@@ -105,12 +110,11 @@ class SaveDirInfo
   end
 
   def dir_name_by_index(dir_index)
-    dir_base_path = root_dir_path
-
     save_data_dir_name = ''
+
     if dir_index >= 0
       dir_name           = 'data_' + dir_index.to_s
-      save_data_dir_name = File.join(dir_base_path, dir_name)
+      save_data_dir_name = File.join(root_dir_path, dir_name)
       logging(save_data_dir_name, 'saveDataDirName created')
     end
 
@@ -166,11 +170,13 @@ class SaveDirInfo
     SaveDirInfo::remove_dir(dir_name)
   end
 
+  # TODO:FIXME dir_nameは実際にはフルパスであることを要求しているが、内部的に求められるはずなのでそのように改修する
   def self.remove_dir(dir_name)
     return unless (FileTest.directory?(dir_name))
 
     # force = true
     # FileUtils.remove_entry_secure(dirName, force)
+
     # 上記のメソッドは一部レンタルサーバ(さくらインターネット等）で禁止されているので、
     # この下の方法で対応しています。
 
@@ -184,6 +190,8 @@ class SaveDirInfo
     Dir.delete(dir_name)
   end
 
+  # TODO:WAHT? このメソッドではfile_nameをフルパスに整形する際にそれが実在することを保証できていない
+  # 用途を勘違いしてる？
   def real_save_file_name(file_name)
     begin
       logging(data_dir_path, 'saveDataDirName')
@@ -198,6 +206,7 @@ class SaveDirInfo
 
 end
 
+# テストハーネス
 if $0 === __FILE__
   require './loggingFunction'
   require 'stringio'
@@ -212,4 +221,5 @@ if $0 === __FILE__
   puts "root_dir_path : #{save_data.root_dir_path}"
   puts "exist_data_dirs : #{save_data.exist_data_dirs((0 .. 0))}"
   puts "data_dir_path : #{save_data.data_dir_path}"
+  puts "real_save_file_name : #{save_data.real_save_file_name('.')}"
 end

@@ -1,7 +1,7 @@
 #!/usr/local/bin/ruby -Ku
 # encoding: utf-8
-$LOAD_PATH << File.dirname(__FILE__) + "/src_ruby"
-$LOAD_PATH << File.dirname(__FILE__) + "/src_bcdice"
+$LOAD_PATH << File.dirname(__FILE__) + '/src_ruby'
+$LOAD_PATH << File.dirname(__FILE__) + '/src_bcdice'
 
 #CGI通信の主幹クラス用ファイル
 #ファイルアップロード系以外は全てこのファイルへ通知が送られます。
@@ -663,6 +663,9 @@ class DodontoFServer
   # DodontoFServerで定義されているCommandList
   # ['key_name', 'method_name']
   #
+  # key_nameの部分はAS側で決め打ちされるので絶対不可侵.
+  # キャメルケースでも、例えスペルミスがあっても今回は変更しない.
+  #
   COMMAND_REFERENCE = {
       :refresh                     => :refresh,
       :getGraveyardCharacterData   => :character_data_in_graveyard,
@@ -750,7 +753,6 @@ class DodontoFServer
 
   def response_for_none_command
     logging 'getResponseTextWhenNoCommandName Begin'
-
     execute_webif_command || test_response
   end
 

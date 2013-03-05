@@ -663,7 +663,7 @@ class DodontoFServer
   # DodontoFServerで定義されているCommandList
   # ['key_name', 'method_name']
   #
-  self.COMMAND_REFERENCE = {
+  COMMAND_REFERENCE = {
       :refresh                     => :refresh,
       :getGraveyardCharacterData   => :character_data_in_graveyard,
       :resurrectCharacter          => :resurrect_character,
@@ -736,7 +736,7 @@ class DodontoFServer
   def execute_command
     current_command = request_data('cmd') || ''
 
-    logging(current_command, "commandName")
+    logging(current_command, 'commandName')
 
     return response_for_none_command if current_command.empty?
 
@@ -749,7 +749,7 @@ class DodontoFServer
   end
 
   def response_for_none_command
-    logging "getResponseTextWhenNoCommandName Begin"
+    logging 'getResponseTextWhenNoCommandName Begin'
 
     execute_webif_command || test_response
   end

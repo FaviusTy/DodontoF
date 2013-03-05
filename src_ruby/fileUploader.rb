@@ -1,4 +1,4 @@
-#--*-coding:utf-8-*--
+# encoding: utf-8
 
 require 'kconv'
 require 'config'
@@ -6,111 +6,110 @@ require 'config'
 class FileUploader
   
   def initialize
-    @resultMessage = "...."
+    @result_message = '....'
   end
   
-  def init(uploadFileInfo, fileSizeLimit, fileCountLimit)
-    @uploadFileInfo = uploadFileInfo
-    @fileSizeLimit = fileSizeLimit
-    @fileCountLimit = fileCountLimit
+  def init(upload_file_info, max_file_size, max_file_count)
+    @upload_file_info = upload_file_info
+    @max_file_size = max_file_size
+    @max_file_count = max_file_count
   end
   
-  def getUploadFileName
-    uploadFileName = @uploadFileInfo.original_filename
-    logging(uploadFileName, "uploadFileName")
-    
-    return uploadFileName
+  def upload_file_name
+    upload_file_name = @upload_file_info.original_filename
+    logging(upload_file_name, 'uploadFileName')
+
+    upload_file_name
   end
   
-  def getUploadFileExtName
-    uploadFileName = getUploadFileName
-    return File.extname(uploadFileName)
+  def upload_file_extension
+    File.extname(upload_file_name)
   end
   
-  def checkUploadFileSize
-    fileSize = @uploadFileInfo.size
-    logging(fileSize, "fileSize");
-    if( fileSize > (@fileSizeLimit * 1024 * 1024))
-      raise "ファイルのサイズが上限の#{ sprintf('%0.2f', @fileSizeLimit) }MBを超えています。（アップロードしようとしたファイルのサイズ:#{ sprintf('%0.2f', 1.0 * fileSize / 1024 / 1024) }MB)"
+  def validation_file_size
+    file_size = @upload_file_info.size
+    logging(file_size, 'fileSize')
+    if file_size > (@max_file_size * 1024 * 1024)
+      raise "ファイルのサイズが上限の#{ sprintf('%0.2f', @max_file_size) }MBを超えています。（アップロードしようとしたファイルのサイズ:#{ sprintf('%0.2f', 1.0 * file_size / 1024 / 1024) }MB)"
     end
   end
   
-  def createDirAndCrean(dirName)
-    unless( FileTest.directory?(dirName) )
-      Dir::mkdir(dirName)
+  def recreate_dir(dir_name)
+    unless FileTest.directory?(dir_name)
+      Dir::mkdir(dir_name)
     end
     
-    files = Dir.glob( File.join(dirName, "*") )
-    logging(files, "dir include fileNames")
+    files = Dir.glob( File.join(dir_name, '*') )
+    logging(files, 'dir include fileNames')
     
-    newOrderFiles = files.sort!{|a, b| File.mtime(b) <=> File.mtime(a)}
-    newOrderFiles.each_with_index do |file, index|
-      if( index < (@fileCountLimit - 1) )
-        logging("@fileCountLimit", @fileCountLimit)
-        logging("delete pass file", file)
+    new_order_files = files.sort!{|a, b| File.mtime(b) <=> File.mtime(a)}
+    new_order_files.each_with_index do |file, index|
+      if index < (@max_file_count - 1)
+        logging('@fileCountLimit', @max_file_count)
+        logging('delete pass file', file)
         next
       end
       File.delete(file)
-      logging("deleted file", file)
+      logging('deleted file', file)
     end
   end
   
-  def createUploadFile(saveDataDirIndex, fileName, subDirName = ".")
+  def create_upload_file(save_data_index, file_name, sub_dir_name = '.')
     
-    saveDirInfo = SaveDirInfo.new(saveDataDirIndex, $saveDataMaxCount, $SAVE_DATA_DIR)
-    saveDirName = saveDirInfo.real_save_file_name(subDirName)
-    logging(saveDirName, "saveDirName")
+    save_dir_info = SaveDirInfo.new(save_data_index, $saveDataMaxCount, $SAVE_DATA_DIR)
+    save_dir_name = save_dir_info.real_save_file_name(sub_dir_name)
+    logging(save_dir_name, 'saveDirName')
     
-    unless(subDirName == ".")
-      createDirAndCrean(saveDirName)
+    unless sub_dir_name == '.'
+      recreate_dir(save_dir_name)
     end
     
-    saveFileName = File.join(saveDirName, fileName)
-    logging(saveFileName, "saveFileName")
+    save_file_name = File.join(save_dir_name, file_name)
+    logging(save_file_name, 'saveFileName')
     
-    logging("open...")
-    open(saveFileName, "w+") do |file|
+    logging('open...')
+    open(save_file_name, 'w+') do |file|
       
       file.binmode
-      file.write(@uploadFileInfo.read)
+      file.write(@upload_file_info.read)
     end
-    logging("close...")
+    logging('close...')
     
-    logging("createUploadFile end.")
-    
-    return saveFileName
+    logging('createUploadFile end.')
+
+    save_file_name
   end
   
-  def setSuccessMeesage(result)
-    @resultMessage = "アップロードに成功しました。<br />この画面を閉じてください。"
+  def set_success_meesage(result) #TODO:WHAT? まるで意味のないメソッドに見える。。。
+    @result_message = 'アップロードに成功しました。<br />この画面を閉じてください。'
   end
   
-  def setErrorMessage(result)
-    @resultMessage = "result:#{result}\nアップロードに失敗しているような気がします。<br />・・・が、もしかすると仕様変更かもしれません。"
+  def set_error_message(result) #TODO:FIXME 上記のSuccessもそうだが、常にこれらを使い分けて呼び出す必要があるならそもそも@result_messageは要らない？
+    @result_message = "result:#{result}\nアップロードに失敗しているような気がします。<br />・・・が、もしかすると仕様変更かもしれません。"
   end
   
-  def setExceptionErrorMeesage(exception)
-    logging("Exception")
+  def set_exception_error_message(exception) #TODO:FIXME 同上
+    logging 'Exception'
     
     $debug = true
     
-    @resultMessage = "アップロード中に下記のエラーが発生しました。もう一度試すか管理者に連絡してください。<br />"
-    @resultMessage += "<hr /><br />"
-    @resultMessage += exception.to_s + "<br />"
-    @resultMessage += exception.inspect.toutf8
-    @resultMessage += $!.inspect.toutf8
-    @resultMessage += $@.inspect.toutf8
-    logging(@resultMessage)
+    @result_message = 'アップロード中に下記のエラーが発生しました。もう一度試すか管理者に連絡してください。<br />'
+    @result_message += '<hr /><br />'
+    @result_message += exception.to_s + '<br />'
+    @result_message += exception.inspect.toutf8
+    @result_message += $!.inspect.toutf8
+    @result_message += $@.inspect.toutf8
+    logging(@result_message)
   end
   
-  def printResultHtml
-    header = "Content-Type: text/html\ncharset: utf-8\n\n";
+  def print_result_html
+    header = "Content-Type: text/html\ncharset: utf-8\n\n"
     print header
     
     message = '<html>
 <META HTTP-EQUIV="Content-type" CONTENT="text/html; charset=UTF-8">
 <body>
-' + @resultMessage + '
+' + @result_message + '
 </body></html>'
     message = message.toutf8
     

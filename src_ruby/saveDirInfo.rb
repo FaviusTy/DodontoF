@@ -80,37 +80,6 @@ class SaveDirInfo
     result
   end
 
-<<<<<<< HEAD
-  def set_dir_index(index)
-    @dir_index = index.to_i
-  end
-
-  def save_data_dir_index
-    return @dir_index if @dir_index
-
-    logging(@dir_index_obj, 'saveDataDirIndexObject')
-
-    if @dir_index_obj.instance_of?(StringIO)
-      logging 'is StringIO'
-      @dir_index_obj = @dir_index_obj.string
-    end
-    dir_index = @dir_index_obj.to_i
-
-    logging(dir_index.inspect, 'saveDataDirIndex')
-
-    unless @sample_mode
-      if dir_index > @max_number
-        raise "saveDataDirIndex:#{dir_index} is over Limit:(#{@max_number})"
-      end
-    end
-
-    logging(dir_index, 'saveDataDirIndex')
-
-    dir_index
-  end
-
-=======
->>>>>>> saveDirInfo改修
   def data_dir_path
     logging 'getDirName begin..'
     dir_name_by_index(dir_index)

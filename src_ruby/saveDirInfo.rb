@@ -6,20 +6,24 @@ require 'fileutils'
 class SaveDirInfo
 
   attr_reader :max_number
+  attr_accessor :dir_index, :sample_mode
 
   # ディレクトリ名の共通プリフィクス
   PREFIX_DIR_NAME = 'data_'
 
   def init(dir_index_obj, max_number = 0, sub_dir = '.')
-    @dir_index_obj = dir_index_obj
-    @dir_index     = nil
     @sub_dir       = sub_dir
     @max_number    = max_number
     @sample_mode   = false
-  end
 
-  def sample_mode_on #TODO:FIXME 参照先が1つも現存していない.削除候補
-    @sample_mode = true
+    # dir_index_objから@dir_indexを生成
+    _dir_index = dir_index_obj.instance_of?(StringIO) ? dir_index_obj.string : dir_index_obj
+    unless @sample_mode
+      if _dir_index.to_i > @max_number
+        raise "saveDataDirIndex:#{_dir_index} is over Limit:(#@max_number)"
+      end
+    end
+    @dir_index = _dir_index.to_i
   end
 
   # saveDataのアクセスパスを返す => 通常は ./saveData
@@ -76,6 +80,7 @@ class SaveDirInfo
     result
   end
 
+<<<<<<< HEAD
   def set_dir_index(index)
     @dir_index = index.to_i
   end
@@ -104,9 +109,11 @@ class SaveDirInfo
     dir_index
   end
 
+=======
+>>>>>>> saveDirInfo改修
   def data_dir_path
     logging 'getDirName begin..'
-    dir_name_by_index(save_data_dir_index)
+    dir_name_by_index(dir_index)
   end
 
   def dir_name_by_index(dir_index)
@@ -121,6 +128,7 @@ class SaveDirInfo
     save_data_dir_name
   end
 
+  # 新しいDataディレクトリとファイルセットを作成する
   def create_dir
     logging('createDir begin')
     logging(data_dir_path, 'createDir saveDataDirName')

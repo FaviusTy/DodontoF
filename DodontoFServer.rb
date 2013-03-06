@@ -97,8 +97,8 @@ class DodontoFServer
 
     @savefiles = {}
     $save_files_name_set.each do |key_name, file_name|
-      logging(key_name, "saveDataKeyName")
-      logging(file_name, "saveFileName")
+      logging(key_name, 'saveDataKeyName')
+      logging(file_name, 'saveFileName')
       @savefiles[key_name] = @savedir_info.real_savefile_name(file_name)
     end
 
@@ -1741,7 +1741,7 @@ class DodontoFServer
     room_number_range = (0..$saveDataMaxCount)
 
     room_number_range.each do |roomNumber|
-      @savedir_info.set_dir_index(roomNumber)
+      @savedir_info.dir_index(roomNumber)
       real_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
 
       next if (File.exist?(real_savefile_name))
@@ -1777,7 +1777,7 @@ class DodontoFServer
 
     room_number_range.each do |roomNo|
 
-      @savedir_info.set_dir_index(roomNo)
+      @savedir_info.dir_index(roomNo)
 
       play_room_state = play_room_state(roomNo)
       next if (play_room_state.nil?)
@@ -1906,7 +1906,7 @@ class DodontoFServer
 
       break if (play_room_states.length > count)
 
-      @savedir_info.set_dir_index(roomNo)
+      @savedir_info.dir_index(roomNo)
 
       play_room_state = play_room_state(roomNo)
       next if (play_room_state.nil?)
@@ -2150,7 +2150,7 @@ class DodontoFServer
   def game_command_infos
     logging('getGameCommandInfos Begin')
 
-    if @savedir_info.save_data_dir_index == -1
+    if @savedir_info.dir_index == -1
       logging('getGameCommandInfos room is -1, so END')
 
       return []
@@ -2169,7 +2169,7 @@ class DodontoFServer
 
 
   def create_dir(play_room_index)
-    @savedir_info.set_dir_index(play_room_index)
+    @savedir_info.dir_index(play_room_index)
     @savedir_info.create_dir
   end
 
@@ -2339,7 +2339,7 @@ class DodontoFServer
     return if (play_room_password.empty?)
 
     if room_number.nil?
-      room_number = @savedir_info.save_data_dir_index
+      room_number = @savedir_info.dir_index
     end
 
     if $noPasswordPlayRoomNumbers.include?(room_number)
@@ -2410,7 +2410,7 @@ class DodontoFServer
 
     return true unless ($isPasswordNeedFroDeletePlayRoom)
 
-    @savedir_info.set_dir_index(room_number)
+    @savedir_info.dir_index(room_number)
     real_savefile_name   = @savedir_info.real_savefile_name($play_room_info_file_name)
     exist_play_room_info = (File.exist?(real_savefile_name))
 
@@ -2873,7 +2873,7 @@ class DodontoFServer
     room_number = check_room_status_data['roomNumber']
     logging(room_number, 'roomNumber')
 
-    @savedir_info.set_dir_index(room_number)
+    @savedir_info.dir_index(room_number)
 
     is_maintenance_on      = false
     is_welcome_message_on  = $isWelcomeMessageOn
@@ -2938,7 +2938,7 @@ class DodontoFServer
 
   def check_login_password(room_number, password, visitor_mode)
     logging("checkLoginPassword roomNumber", room_number)
-    @savedir_info.set_dir_index(room_number)
+    @savedir_info.dir_index(room_number)
     dir_name = @savedir_info.data_dir_path
 
     result = {
@@ -3508,7 +3508,7 @@ class DodontoFServer
   end
 
   def room_local_space_dir_name
-    room_no = @savedir_info.save_data_dir_index
+    room_no = @savedir_info.dir_index
     room_local_space_dir_name_by_room_no(room_no)
   end
 
@@ -3599,7 +3599,7 @@ class DodontoFServer
 
 
   def check_load
-    room_number = @savedir_info.save_data_dir_index
+    room_number = @savedir_info.dir_index
 
     if $unloadablePlayRoomNumbers.include?(room_number)
       raise "unloadablePlayRoomNumber"

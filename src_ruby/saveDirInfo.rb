@@ -95,7 +95,7 @@ class SaveDirInfo
 
     unless @sample_mode
       if dir_index > @max_number
-        raise "saveDataDirIndex:#{dir_index} is over Limit:(#@max_number)"
+        raise "saveDataDirIndex:#{dir_index} is over Limit:(#{@max_number})"
       end
     end
 

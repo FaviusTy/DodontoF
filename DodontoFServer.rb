@@ -27,7 +27,7 @@ if $isFirstCgi
   require 'cgiPatch_forFirstCgi'
 end
 
-require "config.rb"
+require 'config.rb'
 
 
 if $isMessagePackInstalled

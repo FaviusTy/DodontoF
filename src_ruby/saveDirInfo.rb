@@ -80,16 +80,17 @@ class SaveDirInfo
     result
   end
 
+  #このインスタンスが表すDataディレクトリまでのアクセスパスを返す
   def data_dir_path
     logging 'getDirName begin..'
     dir_name_by_index(dir_index)
   end
 
-  def dir_name_by_index(dir_index)
+  def dir_name_by_index(_dir_index)
     save_data_dir_name = ''
 
-    if dir_index >= 0
-      dir_name           = 'data_' + dir_index.to_s
+    if _dir_index >= 0
+      dir_name           = "data_#{_dir_index}"
       save_data_dir_name = File.join(root_dir_path, dir_name)
       logging(save_data_dir_name, 'saveDataDirName created')
     end
@@ -128,7 +129,8 @@ class SaveDirInfo
   def all_save_file_names
     file_names = []
 
-    save_files = $saveFiles.values + [
+    #TODO:BUG ここが動作しなくなった！
+    save_files = $save_files_name_set.values + [
         $loginUserInfo,
         $playRoomInfo,
         $chatMessageDataLogAll,
@@ -187,12 +189,14 @@ end
 if $0 === __FILE__
   require './loggingFunction'
   require 'stringio'
+  require '../DodontoFServer'
   # カレントディレクトリをDodontoFServer.rbの位置に変更
   Dir.chdir('../')
 
 
   save_data = SaveDirInfo.new
   puts "saveData initialized : #{save_data}"
+  puts "all_save_file_names : #{save_data.all_save_file_names}"
   save_data.init(0)
   puts 'init called'
   puts "root_dir_path : #{save_data.root_dir_path}"

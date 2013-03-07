@@ -364,7 +364,7 @@ module ServerCommands
     make_scenario_default_savefile(dir, all_save_data)
 
     remove_old_scenario_file(dir)
-    base_name     = get_new_savefile_base_name(@full_backup_base_name)
+    base_name     = get_new_savefile_base_name(DodontoFServer::FULL_BACKUP_BASE_NAME)
     scenario_file = make_scenario_file(dir, base_name)
 
     result                 = {}

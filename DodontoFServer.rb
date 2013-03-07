@@ -50,6 +50,10 @@ $record     = 'record.json'
 class DodontoFServer
   include ServerCommands
 
+  FULL_BACKUP_BASE_NAME = 'DodontoFFullBackup'
+  DICEBOT_TABLE_PREFIX = 'diceBotTable_'
+  SCENARIO_FILE_EXT = '.tar.gz'
+
   attr :is_add_marker
   attr :jsonp_callback
   attr :is_json_result
@@ -66,10 +70,6 @@ class DodontoFServer
     @is_web_interface = false
     @is_json_result   = true
     @is_record_empty  = false
-
-    @dicebot_table_prefix  = 'diceBotTable_'
-    @full_backup_base_name = 'DodontoFFullBackup'
-    @scenario_file_ext     = '.tar.gz'
     @card                  = nil
   end
 
@@ -1879,7 +1879,7 @@ class DodontoFServer
     dir = dicebot_extra_table_dir_name
     logging(dir, 'dir')
 
-    command_infos = bot.getGameCommandInfos(dir, @dicebot_table_prefix)
+    command_infos = bot.getGameCommandInfos(dir, DodontoFServer::DICEBOT_TABLE_PREFIX)
     logging(command_infos, 'getGameCommandInfos End commandInfos')
 
     command_infos
@@ -2225,7 +2225,7 @@ class DodontoFServer
   end
 
   def remove_old_scenario_file(dir)
-    file_names = Dir.glob("#{dir}/#{@full_backup_base_name}*#{@scenario_file_ext}")
+    file_names = Dir.glob("#{dir}/#{DodontoFServer::FULL_BACKUP_BASE_NAME}*#{DodontoFServer::SCENARIO_FILE_EXT}")
     file_names = file_names.collect { |i| i.untaint }
     logging(file_names, 'removeOldScenarioFile fileNames')
 
@@ -2243,7 +2243,7 @@ class DodontoFServer
     current_dir = FileUtils.pwd.untaint
     FileUtils.cd(dir)
 
-    scenario_file = base_name + @scenario_file_ext
+    scenario_file = base_name + DodontoFServer::SCENARIO_FILE_EXT
     tgz           = Zlib::GzipWriter.new(File.open(scenario_file, 'wb'))
 
     file_names = Dir.glob('*')
@@ -2462,7 +2462,7 @@ class DodontoFServer
 
     is_load_common_table = false
     table_file_data      = TableFileData.new(is_load_common_table)
-    table_file_data.setDir(dir, @dicebot_table_prefix)
+    table_file_data.setDir(dir, DodontoFServer::DICEBOT_TABLE_PREFIX)
     table_infos = table_file_data.getAllTableInfo
 
     logging(table_infos, 'getBotTableInfosFromDir tableInfos')
@@ -2483,7 +2483,7 @@ class DodontoFServer
 
     result_text = 'OK'
     begin
-      creator = TableFileCreator.new(dir, @dicebot_table_prefix, params)
+      creator = TableFileCreator.new(dir, DodontoFServer::DICEBOT_TABLE_PREFIX, params)
       creator.execute
     rescue Exception => e
       logging_exception(e)
@@ -2504,7 +2504,7 @@ class DodontoFServer
 
     result_text = 'OK'
     begin
-      creator = TableFileEditer.new(dir, @dicebot_table_prefix, params)
+      creator = TableFileEditer.new(dir, DodontoFServer::DICEBOT_TABLE_PREFIX, params)
       creator.execute
     rescue Exception => e
       logging_exception(e)
@@ -2527,7 +2527,7 @@ class DodontoFServer
 
     is_load_common_table = false
     table_file_data      = TableFileData.new(is_load_common_table)
-    table_file_data.setDir(dir, @dicebot_table_prefix)
+    table_file_data.setDir(dir, DodontoFServer::DICEBOT_TABLE_PREFIX)
     table_infos = table_file_data.getAllTableInfo
 
     table_info = table_infos.find { |i| i['command'] == command }
@@ -3211,7 +3211,7 @@ class DodontoFServer
     require 'cgiDiceBot.rb'
     bot                  = CgiDiceBot.new
     dir                  = dicebot_extra_table_dir_name
-    result, rand_results = bot.roll(message, game_type, dir, @dicebot_table_prefix, is_need_result)
+    result, rand_results = bot.roll(message, game_type, dir, DodontoFServer::DICEBOT_TABLE_PREFIX, is_need_result)
 
     result.gsub!(/＞/, '→')
     result.sub!(/\r?\n?\Z/, '')

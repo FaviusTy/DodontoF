@@ -12,10 +12,11 @@ $LOAD_PATH << File.dirname(__FILE__) + '/src_bcdice'
 if RUBY_VERSION >= '1.9.0'
   Encoding.default_external = 'utf-8'
 else
+  require 'rubygems'
   require 'jcode'
+  require 'kconv'
 end
 
-require 'kconv'
 require 'cgi'
 require 'stringio'
 require 'logger'
@@ -29,7 +30,6 @@ require 'cgiPatch_forFirstCgi' if Configure.is_fast_cgi
 
 if Configure.is_message_pack_installed
   # gem install msgpack バージョン
-  require 'rubygems'
   require 'msgpack'
 else
   # Pure Ruby MessagePackバージョン
@@ -55,7 +55,7 @@ class DodontoFServer
     @request_params = request_params
     @savedir_info   = savedir_info
 
-    room_index_key = "room"
+    room_index_key = 'room'
     init_savefiles(request_data(room_index_key))
 
     @is_add_marker    = false
@@ -65,7 +65,7 @@ class DodontoFServer
     @is_record_empty  = false
 
     @dicebot_table_prefix  = 'diceBotTable_'
-    @full_backup_base_name = "DodontoFFullBackup"
+    @full_backup_base_name = 'DodontoFFullBackup'
     @scenario_file_ext     = '.tar.gz'
     @card                  = nil
   end
@@ -85,10 +85,10 @@ class DodontoFServer
 
   #TODO:FIXME 1requestにつき1インスタンスでなければこの処理は成立しないので後々改修の余地があり.
   def request_data(key)
-    logging(key, "getRequestData key")
+    logging(key, 'getRequestData key')
 
     value = @request_params[key]
-    logging(@request_params, "@cgiParams")
+    logging(@request_params, '@cgiParams')
     # logging(value, "getRequestData value")
 
     #TODO:WAHT? このCGIインスタンスを生成する処理の理由がわからない
@@ -97,12 +97,12 @@ class DodontoFServer
       value = @cgi.request_params[key].first
     end
 
-    logging(value, "getRequestData result")
+    logging(value, 'getRequestData result')
     value
   end
 
   def cards_info
-    require "card.rb"
+    require 'card.rb'
 
     @card ||= Card.new
   end
@@ -116,7 +116,7 @@ class DodontoFServer
   end
 
   def self.lockfile_name(savefile_name)
-    default_name = (savefile_name + ".lock")
+    default_name = (savefile_name + '.lock')
 
     if Configure.save_data_lock_file_dir.nil?
       return default_name
@@ -128,7 +128,7 @@ class DodontoFServer
 
     subdir_name = savefile_name[Configure.save_data_dir.size .. -1]
 
-    File.join(Configure.save_data_lock_fire_dir, subdir_name) + ".lock"
+    File.join(Configure.save_data_lock_fire_dir, subdir_name) + '.lock'
   end
 
   #override
@@ -142,7 +142,7 @@ class DodontoFServer
       return FileLock.new(lockfile_name)
         #return FileLock2.new(saveFileName + ".lock", isReadOnly)
     rescue => e
-      loggingForce(@savedir_info.inspect, "when getSaveFileLock error : @saveDirInfo.inspect")
+      loggingForce(@savedir_info.inspect, 'when getSaveFileLock error : @saveDirInfo.inspect')
       raise
     end
   end
@@ -170,7 +170,7 @@ class DodontoFServer
   end
 
   def load_savefile(type_name, file_name)
-    logging("loadSaveFile begin")
+    logging('loadSaveFile begin')
 
     save_data = nil
 
@@ -178,7 +178,7 @@ class DodontoFServer
       if long_chatlog?(type_name)
         save_data = load_long_chatlog(type_name, file_name)
       elsif Configure.is_use_record and character_file?(type_name)
-        logging("isCharacterType")
+        logging('isCharacterType')
         save_data = load_character(type_name, file_name)
       else
         save_data = load_default_savefile(type_name, file_name)
@@ -190,7 +190,7 @@ class DodontoFServer
 
     logging(save_data.inspect, file_name)
 
-    logging("loadSaveFile end")
+    logging('loadSaveFile end')
 
     save_data
   end
@@ -205,11 +205,11 @@ class DodontoFServer
 
 
   def character_file?(type_name)
-    type_name == "characters"
+    type_name == 'characters'
   end
 
   def load_character(type_name, file_name)
-    logging(@last_update_times, "loadSaveFileForCharacter begin @lastUpdateTimes")
+    logging(@last_update_times, 'loadSaveFileForCharacter begin @lastUpdateTimes')
 
     character_update_time = savefile_timestamp_millisec(file_name)
 
@@ -218,7 +218,7 @@ class DodontoFServer
     record_caching
 
     save_data = record_by_cache
-    logging(save_data, "getRecordSaveDataFromCash saveData")
+    logging(save_data, 'getRecordSaveDataFromCash saveData')
 
     if save_data.nil?
       save_data = load_default_savefile(type_name, file_name)
@@ -228,8 +228,8 @@ class DodontoFServer
 
     @last_update_times['recordIndex'] = last_record_index_by_cache
 
-    logging(@last_update_times, "loadSaveFileForCharacter End @lastUpdateTimes")
-    logging(save_data, "loadSaveFileForCharacter End saveData")
+    logging(@last_update_times, 'loadSaveFileForCharacter End @lastUpdateTimes')
+    logging(save_data, 'loadSaveFileForCharacter End saveData')
 
     save_data
   end
@@ -237,9 +237,9 @@ class DodontoFServer
   def record_by_cache
     record_index = @last_update_times['recordIndex']
 
-    logging("getRecordSaveDataFromCash begin")
-    logging(record_index, "recordIndex")
-    logging(@record, "@record")
+    logging('getRecordSaveDataFromCash begin')
+    logging(record_index, 'recordIndex')
+    logging(@record, '@record')
 
     return nil if (record_index.nil?)
     return nil if (record_index == 0)
@@ -254,7 +254,7 @@ class DodontoFServer
     @record.each do |params|
       index, command, list, sender = params
 
-      logging(index, "@record.each index")
+      logging(index, '@record.each index')
 
       if index == record_index
         found = true
@@ -271,7 +271,7 @@ class DodontoFServer
 
     save_data = nil
     if found
-      logging(record_data, "recordData")
+      logging(record_data, 'recordData')
       save_data = { 'record' => record_data }
     end
 
@@ -285,7 +285,7 @@ class DodontoFServer
 
     #自分が送ったコマンドであっても結果を取得しないといけないコマンド名はここに列挙
     #キャラクター追加なんかのコマンドは字自分のコマンドでも送信しないとダメなんだよね
-    need_commands = ['addCharacter']
+    need_commands = %w(addCharacter)
     return true if (need_commands.include?(command))
 
     #でも基本的には、自分が送ったコマンドは受け取りたくないんですよ
@@ -304,7 +304,7 @@ class DodontoFServer
       record_index = last[0]
     end
 
-    logging(record_index, "getLastRecordIndexFromCash recordIndex")
+    logging(record_index, 'getLastRecordIndexFromCash recordIndex')
 
     record_index
   end
@@ -322,7 +322,7 @@ class DodontoFServer
   def load_default_savefile(type_name, file_name)
     lockfile = savefile_lock_readonly(file_name)
 
-    text_data = ""
+    text_data = ''
     lockfile.lock do
       @last_update_times[type_name] = savefile_timestamp_millisec(file_name)
       text_data                     = extract_safed_file_text(file_name)
@@ -367,13 +367,13 @@ class DodontoFServer
   end
 
   def save_character_history(save_data)
-    logging("saveCharacterHistory begin")
+    logging('saveCharacterHistory begin')
 
     before = deep_copy(save_data['characters'])
-    logging(before, "saveCharacterHistory BEFORE")
+    logging(before, 'saveCharacterHistory BEFORE')
     yield
     after = save_data['characters']
-    logging(after, "saveCharacterHistory AFTER")
+    logging(after, 'saveCharacterHistory AFTER')
 
     added   = not_exist_characters(after, before)
     removed = not_exist_characters(before, after)
@@ -391,7 +391,7 @@ class DodontoFServer
         write_record(_save_data, 'changeCharacter', changed)
       end
     end
-    logging("saveCharacterHistory end")
+    logging('saveCharacterHistory end')
   end
 
   def deep_copy(obj)
@@ -415,35 +415,35 @@ class DodontoFServer
     result = []
 
     after.each do |a|
-      logging(a, "getChangedCharacters find a")
+      logging(a, 'getChangedCharacters find a')
 
       b = before.find { |i| a['imgId'] == i['imgId'] }
       next if (b.nil?)
 
-      logging(b, "getChangedCharacters find b")
+      logging(b, 'getChangedCharacters find b')
 
       next if (a == b)
 
       result << a
     end
 
-    logging(result, "getChangedCharacters result")
+    logging(result, 'getChangedCharacters result')
 
     result
   end
 
 
   def write_record(save_data, key, list)
-    logging("writeRecord begin")
-    logging(list, "list")
+    logging('writeRecord begin')
+    logging(list, 'list')
 
     if list.nil? or list.empty?
-      logging("list is empty.")
+      logging('list is empty.')
       return nil
     end
 
     record = record_by_save_data(save_data)
-    logging(record, "before record")
+    logging(record, 'before record')
 
     while record.length >= Configure.record_max_count
       record.shift
@@ -460,16 +460,16 @@ class DodontoFServer
     sender = command_sender
 
     record << [record_index, key, list, sender]
-    logging(record, "after record")
+    logging(record, 'after record')
 
-    logging("writeRecord end")
+    logging('writeRecord end')
   end
 
   def clear_record(save_data)
-    logging("clearRecord Begin")
+    logging('clearRecord Begin')
     record = record_by_save_data(save_data)
     record.clear
-    logging("clearRecord End")
+    logging('clearRecord End')
   end
 
   def command_sender
@@ -477,7 +477,7 @@ class DodontoFServer
       @command_sender = request_data('own')
     end
 
-    logging(@command_sender, "@commandSender")
+    logging(@command_sender, '@commandSender')
 
     @command_sender
   end
@@ -501,9 +501,9 @@ class DodontoFServer
     logging(file_name, 'createSaveFile saveFileName')
     exist_files = nil
 
-    logging(SaveDirInfo::SAVE_FILE_NAMES, "$saveFileNames")
+    logging(SaveDirInfo::SAVE_FILE_NAMES, '$saveFileNames')
     change_save_data(SaveDirInfo::SAVE_FILE_NAMES) do |save_data|
-      exist_files = save_data["fileNames"]
+      exist_files = save_data['fileNames']
       exist_files ||= []
       logging(exist_files, 'pre existFiles')
 
@@ -513,7 +513,7 @@ class DodontoFServer
 
       create_file(file_name, text)
 
-      save_data["fileNames"] = exist_files
+      save_data['fileNames'] = exist_files
     end
 
     logging(exist_files, 'createSaveFile existFiles')
@@ -522,7 +522,7 @@ class DodontoFServer
   #override
   def create_file(file_name, text)
     begin
-      File.open(file_name, "w+") do |file|
+      File.open(file_name, 'w+') do |file|
         file.write(text.toutf8)
       end
     rescue => e
@@ -546,14 +546,14 @@ class DodontoFServer
   def self.parse_json(text)
     parsed_data = nil
     begin
-      logging(text, "getJsonDataFromText start")
+      logging(text, 'getJsonDataFromText start')
       begin
         parsed_data = JsonParser.new.parse(text)
-        logging("getJsonDataFromText 1 end")
+        logging('getJsonDataFromText 1 end')
       rescue => e
         text        = CGI.unescape(text)
         parsed_data = JsonParser.new.parse(text)
-        logging("getJsonDataFromText 2 end")
+        logging('getJsonDataFromText 2 end')
       end
     rescue => e
       # loggingException(e)
@@ -564,12 +564,12 @@ class DodontoFServer
   end
 
   def self.parse_msgpack(data)
-    logging("getMessagePackFromData Begin")
+    logging('getMessagePackFromData Begin')
 
     parsed_data = {}
 
     if data.nil?
-      logging("data is nil")
+      logging('data is nil')
       return parsed_data
     end
 
@@ -577,33 +577,33 @@ class DodontoFServer
       if Configure.is_message_pack_installed
         parsed_data = MessagePack.unpack(data)
       else
-        parsed_data = MessagePackPure::Unpacker.new(StringIO.new(data, "r")).read
+        parsed_data = MessagePackPure::Unpacker.new(StringIO.new(data, 'r')).read
       end
     rescue => e
-      loggingForce("getMessagePackFromData rescue")
+      loggingForce('getMessagePackFromData rescue')
       logging_exception(e)
     rescue Exception => e
-      loggingForce("getMessagePackFromData Exception rescue")
+      loggingForce('getMessagePackFromData Exception rescue')
       logging_exception(e)
     end
 
-    logging(parsed_data, "messagePack")
+    logging(parsed_data, 'messagePack')
 
     if DodontoFServer::is_webif_msgpack(parsed_data)
-      logging(data, "data is webif.")
+      logging(data, 'data is webif.')
       parsed_data = DodontoFServer::reform_webif_data(data)
     end
 
-    logging(parsed_data, "getMessagePackFromData End messagePack")
+    logging(parsed_data, 'getMessagePackFromData End messagePack')
 
     return parsed_data
   end
 
   def self.is_webif_msgpack(parsed_data)
-    logging(parsed_data, "isWebif messagePack")
+    logging(parsed_data, 'isWebif messagePack')
 
     unless parsed_data.kind_of?(Hash)
-      logging("messagePack is NOT Hash")
+      logging('messagePack is NOT Hash')
       return true
     end
 
@@ -612,7 +612,7 @@ class DodontoFServer
 
   def self.reform_webif_data(data)
     params = CGI.parse(data)
-    logging(params, "params")
+    logging(params, 'params')
 
     reformed_data = {}
     params.each do |key, value|
@@ -624,7 +624,7 @@ class DodontoFServer
 
   #override
   def extract_safed_file_text(savefile_name)
-    empty = "{}"
+    empty = '{}'
 
     return empty unless (File.exist?(savefile_name))
 
@@ -735,11 +735,11 @@ class DodontoFServer
   end
 
   def execute_webif_command
-    result = { 'result' => 'NG' }
+    result = { :result => 'NG' }
 
     begin
       result = routing_webif_command
-      logging("analyzeWebInterfaceCatches end result", result)
+      logging('analyzeWebInterfaceCatches end result', result)
       set_jsonp_callback
     rescue => e
       result['result'] = e.to_s
@@ -749,7 +749,7 @@ class DodontoFServer
   end
 
   def routing_webif_command
-    logging "analyzeWebInterfaceCatches begin"
+    logging 'analyzeWebInterfaceCatches begin'
 
     @is_web_interface = true
     @is_json_result   = true
@@ -762,7 +762,7 @@ class DodontoFServer
     marker = request_data('marker') || ''
     @is_add_marker = false if marker.empty?
 
-    logging(current_command, "commandName")
+    logging(current_command, 'commandName')
 
     case current_command
       when 'getBusyInfo'
@@ -770,7 +770,7 @@ class DodontoFServer
       when 'getServerInfo'
         return server_info_for_webif
       when 'getRoomList'
-        logging("getRoomList passed")
+        logging('getRoomList passed')
         return room_list_for_webif
       else
 
@@ -801,22 +801,22 @@ class DodontoFServer
 
     end
 
-    { 'result' => "command [#{current_command}] is NOT found" }
+    { :result => "command [#{current_command}] is NOT found" }
   end
 
 
   def login_on_web_interface
     text_room_index = request_data('room') || ''
 
-    raise "プレイルーム番号(room)を指定してください" if text_room_index.empty?
-    raise "プレイルーム番号(room)には半角数字のみを指定してください" unless /^\d+$/ === text_room_index
+    raise 'プレイルーム番号(room)を指定してください' if text_room_index.empty?
+    raise 'プレイルーム番号(room)には半角数字のみを指定してください' unless /^\d+$/ === text_room_index
 
     room_index   = text_room_index.to_i
     password     = request_data('password')
     visitor_mode = true
 
     checked_result = check_login_password(room_index, password, visitor_mode)
-    if checked_result['resultText'] != "OK"
+    if checked_result['resultText'] != 'OK'
       result['result'] = result['resultText']
       return result
     end
@@ -835,22 +835,22 @@ class DodontoFServer
 
 
   def test_response
-    "「どどんとふ」の動作環境は正常に起動しています。"
+    '「どどんとふ」の動作環境は正常に起動しています。'
   end
 
 
   def current_save_data
     @savefiles.each do |type_name, file_name|
-      logging(type_name, "saveFileTypeName")
-      logging(file_name, "saveFileName")
+      logging(type_name, 'saveFileTypeName')
+      logging(file_name, 'saveFileName')
 
       target_last_update_time = @last_update_times[type_name]
       next if (target_last_update_time == nil)
 
-      logging(target_last_update_time, "targetLastUpdateTime")
+      logging(target_last_update_time, 'targetLastUpdateTime')
 
       if savefile_changed?(target_last_update_time, file_name)
-        logging(file_name, "saveFile is changed")
+        logging(file_name, 'saveFile is changed')
         save_data = load_savefile(type_name, file_name)
         yield(save_data, type_name)
       end
@@ -859,14 +859,14 @@ class DodontoFServer
 
 
   def chat_text_for_webif
-    logging("getWebIfChatText begin")
+    logging('getWebIfChatText begin')
 
-    time= request_number_for_webif('time', -1)
-    unless time == -1
-      save_data = chat_text_by_time(time)
-    else
+    time = request_number_for_webif('time', -1)
+    if time == -1
       seconds   = request_data('sec')
       save_data = chat_text_by_second(seconds)
+    else
+      save_data = chat_text_by_time(time)
     end
 
     save_data['result'] = 'OK'
@@ -894,8 +894,8 @@ class DodontoFServer
     logging(seconds, 'getWebIfChatTextFromSecond seconds')
 
     time = target_range_chat_time(seconds)
-    logging(seconds, "seconds")
-    logging(time, "time")
+    logging(seconds, 'seconds')
+    logging(time, 'time')
 
     save_data          = {}
     @last_update_times = { 'chatMessageDataLog' => time }
@@ -905,7 +905,7 @@ class DodontoFServer
 
     exclude_old_chat_for_webif(time, save_data)
 
-    logging("getCurrentSaveData end saveData", save_data)
+    logging('getCurrentSaveData end saveData', save_data)
 
     save_data
   end
@@ -928,7 +928,7 @@ class DodontoFServer
 
   def target_range_chat_time(seconds)
     case seconds
-      when "all"
+      when 'all'
         return 0
       when nil
         return Time.now.to_i - Configure.old_message_timeout
@@ -941,16 +941,16 @@ class DodontoFServer
 
   def chat_color
     name = request_text_for_webif('name') || ''
-    logging(name, "name")
+    logging(name, 'name')
 
-    raise "対象ユーザー名(name)を指定してください" if name.empty?
+    raise '対象ユーザー名(name)を指定してください' if name.empty?
 
     color = chat_color_in_save_data(name)
-    raise "指定ユーザー名の発言が見つかりません" if color.nil?
+    raise '指定ユーザー名の発言が見つかりません' if color.nil?
 
-    result = {
-        'result' => 'OK',
-        'color' => color }
+    {
+        :result => 'OK',
+        :color => color }
   end
 
   def chat_color_in_save_data(name)
@@ -969,16 +969,16 @@ class DodontoFServer
   end
 
   def default_color
-    "000000"
+    '000000'
   end
 
   def busy_info
-    json_data = {
-        "loginCount"    => File.readlines(Configure.login_count_file).join.to_i,
-        "maxLoginCount" => Configure.about_max_login_count,
-        "version"       => Configure.version,
-        "result"        => 'OK',
-    }
+    {
+            "loginCount"    => File.readlines(Configure.login_count_file).join.to_i,
+            "maxLoginCount" => Configure.about_max_login_count,
+            "version"       => Configure.version,
+            "result"        => 'OK',
+        }
   end
 
   def server_info_for_webif
@@ -988,12 +988,12 @@ class DodontoFServer
         'result'               => 'OK',
     }
 
-    if request_boolean_for_webif("card", false)
+    if request_boolean_for_webif('card', false)
       cards_infos              = cards_info.collectCardTypeAndTypeName
-      result_data["cardInfos"] = cards_infos
+      result_data['cardInfos'] = cards_infos
     end
 
-    if request_boolean_for_webif("dice", false)
+    if request_boolean_for_webif('dice', false)
       require 'diceBotInfos'
       dicebot_infos               = DiceBotInfos.new.getInfos
       result_data['diceBotInfos'] = dicebot_infos
@@ -1003,7 +1003,7 @@ class DodontoFServer
   end
 
   def room_list_for_webif
-    logging("getWebIfRoomList Begin")
+    logging('getWebIfRoomList Begin')
     min_room = request_int_for_webif('min_room', 0)
     max_room = request_int_for_webif('max_room', (Configure.save_data_max_count - 1))
 
@@ -1014,26 +1014,26 @@ class DodontoFServer
         "result"         => 'OK',
     }
 
-    logging("getWebIfRoomList End")
+    logging('getWebIfRoomList End')
     result_data
   end
 
   def send_chat_text_for_webif
-    logging("sendWebIfChatText begin")
+    logging('sendWebIfChatText begin')
     save_data = {}
 
     name = request_text_for_webif('name')
-    logging(name, "name")
+    logging(name, 'name')
 
     message = request_text_for_webif('message')
     message.gsub!(/\r\n/, "\r")
-    logging(message, "message")
+    logging(message, 'message')
 
     color = request_text_for_webif('color', default_color)
-    logging(color, "color")
+    logging(color, 'color')
 
     channel = request_int_for_webif('channel')
-    logging(channel, "channel")
+    logging(channel, 'channel')
 
     game_type = request_text_for_webif('bot')
     logging(game_type, 'gameType')
@@ -1041,7 +1041,7 @@ class DodontoFServer
     roll_result, is_secret, rand_results = dice_roll(message, game_type, false)
 
     message = message + roll_result
-    logging(message, "diceRolled message")
+    logging(message, 'diceRolled message')
 
     chat_data = {
         "senderName" => name,
@@ -1050,12 +1050,12 @@ class DodontoFServer
         "uniqueId"   => '0',
         "channel"    => channel,
     }
-    logging("sendWebIfChatText chatData", chat_data)
+    logging('sendWebIfChatText chatData', chat_data)
 
     send_chat_message_by_chat_data(chat_data)
 
     result           = {}
-    result['result'] = 'OK'
+    result[:result] = 'OK'
     result
   end
 
@@ -1085,7 +1085,7 @@ class DodontoFServer
       return default
     end
 
-    (text == "true")
+    (text == 'true')
   end
 
   def request_array_for_webif(key, empty = [], separator = ',')
@@ -1099,13 +1099,13 @@ class DodontoFServer
   end
 
   def request_hash_for_webif(key, default = {}, separator1 = ':', separator2 = ',')
-    logging("getWebIfRequestHash begin")
-    logging(key, "key")
-    logging(separator1, "separator1")
-    logging(separator2, "separator2")
+    logging('getWebIfRequestHash begin')
+    logging(key, 'key')
+    logging(separator1, 'separator1')
+    logging(separator2, 'separator2')
 
     array = request_array_for_webif(key, [], separator2)
-    logging(array, "array")
+    logging(array, 'array')
 
     if array.empty?
       return default
@@ -1113,12 +1113,12 @@ class DodontoFServer
 
     hash = {}
     array.each do |value|
-      logging(value, "array value")
+      logging(value, 'array value')
       key, value = value.split(separator1)
       hash[key]  = value
     end
 
-    logging(hash, "getWebIfRequestHash result")
+    logging(hash, 'getWebIfRequestHash result')
 
     hash
   end
@@ -1127,7 +1127,7 @@ class DodontoFServer
     logging('sendWebIfAddMemo begin')
 
     result           = {}
-    result['result'] = 'OK'
+    result[:result] = 'OK'
 
     result_context = {
         "message"   => request_text_for_webif('message', ''),
@@ -1139,7 +1139,7 @@ class DodontoFServer
         "isPaint"   => true,
         "color"     => 16777215,
         "draggable" => true,
-        "type"      => "Memo",
+        "type"      => 'Memo',
         "imgId"     => create_character_img_id,
     }
 
@@ -1151,10 +1151,10 @@ class DodontoFServer
 
 
   def send_add_character_for_webif
-    logging("sendWebIfAddCharacter begin")
+    logging('sendWebIfAddCharacter begin')
 
     result           = {}
-    result['result'] = 'OK'
+    result[:result] = 'OK'
 
     character_data = {
         "name"        => request_text_for_webif('name'),
@@ -1167,10 +1167,10 @@ class DodontoFServer
         "imageName"   => image_name_for_webif('image', ".\/image\/defaultImageSet\/pawn\/pawnBlack.png"),
         "rotation"    => request_int_for_webif('rotation', 0),
         "statusAlias" => request_hash_for_webif('statusAlias'),
-        "dogTag"      => request_text_for_webif('dogTag', ""),
-        "draggable"   => request_boolean_for_webif("draggable", true),
-        "isHide"      => request_boolean_for_webif("isHide", false),
-        "type"        => "characterData",
+        "dogTag"      => request_text_for_webif('dogTag', ''),
+        "draggable"   => request_boolean_for_webif('draggable', true),
+        "isHide"      => request_boolean_for_webif('isHide', false),
+        "type"        => 'characterData',
         "imgId"       => create_character_img_id,
     }
 
@@ -1178,62 +1178,62 @@ class DodontoFServer
 
 
     if character_data['name'].empty?
-      result['result'] = "キャラクターの追加に失敗しました。キャラクター名が設定されていません"
+      result[:result] = 'キャラクターの追加に失敗しました。キャラクター名が設定されていません'
       return result
     end
 
 
     add_result            = add_character_data([character_data])
-    add_failed_char_names = add_result["addFailedCharacterNames"]
+    add_failed_char_names = add_result['addFailedCharacterNames']
     logging(add_failed_char_names, 'addFailedCharacterNames')
 
     if add_failed_char_names.length > 0
-      result['result'] = "キャラクターの追加に失敗しました。同じ名前のキャラクターがすでに存在しないか確認してください。\"#{add_failed_char_names.join(' ')}\""
+      result[:result] = "キャラクターの追加に失敗しました。同じ名前のキャラクターがすでに存在しないか確認してください。\"#{add_failed_char_names.join(' ')}\""
     end
 
     result
   end
 
   def image_name_for_webif(key, default)
-    logging("getWebIfImageName begin")
-    logging(key, "key")
-    logging(default, "default")
+    logging('getWebIfImageName begin')
+    logging(key, 'key')
+    logging(default, 'default')
 
     image = request_text_for_webif(key, default)
-    logging(image, "image")
+    logging(image, 'image')
 
     if image != default
       image.gsub!('(local)', Configure.image_upload_dir)
       image.gsub!('__LOCAL__', Configure.image_upload_dir)
     end
 
-    logging(image, "getWebIfImageName result")
+    logging(image, 'getWebIfImageName result')
 
     image
   end
 
 
   def change_character_for_webif
-    logging("sendWebIfChangeCharacter begin")
+    logging('sendWebIfChangeCharacter begin')
 
     result           = {}
-    result['result'] = 'OK'
+    result[:result] = 'OK'
 
     begin
       change_character_chatched_for_webif
     rescue => e
       logging_exception(e)
-      result['result'] = e.to_s
+      result[:result] = e.to_s
     end
 
     result
   end
 
   def change_character_chatched_for_webif
-    logging("sendWebIfChangeCharacterChatched begin")
+    logging('sendWebIfChangeCharacterCatches begin')
 
     target_name = request_text_for_webif('targetName')
-    logging(target_name, "targetName")
+    logging(target_name, 'targetName')
 
     if target_name.empty?
       raise '変更するキャラクターの名前(\'target\'パラメータ）が正しく指定されていません'
@@ -1243,14 +1243,14 @@ class DodontoFServer
     change_save_data(@savefiles['characters']) do |saveData|
 
       character_data = character_by_name(saveData, target_name)
-      logging(character_data, "characterData")
+      logging(character_data, 'characterData')
 
       if character_data.nil?
         raise "「#{target_name}」という名前のキャラクターは存在しません"
       end
 
       name = request_any_for_webif(:request_text_for_webif, 'name', character_data)
-      logging(name, "name")
+      logging(name, 'name')
 
       if character_data['name'] != name
         failed_name = already_exist_character_in_room?(saveData, { 'name' => name })
@@ -1289,21 +1289,21 @@ class DodontoFServer
 
 
   def room_info_for_webif
-    logging("getWebIfRoomInfo begin")
+    logging('getWebIfRoomInfo begin')
 
     result           = {}
-    result['result'] = 'OK'
+    result[:result] = 'OK'
 
     save_data(@savefiles['time']) do |data|
-      logging(data, "saveData")
+      logging(data, 'saveData')
       round_time_data   = data['roundTimeData'] || {}
-      result['counter'] = data['counterNames'] || []
+      result[:counter] = data['counterNames'] || []
     end
 
     room_info = _room_info_for_webif
     result.merge!(room_info)
 
-    logging(result, "getWebIfRoomInfo result")
+    logging(result, 'getWebIfRoomInfo result')
 
     result
   end
@@ -1314,21 +1314,21 @@ class DodontoFServer
     real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
 
     save_data(real_savefile_name) do |data|
-      result['roomName']   = data['playRoomName'] || ''
-      result['chatTab']    = data['chatChannelNames'] || []
-      result['outerImage'] = data['canUseExternalImage'] || false
-      result['visit']      = data['canVisit'] || false
-      result['game']       = data['gameType'] || ''
+      result[:roomName]   = data['playRoomName'] || ''
+      result[:chatTab]    = data['chatChannelNames'] || []
+      result[:outerImage] = data['canUseExternalImage'] || false
+      result[:visit]      = data['canVisit'] || false
+      result[:game]       = data['gameType'] || ''
     end
 
     result
   end
 
   def set_room_info_for_webif
-    logging("setWebIfRoomInfo begin")
+    logging('setWebIfRoomInfo begin')
 
     result           = {}
-    result['result'] = 'OK'
+    result[:result] = 'OK'
 
     set_counter_names_in_room_info_webif
 
@@ -1343,7 +1343,7 @@ class DodontoFServer
       saveData['gameType']            = request_any_for_webif(:request_text_for_webif, 'game', room_info)
     end
 
-    logging(result, "setWebIfRoomInfo result")
+    logging(result, 'setWebIfRoomInfo result')
 
     result
   end
@@ -1356,7 +1356,7 @@ class DodontoFServer
   end
 
   def change_counter_names(counter_names)
-    logging(counter_names, "changeCounterNames(counterNames)")
+    logging(counter_names, 'changeCounterNames(counterNames)')
     change_save_data(@savefiles['time']) do |saveData|
       saveData['roundTimeData']       ||= {}
       round_time_data                 = saveData['roundTimeData']
@@ -1367,26 +1367,26 @@ class DodontoFServer
   def request_any_for_webif(function_name, key, default_infos, key2 = nil) #TODO:WHAT? key,key2の具体的な値が不明
     key2 ||= key
 
-    logging("getWebIfRequestAny begin")
-    logging(key, "key")
-    logging(key2, "key2")
-    logging(default_infos, "defaultInfos")
+    logging('getWebIfRequestAny begin')
+    logging(key, 'key')
+    logging(key2, 'key2')
+    logging(default_infos, 'defaultInfos')
 
     default_value = default_infos[key2]
-    logging(default_value, "defaultValue")
+    logging(default_value, 'defaultValue')
 
     command = "#{function_name}( key, defaultValue )"
-    logging(command, "getWebIfRequestAny command")
+    logging(command, 'getWebIfRequestAny command')
 
     result = eval(command)
-    logging(result, "getWebIfRequestAny result")
+    logging(result, 'getWebIfRequestAny result')
 
     result
   end
 
 
   def refresh_for_webif
-    logging("getWebIfRefresh Begin")
+    logging('getWebIfRefresh Begin')
 
     chat_time = request_number_for_webif('chat', -1)
 
@@ -1400,50 +1400,50 @@ class DodontoFServer
     }
 
     @last_update_times.delete_if { |type, time| time == -1 }
-    logging(@last_update_times, "getWebIfRefresh lastUpdateTimes")
+    logging(@last_update_times, 'getWebIfRefresh lastUpdateTimes')
 
     save_data = {}
     refresh_routine(save_data)
     exclude_old_chat_for_webif(chat_time, save_data)
 
     result = {}
-    ["chatMessageDataLog", "mapData", "characters", "graveyard", "effects"].each do |key|
+    %w(chatMessageDataLog mapData characters graveyard effects).each do |key|
       value = save_data.delete(key)
       next if (value.nil?)
 
-      result[key] = value
+      result[:"#{key}"] = value
     end
 
-    result['roomInfo']        = save_data
-    result['lastUpdateTimes'] = @last_update_times
-    result['result']          = 'OK'
+    result[:roomInfo]        = save_data
+    result[:lastUpdateTimes] = @last_update_times
+    result[:result]          = 'OK'
 
-    logging("getWebIfRefresh End result", result)
+    logging('getWebIfRefresh End result', result)
 
     result
   end
 
 
   def refresh
-    logging("==>Begin refresh")
+    logging('==>Begin refresh')
 
     save_data = {}
 
     if Configure.is_mentenance
-      save_data["warning"] = { "key" => "canNotRefreshBecauseMentenanceNow" }
+      save_data['warning'] = { :key => 'canNotRefreshBecauseMaintenanceNow' }
       return save_data
     end
 
-    logging(params, "params")
+    logging(params, 'params')
 
     @last_update_times = params['times']
-    logging(@last_update_times, "@lastUpdateTimes")
+    logging(@last_update_times, '@lastUpdateTimes')
 
     is_first_chat_refresh = (@last_update_times['chatMessageDataLog'] == 0)
-    logging(is_first_chat_refresh, "isFirstChatRefresh")
+    logging(is_first_chat_refresh, 'isFirstChatRefresh')
 
     refresh_index = params['rIndex']
-    logging(refresh_index, "refreshIndex")
+    logging(refresh_index, 'refreshIndex')
 
     @isGetOwnRecord = params['isGetOwnRecord']
 
@@ -1469,8 +1469,8 @@ class DodontoFServer
       save_data['isFirstChatRefresh'] = is_first_chat_refresh
     end
 
-    logging(save_data, "refresh end saveData")
-    logging("==>End refresh")
+    logging(save_data, 'refresh end saveData')
+    logging('==>End refresh')
 
     save_data
   end
@@ -1490,8 +1490,8 @@ class DodontoFServer
     now              = Time.now
     while_limit_time = now + Configure.refresh_timeout
 
-    logging(now, "now")
-    logging(while_limit_time, "whileLimitTime")
+    logging(now, 'now')
+    logging(while_limit_time, 'whileLimitTime')
 
     while Time.now < while_limit_time
 
@@ -1499,15 +1499,15 @@ class DodontoFServer
 
       break unless (save_data.empty?)
 
-      intalval = refresh_interval
-      logging(intalval, "saveData is empty, sleep second")
-      sleep(intalval)
-      logging("awake.")
+      interval = refresh_interval
+      logging(interval, 'saveData is empty, sleep second')
+      sleep(interval)
+      logging('awake.')
     end
   end
 
   def refresh_interval
-    if Configure.is_commet
+    if Configure.is_comet
       Configure.refresh_interval
     else
       Configure.refresh_interval_for_not_comet
@@ -1587,19 +1587,18 @@ class DodontoFServer
     return if (is_logout)
 
     user_info = {
-        'userName'    => user_name,
-        'timeSeconds' => now_seconds,
+        :userName => user_name,
+        :timeSeconds => now_seconds,
     }
 
-    user_info['isVisiter'] = true if (is_visitor)
+    user_info[:isVisiter] = true if (is_visitor)
 
     save_data[unique_id] = user_info
   end
 
 
   def play_room_name(save_data, index)
-    play_room_name = save_data['playRoomName']
-    play_room_name ||= "プレイルームNo.#{index}"
+    save_data['playRoomName'] || "プレイルームNo.#{index}"
   end
 
   def login_user_count_list(target_range)
@@ -1610,7 +1609,7 @@ class DodontoFServer
       next unless (target_range.include?(index))
 
       if saveFiles.size != 1
-        logging("emptry room")
+        logging('empty room')
         result_list[index] = 0
         next
       end
@@ -1632,7 +1631,7 @@ class DodontoFServer
       next unless (target_range.include?(index))
 
       if saveFiles.size != 1
-        logging("emptry room")
+        logging('empty room')
         #loginUserList[index] = []
         next
       end
@@ -1641,7 +1640,7 @@ class DodontoFServer
       real_savefile_name = saveFiles.first
       login_user_info    = update_login_user_info(real_savefile_name)
       login_user_info.each do |data|
-        user_names << data["userName"]
+        user_names << data['userName']
       end
 
       login_user_list[index] = user_names
@@ -1668,47 +1667,47 @@ class DodontoFServer
   end
 
   def remove_old_room_for_access_times(access_times)
-    logging("removeOldRoom Begin")
+    logging('removeOldRoom Begin')
     if Configure.remove_old_play_room_limit_days <= 0
       return access_times
     end
 
-    logging(access_times, "accessTimes")
+    logging(access_times, 'accessTimes')
 
     target_rooms = delete_room_numbers(access_times)
 
     ignore_login_user = true
     password          = nil
     result            = remove_play_room_by_params(target_rooms, ignore_login_user, password)
-    logging(result, "removePlayRoomByParams result")
+    logging(result, 'removePlayRoomByParams result')
 
     result
   end
 
   def delete_room_numbers(access_times)
-    logging(access_times, "getDeleteTargetRoomNumbers accessTimes")
+    logging(access_times, 'getDeleteTargetRoomNumbers accessTimes')
 
     room_numbers = []
 
     access_times.each do |index, time|
-      logging(index, "index")
-      logging(time, "time")
+      logging(index, 'index')
+      logging(time, 'time')
 
       next if (time.nil?)
 
       time_diff_sec = (Time.now - time)
-      logging(time_diff_sec, "timeDiffSeconds")
+      logging(time_diff_sec, 'timeDiffSeconds')
 
       limit_sec = Configure.remove_old_play_room_limit_days * 24 * 60 * 60
-      logging(limit_sec, "limitSeconds")
+      logging(limit_sec, 'limitSeconds')
 
       if time_diff_sec > limit_sec
-        logging(index, "roomNumbers added index")
+        logging(index, 'roomNumbers added index')
         room_numbers << index
       end
     end
 
-    logging(room_numbers, "roomNumbers")
+    logging(room_numbers, 'roomNumbers')
     room_numbers
   end
 
@@ -1732,19 +1731,19 @@ class DodontoFServer
   end
 
   def play_room_states
-    logging(params, "params")
+    logging(params, 'params')
 
     min_room         = min_room(params)
     max_room         = max_room(params)
     play_room_states = play_room_states_local(min_room, max_room)
 
     result = {
-        "min_room"       => min_room,
-        "max_room"       => max_room,
-        "playRoomStates" => play_room_states,
+        :min_room => min_room,
+        :max_room => max_room,
+        :playRoomStates => play_room_states,
     }
 
-    logging(result, "getPlayRoomStatesLocal result")
+    logging(result, 'getPlayRoomStatesLocal result')
 
     result
   end
@@ -1771,9 +1770,9 @@ class DodontoFServer
     # playRoomState = nil
     play_room_state                      = {}
     play_room_state['passwordLockState'] = false
-    play_room_state['index']             = sprintf("%3d", room_no)
-    play_room_state['playRoomName']      = "（空き部屋）"
-    play_room_state['lastUpdateTime']    = ""
+    play_room_state['index']             = sprintf('%3d', room_no)
+    play_room_state['playRoomName']      = '（空き部屋）'
+    play_room_state['lastUpdateTime']    = ''
     play_room_state['canVisit']          = false
     play_room_state['gameType']          = ''
     play_room_state['login_users']       = []
@@ -1781,10 +1780,10 @@ class DodontoFServer
     begin
       play_room_state = play_room_state_local(room_no, play_room_state)
     rescue => e
-      loggingForce("getPlayRoomStateLocal rescue")
+      loggingForce('getPlayRoomStateLocal rescue')
       logging_exception(e)
     rescue Exception => e
-      loggingForce("getPlayRoomStateLocal Exception rescue")
+      loggingForce('getPlayRoomStateLocal Exception rescue')
       logging_exception(e)
     end
 
@@ -1800,7 +1799,7 @@ class DodontoFServer
     save_data(play_room_info_file) do |playRoomDataTmp|
       play_room_data = playRoomDataTmp
     end
-    logging(play_room_data, "playRoomData")
+    logging(play_room_data, 'playRoomData')
 
     return play_room_state if (play_room_data.empty?)
 
@@ -1810,7 +1809,7 @@ class DodontoFServer
     game_type           = play_room_data['gameType']
     timestamp           = save_data_lastaccess_time(SaveDirInfo::FILE_NAME_SET[:chatMessageDataLog], room_no)
 
-    time_display = ""
+    time_display = ''
     unless timestamp.nil?
       time_display = "#{timestamp.strftime('%Y/%m/%d %H:%M:%S')}"
     end
@@ -1831,7 +1830,7 @@ class DodontoFServer
     user_names = []
 
     real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::LOGIN_FILE)
-    logging(real_savefile_name, "getLoginUserNames real_savefile_name")
+    logging(real_savefile_name, 'getLoginUserNames real_savefile_name')
 
     unless File.exist?(real_savefile_name)
       return user_names
@@ -1846,33 +1845,33 @@ class DodontoFServer
       end
     end
 
-    logging(user_names, "getLoginUserNames user_names")
+    logging(user_names, 'getLoginUserNames user_names')
     user_names
   end
 
   def game_title(game_type)
     require 'diceBotInfos'
     dicebot_infos = DiceBotInfos.new.getInfos
-    game_info     = dicebot_infos.find { |i| i["gameType"] == game_type }
+    game_info     = dicebot_infos.find { |i| i['gameType'] == game_type }
 
     return '--' if (game_info.nil?)
 
-    game_info["name"]
+    game_info['name']
   end
 
 
   def play_room_states_by_count
-    logging(params, "params")
+    logging(params, 'params')
 
     min_room         = min_room(params)
-    count            = params["count"]
+    count            = params['count']
     play_room_states = play_room_states_by_count_local(min_room, count)
 
     result = {
-        "playRoomStates" => play_room_states,
+        :playRoomStates => play_room_states,
     }
 
-    logging(result, "getPlayRoomStatesByCount result")
+    logging(result, 'getPlayRoomStatesByCount result')
 
     result
   end
@@ -1912,8 +1911,8 @@ class DodontoFServer
 
     user_list.sort!
 
-    logging(total, "getAllLoginCount total")
-    logging(user_list, "getAllLoginCount userList")
+    logging(total, 'getAllLoginCount total')
+    logging(user_list, 'getAllLoginCount userList')
     return total, user_list
   end
 
@@ -1943,7 +1942,7 @@ class DodontoFServer
       # next if( index >= 3 )
 
       count, game_type = info
-      famous_games << { "gameType" => game_type, "count" => count }
+      famous_games << { :gameType => game_type, :count => count }
     end
 
     logging('famousGames', famous_games)
@@ -1961,7 +1960,7 @@ class DodontoFServer
   end
 
   def login_info
-    logging("getLoginInfo begin")
+    logging('getLoginInfo begin')
 
     unique_id = params['uniqueId']
     unique_id ||= create_unique_id
@@ -1972,38 +1971,38 @@ class DodontoFServer
     card_infos = cards_info.collectCardTypeAndTypeName
 
     result = {
-        "loginMessage"               => login_message,
-        "cardInfos"                  => card_infos,
-        "isDiceBotOn"                => Configure.is_dicebot,
-        "uniqueId"                   => unique_id,
-        "refreshTimeout"             => Configure.refresh_timeout,
-        "refreshInterval"            => refresh_interval,
-        "isCommet"                   => Configure.is_comet,
-        "version"                    => Configure.version,
-        "playRoomMaxNumber"          => (Configure.save_data_max_count - 1),
-        "warning"                    => login_warning,
-        "playRoomGetRangeMax"        => Configure.play_room_get_range_max,
-        "allLoginCount"              => all_login_count.to_i,
-        "limitLoginCount"            => Configure.limit_login_count,
-        "loginUserCountList"         => login_user_count_list,
-        "maxLoginCount"              => Configure.about_max_login_count,
-        "skinImage"                  => Configure.skin_image,
-        "isPaformanceMonitor"        => Configure.is_paformance_monitor,
-        "fps"                        => Configure.fps,
-        "loginTimeLimitSecond"       => Configure.login_time_limit_second,
-        "removeOldPlayRoomLimitDays" => Configure.remove_old_play_room_limit_days,
-        "canTalk"                    => Configure.can_talk,
-        "retryCountLimit"            => Configure.retry_count_limit,
-        "imageUploadDirInfo"         => { Configure.local_upload_dir_marker => Configure.image_upload_dir },
-        "mapMaxWidth"                => Configure.map_max_width,
-        "mapMaxHeigth"               => Configure.map_max_heigth,
-        'diceBotInfos'               => dicebot_infos,
-        'isNeedCreatePassword'       => (not Configure.create_play_room_password.empty?),
-        'defaultUserNames'           => Configure.default_user_names,
+        :loginMessage => login_message,
+        :cardInfos => card_infos,
+        :isDiceBotOn => Configure.is_dicebot,
+        :uniqueId => unique_id,
+        :refreshTimeout => Configure.refresh_timeout,
+        :refreshInterval => refresh_interval,
+        :isCommet => Configure.is_comet,
+        :version => Configure.version,
+        :playRoomMaxNumber => (Configure.save_data_max_count - 1),
+        :warning => login_warning,
+        :playRoomGetRangeMax => Configure.play_room_get_range_max,
+        :allLoginCount => all_login_count.to_i,
+        :limitLoginCount => Configure.limit_login_count,
+        :loginUserCountList => login_user_count_list,
+        :maxLoginCount => Configure.about_max_login_count,
+        :skinImage => Configure.skin_image,
+        :isPaformanceMonitor => Configure.is_paformance_monitor,
+        :fps => Configure.fps,
+        :loginTimeLimitSecond => Configure.login_time_limit_second,
+        :removeOldPlayRoomLimitDays => Configure.remove_old_play_room_limit_days,
+        :canTalk => Configure.can_talk,
+        :retryCountLimit => Configure.retry_count_limit,
+        :imageUploadDirInfo => { Configure.local_upload_dir_marker => Configure.image_upload_dir },
+        :mapMaxWidth => Configure.map_max_width,
+        :mapMaxHeigth => Configure.map_max_heigth,
+        :diceBotInfos => dicebot_infos,
+        :isNeedCreatePassword => (not Configure.create_play_room_password.empty?),
+        :defaultUserNames => Configure.default_user_names,
     }
 
-    logging(result, "result")
-    logging("getLoginInfo end")
+    logging(result, 'result')
+    logging('getLoginInfo end')
     result
   end
 
@@ -2020,7 +2019,7 @@ class DodontoFServer
     lockfile      = real_savefile_lock_readonly(savefile_name)
 
     lockfile.lock do
-      File.open(savefile_name, "w+") do |file|
+      File.open(savefile_name, 'w+') do |file|
         file.write(text.toutf8)
       end
     end
@@ -2030,14 +2029,14 @@ class DodontoFServer
   def login_warning
     unless File.exist?(small_image_dir)
       return {
-          "key"    => "noSmallImageDir",
-          "params" => [small_image_dir],
+          :key => 'noSmallImageDir',
+          :params => [small_image_dir],
       }
     end
 
     if Configure.is_mentenance
       return {
-          "key" => "canNotLoginBecauseMentenanceNow",
+          :key => 'canNotLoginBecauseMaintenanceNow',
       }
     end
 
@@ -2045,20 +2044,20 @@ class DodontoFServer
   end
 
   def login_message
-    message = ""
+    message = ''
     message << login_message_header
     message << login_message_history_part
     message
   end
 
   def login_message_header
-    login_message = ""
+    login_message = ''
 
     if File.exist?(Configure.login_message_file)
       File.readlines(Configure.login_message_file).each do |line|
         login_message << line.chomp << "\n"
       end
-      logging(login_message, "loginMessage")
+      logging(login_message, 'loginMessage')
     else
       logging("#{Configure.login_message_file} is NOT found.")
     end
@@ -2080,7 +2079,7 @@ class DodontoFServer
   end
 
   def dicebot_infos
-    logging("getDiceBotInfos Begin")
+    logging('getDiceBotInfos Begin')
 
     require 'diceBotInfos'
     dicebot_infos = DiceBotInfos.new.getInfos
@@ -2088,24 +2087,24 @@ class DodontoFServer
     command_infos = game_command_infos
 
     command_infos.each do |commandInfo|
-      logging(commandInfo, "commandInfos.each commandInfos")
+      logging(commandInfo, 'commandInfos.each commandInfos')
       dicebot_prefix(dicebot_infos, commandInfo)
     end
 
-    logging(dicebot_infos, "getDiceBotInfos diceBotInfos")
+    logging(dicebot_infos, 'getDiceBotInfos diceBotInfos')
 
     dicebot_infos
   end
 
   def dicebot_prefix(dicebot_infos, command_info)
-    game_type = command_info["gameType"]
+    game_type = command_info['gameType']
 
     if game_type.empty?
       dicebot_prefix_all(dicebot_infos, command_info)
       return
     end
 
-    bot_info = dicebot_infos.find { |i| i["gameType"] == game_type }
+    bot_info = dicebot_infos.find { |i| i['gameType'] == game_type }
     dicebot_prefix_one(bot_info, command_info)
   end
 
@@ -2116,13 +2115,13 @@ class DodontoFServer
   end
 
   def dicebot_prefix_one(bot_info, command_info)
-    logging(bot_info, "botInfo")
+    logging(bot_info, 'botInfo')
     return if (bot_info.nil?) #TODO:FIXME この条件式の戻り値はnull.かつこの条件が真である場合も以下のif条件は正常に動作し、同様にnullを返すので不要とおもわれる.
 
-    prefixs = bot_info["prefixs"]
+    prefixs = bot_info['prefixs']
     return if (prefixs.nil?)
 
-    prefixs << command_info["command"]
+    prefixs << command_info['command']
   end
 
   def game_command_infos
@@ -2140,7 +2139,7 @@ class DodontoFServer
     logging(dir, 'dir')
 
     command_infos = bot.getGameCommandInfos(dir, @dicebot_table_prefix)
-    logging(command_infos, "getGameCommandInfos End commandInfos")
+    logging(command_infos, 'getGameCommandInfos End commandInfos')
 
     command_infos
   end
@@ -2154,10 +2153,10 @@ class DodontoFServer
   def create_play_room
     logging('createPlayRoom begin')
 
-    result_text     = "OK"
+    result_text     = 'OK'
     play_room_index = -1
     begin
-      logging(params, "params")
+      logging(params, 'params')
 
       check_create_play_room_password(params['createPassword'])
 
@@ -2171,9 +2170,9 @@ class DodontoFServer
 
       if play_room_index == -1
         play_room_index = find_empty_room_number
-        raise Exception.new("noEmptyPlayRoom") if (play_room_index == -1)
+        raise Exception.new('noEmptyPlayRoom') if (play_room_index == -1)
 
-        logging(play_room_index, "findEmptyRoomNumber playRoomIndex")
+        logging(play_room_index, 'findEmptyRoomNumber playRoomIndex')
       end
 
       logging(play_room_name, 'playRoomName')
@@ -2183,9 +2182,9 @@ class DodontoFServer
       init_savefiles(play_room_index)
       check_set_password(play_room_password, play_room_index)
 
-      logging("@saveDirInfo.removeSaveDir(playRoomIndex) Begin")
+      logging('@saveDirInfo.removeSaveDir(playRoomIndex) Begin')
       @savedir_info.remove_dir(play_room_index)
-      logging("@saveDirInfo.removeSaveDir(playRoomIndex) End")
+      logging('@saveDirInfo.removeSaveDir(playRoomIndex) End')
 
       create_dir(play_room_index)
 
@@ -2193,7 +2192,7 @@ class DodontoFServer
       logging(play_room_changed_password, 'playRoomChangedPassword')
 
       view_states = params['viewStates']
-      logging("viewStates", view_states)
+      logging('viewStates', view_states)
 
       real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
 
@@ -2211,14 +2210,14 @@ class DodontoFServer
       send_room_create_message(play_room_index)
     rescue => e
       logging_exception(e)
-      result_text = e.inspect + "$@ : " + $@.join("\n")
+      result_text = e.inspect + '$@ : ' + $@.join("\n")
     rescue Exception => errorMessage
       result_text = errorMessage.to_s
     end
 
     result = {
-        "resultText"    => result_text,
-        "playRoomIndex" => play_room_index,
+        :resultText => result_text,
+        :playRoomIndex => play_room_index,
     }
     logging(result, 'result')
     logging('createDir finished')
@@ -2233,15 +2232,15 @@ class DodontoFServer
     return if (Configure.create_play_room_password.empty?)
     return if (Configure.create_play_room_password == password)
 
-    raise Exception.new("errorPassword")
+    raise Exception.new('errorPassword')
   end
 
 
   def send_room_create_message(room_no)
     chat_data = {
-        "senderName" => "どどんとふ",
+        "senderName" => 'どどんとふ',
         "message"    => "＝＝＝＝＝＝＝　プレイルーム　【　No.　#{room_no}　】　へようこそ！　＝＝＝＝＝＝＝",
-        "color"      => "cc0066",
+        "color"      => 'cc0066',
         "uniqueId"   => '0',
         "channel"    => 0,
     }
@@ -2258,17 +2257,17 @@ class DodontoFServer
   def changed_password(pass)
     return nil if (pass.empty?)
 
-    salt = [rand(64), rand(64)].pack("C*").tr("\x00-\x3f", "A-Za-z0-9./")
+    salt = [rand(64), rand(64)].pack('C*').tr("\x00-\x3f", "A-Za-z0-9./")
     pass.crypt(salt)
   end
 
   def change_play_room
-    logging "changePlayRoom begin"
+    logging 'changePlayRoom begin'
 
-    result_text = "OK"
+    result_text = 'OK'
 
     begin
-      logging(params, "params")
+      logging(params, 'params')
 
       play_room_password = params['playRoomPassword']
       check_set_password(play_room_password)
@@ -2277,7 +2276,7 @@ class DodontoFServer
       logging('playRoomPassword is get')
 
       view_states = params['viewStates']
-      logging("viewStates", view_states)
+      logging('viewStates', view_states)
 
       real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
 
@@ -2305,7 +2304,7 @@ class DodontoFServer
     end
 
     result = {
-        "resultText" => result_text,
+        :resultText => result_text,
     }
     logging(result, 'changePlayRoom result')
 
@@ -2344,43 +2343,43 @@ class DodontoFServer
 
   def check_remove_play_room(room_number, ignore_login_user, password)
     room_number_range = (room_number..room_number)
-    logging(room_number_range, "checkRemovePlayRoom roomNumberRange")
+    logging(room_number_range, 'checkRemovePlayRoom roomNumberRange')
 
     unless ignore_login_user
       user_names = login_user_names
       user_count = user_names.size
-      logging(user_count, "checkRemovePlayRoom userCount")
+      logging(user_count, 'checkRemovePlayRoom userCount')
 
       if user_count > 0
-        return "userExist"
+        return 'userExist'
       end
     end
 
     unless password.nil?
       unless check_password(room_number, password)
-        return "password"
+        return 'password'
       end
     end
 
     if Configure.unremovable_play_room_numbers.include?(room_number)
-      return "unremovablePlayRoomNumber"
+      return 'unremovablePlayRoomNumber'
     end
 
     last_access_times = save_data_lastaccess_times(room_number_range)
     last_access_time  = last_access_times[room_number]
-    logging(last_access_time, "lastAccessTime")
+    logging(last_access_time, 'lastAccessTime')
 
     unless last_access_time.nil?
       now         = Time.now
       spend_times = now - last_access_time
-      logging(spend_times, "spendTimes")
-      logging(spend_times / 60 / 60, "spendTimes / 60 / 60")
+      logging(spend_times, 'spendTimes')
+      logging(spend_times / 60 / 60, 'spendTimes / 60 / 60')
       if spend_times < Configure.deletable_passed_seconds
         return "プレイルームNo.#{room_number}の最終更新時刻から#{Configure.deletable_passed_seconds}秒が経過していないため削除できません"
       end
     end
 
-    "OK"
+    'OK'
   end
 
 
@@ -2408,8 +2407,7 @@ class DodontoFServer
 
     room_numbers      = params['roomNumbers']
     ignore_login_user = params['ignoreLoginUser']
-    password          = params['password']
-    password          ||= ""
+    password          = params['password'] || ''
 
     remove_play_room_by_params(room_numbers, ignore_login_user, password)
   end
@@ -2427,16 +2425,16 @@ class DodontoFServer
       logging(room_number, 'roomNumber')
 
       result_text = check_remove_play_room(room_number, ignore_login_user, password)
-      logging(result_text, "checkRemovePlayRoom resultText")
+      logging(result_text, 'checkRemovePlayRoom resultText')
 
       case result_text
-        when "OK"
+        when 'OK'
           @savedir_info.remove_dir(room_number)
           remove_local_space_dir(room_number)
           deleted_room_numbers << room_number
-        when "password"
+        when 'password'
           password_room_numbers << room_number
-        when "userExist"
+        when 'userExist'
           ask_delete_room_numbers << room_number
         else
           error_messages << result_text
@@ -2444,10 +2442,10 @@ class DodontoFServer
     end
 
     result = {
-        "deletedRoomNumbers"   => deleted_room_numbers,
-        "askDeleteRoomNumbers" => ask_delete_room_numbers,
-        "passwordRoomNumbers"  => password_room_numbers,
-        "errorMessages"        => error_messages,
+        :deletedRoomNumbers => deleted_room_numbers,
+        :askDeleteRoomNumbers => ask_delete_room_numbers,
+        :passwordRoomNumbers => password_room_numbers,
+        :errorMessages => error_messages,
     }
     logging(result, 'result')
 
@@ -2460,11 +2458,11 @@ class DodontoFServer
   end
 
   def real_savefile_name(file_name)
-    @savedir_info.real_savefile_name($saveFileTempName)
+    @savedir_info.real_savefile_name(file_name)
   end
 
   def save_scenario
-    logging("saveScenario begin")
+    logging('saveScenario begin')
     dir = room_local_space_dir_name
     make_dir(dir)
 
@@ -2481,10 +2479,10 @@ class DodontoFServer
     scenario_file = make_scenario_file(dir, base_name)
 
     result                 = {}
-    result['result']       = "OK"
-    result["saveFileName"] = scenario_file
+    result[:result]       = 'OK'
+    result[:saveFileName] = scenario_file
 
-    logging(result, "saveScenario result")
+    logging(result, 'saveScenario result')
     result
   end
 
@@ -2563,13 +2561,13 @@ class DodontoFServer
   end
 
   def move_playroom_images(dir, all_savedata)
-    logging(dir, "movePlayroomImagesToDir dir")
+    logging(dir, 'movePlayroomImagesToDir dir')
     playroom_info = all_savedata['playRoomInfo']
     return if (playroom_info.nil?)
-    logging(playroom_info, "playRoomInfo")
+    logging(playroom_info, 'playRoomInfo')
 
     background_image = playroom_info['backgroundImage']
-    logging(background_image, "backgroundImage")
+    logging(background_image, 'backgroundImage')
     return if (background_image.nil?)
     return if (background_image.empty?)
 
@@ -2577,45 +2575,45 @@ class DodontoFServer
   end
 
   def change_file_place(from, to)
-    logging(from, "changeFilePlace from")
+    logging(from, 'changeFilePlace from')
 
     from_file_name, text = from.split(/\t/)
     from_file_name       ||= from
 
     result = copy_file(from_file_name, to)
-    logging(result, "copyFile result")
+    logging(result, 'copyFile result')
 
     return unless (result)
 
-    from.gsub!(/.*\//, Configure.image_upload_dir_marker + "/")
-    logging(from, "changeFilePlace result")
+    from.gsub!(/.*\//, Configure.image_upload_dir_marker + '/')
+    logging(from, 'changeFilePlace result')
   end
 
   def copy_file(from, to)
-    logging("moveFile begin")
-    logging(from, "from")
-    logging(to, "to")
+    logging('moveFile begin')
+    logging(from, 'from')
+    logging(to, 'to')
 
-    logging(@save_scenario_base_url, "@saveScenarioBaseUrl")
+    logging(@save_scenario_base_url, '@saveScenarioBaseUrl')
     from.gsub!(@save_scenario_base_url, './')
-    logging(from, "from2")
+    logging(from, 'from2')
 
     return false if (from.nil?)
     return false unless (File.exist?(from))
 
     from_dir = File.dirname(from)
-    logging(from_dir, "fromDir")
+    logging(from_dir, 'fromDir')
     if from_dir == to
-      logging("from, to is equal dir")
+      logging('from, to is equal dir')
       return true
     end
 
-    logging("copying...")
+    logging('copying...')
 
     result = true
     begin
       FileUtils.cp(from, to)
-    rescue => e
+    rescue
       result = false
     end
 
@@ -2623,48 +2621,48 @@ class DodontoFServer
   end
 
   def make_chat_pallet_savefile(dir, chat_palette_savedata_string)
-    logging("makeChatPalletSaveFile Begin")
-    logging(dir, "makeChatPalletSaveFile dir")
+    logging('makeChatPalletSaveFile Begin')
+    logging(dir, 'makeChatPalletSaveFile dir')
 
     current_dir = FileUtils.pwd.untaint
     FileUtils.cd(dir)
 
-    File.open($scenario_default_chat_pallete, "a+") do |file|
+    File.open($scenario_default_chat_pallete, 'a+') do |file|
       file.write(chat_palette_savedata_string)
     end
 
     FileUtils.cd(current_dir)
-    logging("makeChatPalletSaveFile End")
+    logging('makeChatPalletSaveFile End')
   end
 
   def make_scenario_default_savefile(dir, all_savedata)
-    logging("makeScenariDefaultSaveFile Begin")
-    logging(dir, "makeScenariDefaultSaveFile dir")
+    logging('makeScenarioDefaultSaveFile Begin')
+    logging(dir, 'makeScenarioDefaultSaveFile dir')
 
-    extension = "sav"
+    extension = 'sav'
     result    = save_select_files_from_all_savedata(all_savedata, extension)
 
-    from = result["saveFileName"]
+    from = result[:saveFileName]
     to   = File.join(dir, $scenario_default_savedata)
 
     FileUtils.mv(from, to)
 
-    logging("makeScenariDefaultSaveFile End")
+    logging('makeScenarioDefaultSaveFile End')
   end
 
 
   def remove_old_scenario_file(dir)
     file_names = Dir.glob("#{dir}/#{@full_backup_base_name}*#{@scenario_file_ext}")
     file_names = file_names.collect { |i| i.untaint }
-    logging(file_names, "removeOldScenarioFile fileNames")
+    logging(file_names, 'removeOldScenarioFile fileNames')
 
     file_names.each do |fileName|
       File.delete(fileName)
     end
   end
 
-  def make_scenario_file(dir, base_name = "scenario")
-    logging("makeScenarioFile begin")
+  def make_scenario_file(dir, base_name = 'scenario')
+    logging('makeScenarioFile begin')
 
     require 'zlib'
     require 'archive/tar/minitar'
@@ -2696,7 +2694,7 @@ class DodontoFServer
 
   def save_map
     extension    = request_data('extension')
-    select_types = ['map', 'characters']
+    select_types = %w(map characters)
     save_select_files(select_types, extension)
   end
 
@@ -2708,10 +2706,10 @@ class DodontoFServer
 
   def save_select_files_from_all_savedata(all_savedata, extension)
     result           = {}
-    result["result"] = "unknown error"
+    result[:result] = 'unknown error'
 
     if all_savedata.empty?
-      result["result"] = "no save data"
+      result[:result] = 'no save data'
       return result
     end
 
@@ -2724,27 +2722,27 @@ class DodontoFServer
     savefile_name = get_new_savefile_name(extension)
     create_savefile(savefile_name, text)
 
-    result["result"]       = "OK"
-    result["saveFileName"] = savefile_name
-    logging(result, "saveSelectFiles result")
+    result[:result]       = 'OK'
+    result[:saveFileName] = savefile_name
+    logging(result, 'saveSelectFiles result')
 
     result
   end
 
 
   def get_select_files_data(select_types, is_add_playroom_info = false)
-    logging("getSelectFilesData begin")
+    logging('getSelectFilesData begin')
 
     @last_update_times = {}
     select_types.each do |type|
       @last_update_times[type] = 0
     end
-    logging("dummy @lastUpdateTimes created")
+    logging('dummy @lastUpdateTimes created')
 
     all_savedata = {}
     current_save_data do |targetSaveData, saveFileTypeName|
       all_savedata[saveFileTypeName] = targetSaveData
-      logging(saveFileTypeName, "saveFileTypeName in save")
+      logging(saveFileTypeName, 'saveFileTypeName in save')
     end
 
     if is_add_playroom_info
@@ -2755,7 +2753,7 @@ class DodontoFServer
       end
     end
 
-    logging(all_savedata, "saveDataAll tmp")
+    logging(all_savedata, 'saveDataAll tmp')
 
     all_savedata
   end
@@ -2766,7 +2764,7 @@ class DodontoFServer
   end
 
   def get_new_savefile_name(extension)
-    base_name     = get_new_savefile_base_name("DodontoF")
+    base_name     = get_new_savefile_base_name('DodontoF')
     savefile_name = base_name + ".#{extension}"
     file_join(Configure.save_data_temp_dir, savefile_name).untaint
   end
@@ -2791,7 +2789,7 @@ class DodontoFServer
   def delete_old_savefile_catched
 
     change_save_data(SaveDirInfo::SAVE_FILE_NAMES) do |saveData|
-      exist_file_names = saveData["fileNames"]
+      exist_file_names = saveData['fileNames']
       exist_file_names ||= []
       logging(exist_file_names, 'existSaveFileNames')
 
@@ -2806,7 +2804,7 @@ class DodontoFServer
         created_time = savefile_timestamp(saveFileName)
         now          = Time.now.to_i
         diff         = (now - created_time)
-        logging(diff, "createdTime diff")
+        logging(diff, 'createdTime diff')
         next if (diff < Configure.old_save_file_delete_seconds)
 
         begin
@@ -2818,14 +2816,14 @@ class DodontoFServer
         delete_targets << saveFileName
       end
 
-      logging(delete_targets, "deleteTargets")
+      logging(delete_targets, 'deleteTargets')
 
       delete_targets.each do |fileName|
         exist_file_names.delete_if { |i| i == fileName }
       end
-      logging(exist_file_names, "existSaveFileNames")
+      logging(exist_file_names, 'existSaveFileNames')
 
-      saveData["fileNames"] = exist_file_names
+      saveData['fileNames'] = exist_file_names
     end
 
   end
@@ -2836,9 +2834,9 @@ class DodontoFServer
   end
 
   def self.logging_exception(e)
-    loggingForce(e.to_s, "exception mean")
-    loggingForce($@.join("\n"), "exception from")
-    loggingForce($!.inspect, "$!.inspect")
+    loggingForce(e.to_s, 'exception mean')
+    loggingForce($@.join("\n"), 'exception from')
+    loggingForce($!.inspect, '$!.inspect')
   end
 
 
@@ -2877,28 +2875,28 @@ class DodontoFServer
     end
 
     unless Configure.mentenance_mode_password.nil?
-      if check_room_status_data["adminPassword"] == Configure.mentenance_mode_password
+      if check_room_status_data['adminPassword'] == Configure.mentenance_mode_password
         is_password_locked    = false
         is_welcome_message_on = false
         is_maintenance_on     = true
       end
     end
 
-    logging("isPasswordLocked", is_password_locked)
+    logging(:isPasswordLocked, is_password_locked)
 
     result = {
-        'isRoomExist'         => is_exist_playroom_info,
-        'roomName'            => play_room_name,
-        'roomNumber'          => room_number,
-        'chatChannelNames'    => chat_channel_names,
-        'canUseExternalImage' => can_use_external_image,
-        'canVisit'            => can_visit,
-        'isPasswordLocked'    => is_password_locked,
-        'isMentenanceModeOn'  => is_maintenance_on,
-        'isWelcomeMessageOn'  => is_welcome_message_on,
+        :isRoomExist => is_exist_playroom_info,
+        :roomName => play_room_name,
+        :roomNumber => room_number,
+        :chatChannelNames => chat_channel_names,
+        :canUseExternalImage => can_use_external_image,
+        :canVisit => can_visit,
+        :isPasswordLocked => is_password_locked,
+        :isMentenanceModeOn => is_maintenance_on,
+        :isWelcomeMessageOn => is_welcome_message_on,
     }
 
-    logging(result, "checkRoomStatus End result")
+    logging(result, 'checkRoomStatus End result')
 
     result
   end
@@ -2915,20 +2913,20 @@ class DodontoFServer
   end
 
   def check_login_password(room_number, password, visitor_mode)
-    logging("checkLoginPassword roomNumber", room_number)
+    logging('checkLoginPassword roomNumber', room_number)
     @savedir_info.dir_index(room_number)
     dir_name = @savedir_info.data_dir_path
 
     result = {
-        'resultText'  => '',
-        'visiterMode' => false,
-        'roomNumber'  => room_number,
+        :resultText => '',
+        :visiterMode => false,
+        :roomNumber => room_number,
     }
 
     is_room_exist = (File.exist?(dir_name))
 
     unless is_room_exist
-      result['resultText'] = "プレイルームNo.#{room_number}は作成されていません"
+      result[:resultText] = "プレイルームNo.#{room_number}は作成されていません"
       return result
     end
 
@@ -2938,14 +2936,14 @@ class DodontoFServer
     save_data(true_savefile_name) do |saveData|
       can_visit = saveData['canVisit']
       if can_visit and visitor_mode
-        result['resultText']  = "OK"
-        result['visiterMode'] = true
+        result[:resultText]  = 'OK'
+        result[:visiterMode] = true
       else
         changed_password = saveData['playRoomChangedPassword']
         if password_match?(password, changed_password)
-          result['resultText'] = "OK"
+          result[:resultText] = 'OK'
         else
-          result['resultText'] = "パスワードが違います"
+          result[:resultText] = 'パスワードが違います'
         end
       end
     end
@@ -2969,7 +2967,7 @@ class DodontoFServer
     true_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::LOGIN_FILE)
     change_save_data(true_savefile_name) do |saveData|
       saveData.each do |existUserId, userInfo|
-        logging(existUserId, "existUserId in logout check")
+        logging(existUserId, 'existUserId in logout check')
         logging(unique_id, 'uniqueId in logout check')
 
         if existUserId == unique_id
@@ -2997,21 +2995,21 @@ class DodontoFServer
       return "ファイルサイズが最大値(#{max_file_size}MB)以上のためアップロードに失敗しました。"
     end
 
-    ""
+    ''
   end
 
 
   def bot_table_infos
-    logging("getBotTableInfos Begin")
+    logging('getBotTableInfos Begin')
     result = {
-        "resultText" => "OK",
+        :resultText => 'OK',
     }
 
     dir                  = dicebot_extra_table_dir_name
-    result["tableInfos"] = get_bot_table_infos_from_dir(dir)
+    result[:tableInfos] = get_bot_table_infos_from_dir(dir)
 
-    logging(result, "result")
-    logging("getBotTableInfos End")
+    logging(result, 'result')
+    logging('getBotTableInfos End')
     result
   end
 
@@ -3025,8 +3023,8 @@ class DodontoFServer
     table_file_data.setDir(dir, @dicebot_table_prefix)
     table_infos = table_file_data.getAllTableInfo
 
-    logging(table_infos, "getBotTableInfosFromDir tableInfos")
-    table_infos.sort! { |a, b| a["command"].to_i <=> b["command"].to_i }
+    logging(table_infos, 'getBotTableInfosFromDir tableInfos')
+    table_infos.sort! { |a, b| a['command'].to_i <=> b['command'].to_i }
 
     logging(table_infos, 'getBotTableInfosFromDir result tableInfos')
 
@@ -3036,22 +3034,22 @@ class DodontoFServer
 
   def add_bot_table
     result               = {}
-    result['resultText'] = add_bot_table_main
+    result[:resultText] = add_bot_table_main
 
-    if result['resultText'] != "OK"
+    if result[:resultText] != 'OK'
       return result
     end
 
-    logging("addBotTableMain called")
+    logging('addBotTableMain called')
 
     result = bot_table_infos
-    logging(result, "addBotTable result")
+    logging(result, 'addBotTable result')
 
     result
   end
 
   def add_bot_table_main
-    logging("addBotTableMain Begin")
+    logging('addBotTableMain Begin')
 
     dir = dicebot_extra_table_dir_name
     make_dir(dir)
@@ -3067,7 +3065,7 @@ class DodontoFServer
       result_text = e.to_s
     end
 
-    logging(result_text, "addBotTableMain End resultText")
+    logging(result_text, 'addBotTableMain End resultText')
 
     result_text
   end
@@ -3075,9 +3073,9 @@ class DodontoFServer
 
   def change_bot_table
     result               = {}
-    result['resultText'] = change_bot_table_main
+    result[:resultText] = change_bot_table_main
 
-    if result['resultText'] != "OK"
+    if result[:resultText] != 'OK'
       return result
     end
 
@@ -3085,7 +3083,7 @@ class DodontoFServer
   end
 
   def change_bot_table_main
-    logging("changeBotTableMain Begin")
+    logging('changeBotTableMain Begin')
 
     dir = dicebot_extra_table_dir_name
 
@@ -3100,7 +3098,7 @@ class DodontoFServer
       result_text = e.to_s
     end
 
-    logging(result_text, "changeBotTableMain End resultText")
+    logging(result_text, 'changeBotTableMain End resultText')
 
     result_text
   end
@@ -3112,9 +3110,9 @@ class DodontoFServer
   end
 
   def remove_bot_table_main
-    logging("removeBotTableMain Begin")
+    logging('removeBotTableMain Begin')
 
-    command = params["command"]
+    command = params['command']
 
     dir = dicebot_extra_table_dir_name
 
@@ -3125,15 +3123,15 @@ class DodontoFServer
     table_file_data.setDir(dir, @dicebot_table_prefix)
     table_infos = table_file_data.getAllTableInfo
 
-    table_info = table_infos.find { |i| i["command"] == command }
-    logging(table_info, "tableInfo")
+    table_info = table_infos.find { |i| i['command'] == command }
+    logging(table_info, 'tableInfo')
     return if (table_info.nil?)
 
-    file_name = table_info["fileName"]
-    logging(file_name, "fileName")
+    file_name = table_info['fileName']
+    logging(file_name, 'fileName')
     return if (file_name.nil?)
 
-    logging("isFile exist?")
+    logging('isFile exist?')
     return unless (File.exist?(file_name))
 
     begin
@@ -3142,53 +3140,53 @@ class DodontoFServer
       logging_exception(e)
     end
 
-    logging("removeBotTableMain End")
+    logging('removeBotTableMain End')
   end
 
 
   def request_replay_data_list
-    logging("requestReplayDataList begin")
+    logging('requestReplayDataList begin')
     result = {
-        "resultText" => "OK",
+        :resultText => 'OK',
     }
 
-    result["replayDataList"] = get_replay_data_list #[{"title"=>x, "url"=>y}]
+    result[:replayDataList] = get_replay_data_list #[{"title"=>x, "url"=>y}]
 
-    logging(result, "result")
-    logging("requestReplayDataList end")
+    logging(result, 'result')
+    logging('requestReplayDataList end')
     result
   end
 
   def upload_replay_data
     upload_base_file(Configure.replay_data_upload_dir, Configure.upload_replay_data_max_size) do |fileNameFullPath, fileNameOriginal, result|
-      logging("uploadReplayData yield Begin")
+      logging('uploadReplayData yield Begin')
 
       own_url    = params['ownUrl']
-      replay_url = own_url + "?replay=" + CGI.escape(fileNameFullPath)
+      replay_url = own_url + '?replay=' + CGI.escape(fileNameFullPath)
 
       replay_data_name = params['replayDataName']
       replay_data_info = set_replay_data_info(fileNameFullPath, replay_data_name, replay_url)
 
-      result["replayDataInfo"] = replay_data_info
-      result["replayDataList"] = get_replay_data_list #[{"title"=>x, "url"=>y}]
+      result[:replayDataInfo] = replay_data_info
+      result[:replayDataList] = get_replay_data_list #[{"title"=>x, "url"=>y}]
 
-      logging("uploadReplayData yield End")
+      logging('uploadReplayData yield End')
     end
 
   end
 
   def get_replay_data_list
-    replay_data_list = nil
+    replay_data_list = []
 
     save_data(get_replay_data_info_file_name) do |saveData|
       replay_data_list = saveData['replayDataList']
     end
 
-    replay_data_list ||= []
+    replay_data_list
   end
 
   def get_replay_data_info_file_name
-    info_file_name = file_join(Configure.replay_data_up_load_dir, 'replayDataInfo.json')
+    file_join(Configure.replay_data_up_load_dir, 'replayDataInfo.json')
   end
 
 
@@ -3212,16 +3210,16 @@ class DodontoFServer
 
 
   def remove_replay_data
-    logging("removeReplayData begin")
+    logging('removeReplayData begin')
 
     result = {
-        "resultText" => "NG",
+        :resultText => 'NG',
     }
 
     begin
       replay_data = params
 
-      logging(replay_data, "replayData")
+      logging(replay_data, 'replayData')
 
       replay_data_list = []
       change_save_data(get_replay_data_info_file_name) do |saveData|
@@ -3238,11 +3236,11 @@ class DodontoFServer
         end
       end
 
-      logging("removeReplayData replayDataList", replay_data_list)
+      logging('removeReplayData replayDataList', replay_data_list)
 
       result = request_replay_data_list
     rescue => e
-      result["resultText"] = e.to_s
+      result[:resultText] = e.to_s
       logging_exception(e)
     end
 
@@ -3256,13 +3254,13 @@ class DodontoFServer
       delete_old_upload_file
 
       base_url = params['baseUrl']
-      logging(base_url, "baseUrl")
+      logging(base_url, 'baseUrl')
 
       file_upload_url = base_url + fileNameFullPath
 
-      result["uploadFileInfo"] = {
-          "fileName"      => fileNameOriginal,
-          "fileUploadUrl" => file_upload_url,
+      result[:uploadFileInfo] = {
+          :fileName => fileNameOriginal,
+          :fileUploadUrl => file_upload_url,
       }
     end
   end
@@ -3271,13 +3269,13 @@ class DodontoFServer
   def delete_old_upload_file
     delete_old_file(Configure.file_upload_dir,
                     Configure.upload_file_time_limit_seconds,
-                    File.join(Configure.file_upload_dir, "dummy.txt"))
+                    File.join(Configure.file_upload_dir, 'dummy.txt'))
   end
 
   def delete_old_file(save_dir, limit_sec, exclude_file_name = nil)
     begin
       limit_time = (Time.now.to_i - limit_sec)
-      file_names = Dir.glob(File.join(save_dir, "*"))
+      file_names = Dir.glob(File.join(save_dir, '*'))
       file_names.delete_if { |i| i == exclude_file_name }
 
       file_names.each do |file_name|
@@ -3294,24 +3292,24 @@ class DodontoFServer
 
 
   def upload_base_file(file_upload_dir, max_size, is_rename = true)
-    logging("uploadFile() Begin")
+    logging('uploadFile() Begin')
 
     result = {
-        "resultText" => "NG",
+        :resultText => 'NG',
     }
 
     begin
 
       unless File.exist?(file_upload_dir)
-        result["resultText"] = "#{file_upload_dir}が存在しないためアップロードに失敗しました。"
+        result[:resultText] = "#{file_upload_dir}が存在しないためアップロードに失敗しました。"
         return result
       end
 
       file_data = params['fileData']
 
       check_result = check_filesize_on_mb(file_data, max_size)
-      if check_result != ""
-        result["resultText"] = check_result
+      if check_result != ''
+        result[:resultText] = check_result
         return result
       end
 
@@ -3323,31 +3321,31 @@ class DodontoFServer
       end
 
       full_path = file_join(file_upload_dir, file_name).untaint
-      logging(full_path, "fileNameFullPath")
+      logging(full_path, 'fileNameFullPath')
 
       yield(full_path, org_file_name, result)
 
-      open(full_path, "w+") do |file|
+      open(full_path, 'w+') do |file|
         file.binmode
         file.write(file_data)
       end
       File.chmod(0666, full_path)
 
-      result["resultText"] = "OK"
+      result[:resultText] = 'OK'
     rescue => e
-      logging(e, "error")
-      result["resultText"] = e.to_s
+      logging(e, 'error')
+      result[:resultText] = e.to_s
     end
 
-    logging(result, "load result")
-    logging("uploadFile() End")
+    logging(result, 'load result')
+    logging('uploadFile() End')
 
     result
   end
 
 
   def load_scenario
-    logging("loadScenario() Begin")
+    logging('loadScenario() Begin')
     check_load
 
     set_record_empty
@@ -3365,9 +3363,9 @@ class DodontoFServer
       scenario_file = fileNameFullPath
     end
 
-    logging(result, "uploadFileBase result")
+    logging(result, 'uploadFileBase result')
 
-    unless result["resultText"] == 'OK'
+    unless result[:resultText] == 'OK'
       return result
     end
 
@@ -3382,7 +3380,7 @@ class DodontoFServer
   end
 
   def clear_dir(dir)
-    logging(dir, "clearDir dir")
+    logging(dir, 'clearDir dir')
 
     unless File.exist?(dir)
       return
@@ -3393,7 +3391,7 @@ class DodontoFServer
       return
     end
 
-    files = Dir.glob(File.join(dir, "*"))
+    files = Dir.glob(File.join(dir, '*'))
     files.each do |file|
       File.delete(file.untaint)
     end
@@ -3407,7 +3405,7 @@ class DodontoFServer
     require 'archive/tar/minitar'
 
     read_scenario_tar(scenario_file) do |tar|
-      logging("begin read scenario tar file")
+      logging('begin read scenario tar file')
 
       Archive::Tar::Minitar.unpackWithCheck(tar, file_upload_dir) do |fileName, isDirectory|
         check_unpack_file(fileName, isDirectory)
@@ -3416,7 +3414,7 @@ class DodontoFServer
 
     File.delete(scenario_file)
 
-    logging("archive extend !")
+    logging('archive extend !')
   end
 
   def read_scenario_tar(scenario_file)
@@ -3426,7 +3424,7 @@ class DodontoFServer
         tar = file
         tar = Zlib::GzipReader.new(file)
 
-        logging("scenarioFile is gzip")
+        logging('scenarioFile is gzip')
         yield(tar)
 
       end
@@ -3434,7 +3432,7 @@ class DodontoFServer
       File.open(scenario_file, 'rb') do |file|
         tar = file
 
-        logging("scenarioFile is tar")
+        logging('scenarioFile is tar')
         yield(tar)
 
       end
@@ -3461,7 +3459,7 @@ class DodontoFServer
   def allowed_unpack_file?(file_name)
 
     if /\// =~ file_name
-      loggingForce(file_name, 'NG! checkUnpackFile /\// paturn')
+      loggingForce(file_name, 'NG! checkUnpackFile /\// pattern')
       return false
     end
 
@@ -3469,7 +3467,7 @@ class DodontoFServer
       return true
     end
 
-    loggingForce(file_name, 'NG! checkUnpackFile else paturn')
+    loggingForce(file_name, 'NG! checkUnpackFile else pattern')
 
     false
   end
@@ -3483,8 +3481,7 @@ class DodontoFServer
     rule = /\.(jpg|jpeg|gif|png|bmp|pdf|doc|txt|html|htm|xls|rtf|zip|lzh|rar|swf|flv|avi|mp4|mp3|wmv|wav|sav|cpd)$/
 
     return nil unless (rule === file_name)
-
-    ext_name = "." + $1
+    return '.' + $1
   end
 
   def room_local_space_dir_name
@@ -3493,11 +3490,11 @@ class DodontoFServer
   end
 
   def room_local_space_dir_name_by_room_no(room_no)
-    dir = File.join(Configure.image_upload_dir, "room_#{room_no}")
+    File.join(Configure.image_upload_dir, "room_#{room_no}")
   end
 
   def make_dir(dir)
-    logging(dir, "makeDir dir")
+    logging(dir, 'makeDir dir')
 
     if File.exist?(dir) && File.directory?(dir)
       return
@@ -3518,9 +3515,7 @@ class DodontoFServer
 
   def load_scenario_default_info(dir)
     load_scenario_default_savedata(dir)
-    chat_palette_savedata = load_scenario_default_chat_pallete(dir)
-
-    chat_palette_savedata
+    return load_scenario_default_chat_pallete(dir)
   end
 
   def load_scenario_default_savedata(dir)
@@ -3553,7 +3548,7 @@ class DodontoFServer
 
 
   def load
-    logging("saveData load() Begin")
+    logging('saveData load() Begin')
 
     result = {}
 
@@ -3569,10 +3564,10 @@ class DodontoFServer
 
       result = load_from_json_data_string(json_data_string)
     rescue => e
-      result["resultText"] = e.to_s
+      result[:resultText] = e.to_s
     end
 
-    logging(result, "load result")
+    logging(result, 'load result')
 
     result
   end
@@ -3582,7 +3577,7 @@ class DodontoFServer
     room_number = @savedir_info.dir_index
 
     if Configure.unloadable_play_room_numbers.include?(room_number)
-      raise "unloadablePlayRoomNumber"
+      raise 'unloadablePlayRoomNumber'
     end
   end
 
@@ -3621,21 +3616,21 @@ class DodontoFServer
     end
 
     targets = params['targets']
-    logging(targets, "targets")
+    logging(targets, 'targets')
 
     if targets.nil?
-      logging("loadSaveFileDataAll(saveDataAll)")
+      logging('loadSaveFileDataAll(saveDataAll)')
       load_savefile_all_data(save_data_all)
     else
-      logging("loadSaveFileDataFilterByTargets(saveDataAll, targets)")
+      logging('loadSaveFileDataFilterByTargets(saveDataAll, targets)')
       load_savefile_data_filter_targets(save_data_all, targets)
     end
 
     result = {
-        "resultText" => "OK"
+        :resultText => 'OK'
     }
 
-    logging(result, "loadFromJsonData result")
+    logging(result, 'loadFromJsonData result')
 
     result
   end
@@ -3656,9 +3651,9 @@ class DodontoFServer
 
   def load_character_data_list(all_save_data, type)
     character_data_list = load_data(all_save_data, 'characters', 'characters', [])
-    logging(character_data_list, "characterDataList")
+    logging(character_data_list, 'characterDataList')
 
-    character_data_list = character_data_list.delete_if { |i| (i["type"] != type) }
+    character_data_list = character_data_list.delete_if { |i| (i['type'] != type) }
     add_character_data(character_data_list)
   end
 
@@ -3667,43 +3662,43 @@ class DodontoFServer
       logging(target, 'loadSaveFileDataFilterByTargets each target')
 
       case target
-        when "map"
+        when 'map'
           map_data = load_data(all_save_data, 'map', 'mapData', {})
           change_map_savedata(map_data)
-        when "characterData", "mapMask", "mapMarker", "magicRangeMarker", "magicRangeMarkerDD4th", "Memo", card_type
+        when 'characterData', 'mapMask', 'mapMarker', 'magicRangeMarker', 'magicRangeMarkerDD4th', 'Memo', card_type
           load_character_data_list(all_save_data, target)
-        when "characterWaitingRoom"
-          logging("characterWaitingRoom called")
+        when 'characterWaitingRoom'
+          logging('characterWaitingRoom called')
           waiting_room = load_data(all_save_data, 'characters', 'waitingRoom', [])
           set_waiting_room_info(waiting_room)
-        when "standingGraphicInfos"
+        when 'standingGraphicInfos'
           effects = load_data(all_save_data, 'effects', 'effects', [])
-          effects = effects.delete_if { |i| (i["type"] != target) }
-          logging(effects, "standingGraphicInfos effects");
+          effects = effects.delete_if { |i| (i['type'] != target) }
+          logging(effects, 'standingGraphicInfos effects')
           add_effect_data(effects)
-        when "cutIn"
+        when 'cutIn'
           effects = load_data(all_save_data, 'effects', 'effects', [])
-          effects = effects.delete_if { |i| (i["type"] != nil) }
+          effects = effects.delete_if { |i| (i['type'] != nil) }
           add_effect_data(effects)
-        when "initiative"
+        when 'initiative'
           round_time_data = load_data(all_save_data, 'time', 'roundTimeData', {})
           change_initiative_data(round_time_data)
         else
-          loggingForce(target, "invalid load target type")
+          loggingForce(target, 'invalid load target type')
       end
     end
   end
 
   def load_savefile_all_data(all_save_data)
-    logging("loadSaveFileDataAll(saveDataAll) begin")
+    logging('loadSaveFileDataAll(saveDataAll) begin')
 
     @savefiles.each do |fileTypeName, trueSaveFileName|
-      logging(fileTypeName, "fileTypeName")
-      logging(trueSaveFileName, "real_savefile_name")
+      logging(fileTypeName, 'fileTypeName')
+      logging(trueSaveFileName, 'real_savefile_name')
 
       save_data_type = all_save_data[fileTypeName]
       save_data_type ||= {}
-      logging(save_data_type, "saveDataForType")
+      logging(save_data_type, 'saveDataForType')
 
       load_savefile_data_each_type(fileTypeName, trueSaveFileName, save_data_type)
     end
@@ -3714,108 +3709,108 @@ class DodontoFServer
       load_savefile_data_each_type(SaveDirInfo::PLAY_ROOM_INFO, real_save_file_name, save_data_type)
     end
 
-    logging("loadSaveFileDataAll(saveDataAll) end")
+    logging('loadSaveFileDataAll(saveDataAll) end')
   end
 
 
   def load_savefile_data_each_type(file_type_name, real_savefile_name, save_data_type)
 
     change_save_data(real_savefile_name) do |saveDataCurrent|
-      logging(saveDataCurrent, "before saveDataCurrent")
+      logging(saveDataCurrent, 'before saveDataCurrent')
       saveDataCurrent.clear
 
       save_data_type.each do |key, value|
-        logging(key, "saveDataForType.each key")
-        logging(value, "saveDataForType.each value")
+        logging(key, 'saveDataForType.each key')
+        logging(value, 'saveDataForType.each value')
         saveDataCurrent[key] = value
       end
-      logging(saveDataCurrent, "after saveDataCurrent")
+      logging(saveDataCurrent, 'after saveDataCurrent')
     end
 
   end
 
 
   def small_image_dir
-    file_join(Configure.image_upload_dir, "smallImages")
+    file_join(Configure.image_upload_dir, 'smallImages')
   end
 
-  def save_small_image(small_image_Data, file_base_name, upload_image_file_name)
-    logging("saveSmallImage begin")
-    logging(file_base_name, "imageFileNameBase")
-    logging(upload_image_file_name, "uploadImageFileName")
+  def save_small_image(small_image_data, file_base_name, upload_image_file_name)
+    logging('saveSmallImage begin')
+    logging(file_base_name, 'imageFileNameBase')
+    logging(upload_image_file_name, 'uploadImageFileName')
 
     upload_file_full_path = file_join(small_image_dir, file_base_name)
-    upload_file_full_path += ".png"
+    upload_file_full_path += '.png'
     upload_file_full_path.untaint
-    logging(upload_file_full_path, "uploadSmallImageFileName")
+    logging(upload_file_full_path, 'uploadSmallImageFileName')
 
-    open(upload_file_full_path, "wb+") do |file|
-      file.write(small_image_Data)
+    open(upload_file_full_path, 'wb+') do |file|
+      file.write(small_image_data)
     end
-    logging("small image create successed.")
+    logging('small image create successed.')
 
     tag_info = params['tagInfo']
-    logging(tag_info, "uploadImageData tagInfo")
+    logging(tag_info, 'uploadImageData tagInfo')
 
-    tag_info["smallImage"] = upload_file_full_path
-    logging(tag_info, "uploadImageData tagInfo smallImage url added")
+    tag_info['smallImage'] = upload_file_full_path
+    logging(tag_info, 'uploadImageData tagInfo smallImage url added')
 
     marge_tag_info(tag_info, upload_image_file_name)
-    logging(tag_info, "saveSmallImage margeTagInfo tagInfo")
+    logging(tag_info, 'saveSmallImage margeTagInfo tagInfo')
     change_image_tags_local(upload_image_file_name, tag_info)
 
-    logging("saveSmallImage end")
+    logging('saveSmallImage end')
   end
 
   def marge_tag_info(tag_info, source)
-    logging(source, "margeTagInfo source")
+    logging(source, 'margeTagInfo source')
     old_tag_info = image_tags[source]
-    logging(old_tag_info, "margeTagInfo tagInfo_old")
+    logging(old_tag_info, 'margeTagInfo tagInfo_old')
     return if (old_tag_info.nil?)
 
     old_tag_info.keys.each do |key|
       tag_info[key] = old_tag_info[key]
     end
 
-    logging(tag_info, "margeTagInfo tagInfo")
+    logging(tag_info, 'margeTagInfo tagInfo')
   end
 
   def upload_image_data
-    logging "uploadImageData load Begin"
+    logging 'uploadImageData load Begin'
 
     result = {
-        "resultText" => "OK"
+        :resultText => 'OK'
     }
 
     begin
 
-      image_file_name = params["imageFileName"]
-      logging(image_file_name, "imageFileName")
+      image_file_name = params['imageFileName']
+      logging(image_file_name, 'imageFileName')
 
-      image_data       = image_data_in_params(params, "imageData")
-      small_image_data = image_data_in_params(params, "smallImageData")
+      image_data       = image_data_in_params(params, 'imageData')
+      small_image_data = image_data_in_params(params, 'smallImageData')
 
       if image_data.nil?
-        logging("createSmallImage is here")
+        logging('createSmallImage is here')
         image_file_base_name = File.basename(image_file_name)
         save_small_image(small_image_data, image_file_base_name, image_file_name)
         return result
       end
 
       save_dir             = Configure.image_upload_dir
-      image_file_base_name = new_file_name(image_file_name, "img")
-      logging(image_file_base_name, "imageFileNameBase")
+      image_file_base_name = new_file_name(image_file_name, 'img')
+      logging(image_file_base_name, 'imageFileNameBase')
 
       upload_image_file_name = file_join(save_dir, image_file_base_name)
-      logging(upload_image_file_name, "uploadImageFileName")
+      logging(upload_image_file_name, 'uploadImageFileName')
 
-      open(upload_image_file_name, "wb+") do |file|
+      open(upload_image_file_name, 'wb+') do |file|
         file.write(image_data)
       end
 
       save_small_image(small_image_data, image_file_base_name, upload_image_file_name)
     rescue => e
-      result["resultText"] = e.to_s
+      result[:resultText] = e.to_s
     end
 
     result
@@ -3832,36 +3827,36 @@ class DodontoFServer
   end
 
 
-  def new_file_name(file_name, prefix = "")
+  def new_file_name(file_name, prefix = '')
     @new_file_name_index ||= 0
 
     ext_name = allowed_file_ext_name(file_name) || ''
 
-    logging(ext_name, "extName")
+    logging(ext_name, 'extName')
 
-    result = prefix + Time.now.to_f.to_s.gsub(/\./, '_') + "_" + @new_file_name_index.to_s + ext_name
+    result = prefix + Time.now.to_f.to_s.gsub(/\./, '_') + '_' + @new_file_name_index.to_s + ext_name
 
     result.untaint
   end
 
   def delete_image
-    logging("deleteImage begin")
+    logging('deleteImage begin')
 
     image_data = params
-    logging(image_data, "imageData")
+    logging(image_data, 'imageData')
 
     url_list = image_data['imageUrlList']
-    logging(url_list, "imageUrlList")
+    logging(url_list, 'imageUrlList')
 
     image_files = all_image_file_name_from_tag_info_file
     add_local_image_to_list(image_files)
-    logging(image_files, "imageFiles")
+    logging(image_files, 'imageFiles')
 
     url_file_name = SaveDirInfo::IMG_URL_TEXT
-    logging(url_file_name, "imageUrlFileName")
+    logging(url_file_name, 'imageUrlFileName')
 
     complete_count = 0
-    result_text    = ""
+    result_text    = ''
     url_list.each do |imageUrl|
       if protected_image?(imageUrl)
         warning_message = "#{imageUrl}は削除できない画像です。"
@@ -3883,10 +3878,10 @@ class DodontoFServer
     end
 
     result_text += "#{complete_count}個のファイルを削除しました。"
-    result      = { "resultText" => result_text }
-    logging(result, "result")
+    result      = { :resultText => result_text }
+    logging(result, 'result')
 
-    logging("deleteImage end")
+    logging('deleteImage end')
     result
   end
 
@@ -3901,7 +3896,7 @@ class DodontoFServer
   end
 
   def delete_target_image_url(image_url, image_files, image_url_file_name)
-    logging(image_url, "deleteTargetImageUrl(imageUrl)")
+    logging(image_url, 'deleteTargetImageUrl(imageUrl)')
 
     if image_files.include?(image_url) && File.exist?(image_url)
       delete_file(image_url)
@@ -3911,7 +3906,7 @@ class DodontoFServer
     locker = savefile_lock(image_url_file_name)
     locker.lock do
       lines = File.readlines(image_url_file_name)
-      logging(lines, "lines")
+      logging(lines, 'lines')
 
       delete_result = lines.reject! { |i| i.chomp == image_url }
 
@@ -3919,7 +3914,7 @@ class DodontoFServer
         return false
       end
 
-      logging(lines, "lines deleted")
+      logging(lines, 'lines deleted')
       create_file(image_url_file_name, lines.join)
     end
 
@@ -3928,32 +3923,32 @@ class DodontoFServer
 
   #override
   def add_text_to_file(file_name, text)
-    File.open(file_name, "a+") do |file|
+    File.open(file_name, 'a+') do |file|
       file.write(text)
     end
   end
 
   def upload_image_url
-    logging("uploadImageUrl begin")
+    logging('uploadImageUrl begin')
 
     image_data = params
-    logging(image_data, "imageData")
+    logging(image_data, 'imageData')
 
     image_url = image_data['imageUrl']
-    logging(image_url, "imageUrl")
+    logging(image_url, 'imageUrl')
 
     image_url_text = SaveDirInfo::IMG_URL_TEXT
-    logging(image_url_text, "imageUrlFileName")
+    logging(image_url_text, 'imageUrlFileName')
 
-    result_text = "画像URLのアップロードに失敗しました。"
+    result_text = '画像URLのアップロードに失敗しました。'
     locker      = savefile_lock(image_url_text)
     locker.lock do
       exists_urls = File.readlines(image_url_text).collect { |i| i.chomp }
       if exists_urls.include?(image_url)
-        result_text = "すでに登録済みの画像URLです。"
+        result_text = 'すでに登録済みの画像URLです。'
       else
         add_text_to_file(image_url_text, (image_url + "\n"))
-        result_text = "画像URLのアップロードに成功しました。"
+        result_text = '画像URLのアップロードに成功しました。'
       end
     end
 
@@ -3961,14 +3956,14 @@ class DodontoFServer
     logging(tag_info, 'uploadImageUrl.tagInfo')
     change_image_tags_local(image_url, tag_info)
 
-    logging("uploadImageUrl end")
+    logging('uploadImageUrl end')
 
     { "resultText" => result_text }
   end
 
 
   def character_data_in_graveyard
-    logging("getGraveyardCharacterData start.")
+    logging('getGraveyardCharacterData start.')
     result = []
 
     save_data(@savefiles['characters']) do |saveData|
@@ -3982,7 +3977,7 @@ class DodontoFServer
   end
 
   def waiting_room_info
-    logging("getWaitingRoomInfo start.")
+    logging('getWaitingRoomInfo start.')
     result = []
 
     save_data(@savefiles['characters']) do |saveData|
@@ -4001,10 +3996,10 @@ class DodontoFServer
   end
 
   def image_list
-    logging("getImageList start.")
+    logging('getImageList start.')
 
     image_list = all_image_file_name_from_tag_info_file
-    logging(image_list, "imageList all result")
+    logging(image_list, 'imageList all result')
 
     add_texts_character_image_list(image_list, SaveDirInfo::IMG_URL_TEXT)
     add_local_image_to_list(image_list)
@@ -4042,7 +4037,7 @@ class DodontoFServer
       next unless (allowed_file_ext?(fileName))
 
       image_list << fileName
-      logging(fileName, "added local image")
+      logging(fileName, 'added local image')
     end
   end
 
@@ -4068,18 +4063,18 @@ class DodontoFServer
       message_once = message
 
       if repeat_count > 1
-        message_once = message + " #" + (i + 1).to_s
+        message_once = message + ' #' + (i + 1).to_s
       end
 
-      logging(message_once, "sendDiceBotChatMessage oneMessage")
+      logging(message_once, 'sendDiceBotChatMessage oneMessage')
       result = send_dicebot_chat_message_once(params, message_once)
-      logging(result, "sendDiceBotChatMessageOnece result")
+      logging(result, 'sendDiceBotChatMessageOnece result')
 
       next if (result.nil?)
       results << result
     end
 
-    logging(results, "sendDiceBotChatMessage results")
+    logging(results, 'sendDiceBotChatMessage results')
 
     results
   end
@@ -4110,9 +4105,9 @@ class DodontoFServer
 
     logging(roll_result, 'rollResult')
     logging(is_secret, 'isSecret')
-    logging(rand_results, "randResults")
+    logging(rand_results, 'randResults')
 
-    secret_result = ""
+    secret_result = ''
     if is_secret
       secret_result = message + roll_result
     else
@@ -4174,31 +4169,31 @@ class DodontoFServer
 
 
   def chat_rolled_message(message, is_secret, rand_results, params)
-    logging("getChatRolledMessage Begin")
-    logging(message, "message")
-    logging(is_secret, "isSecret")
-    logging(rand_results, "randResults")
+    logging('getChatRolledMessage Begin')
+    logging(message, 'message')
+    logging(is_secret, 'isSecret')
+    logging(rand_results, 'randResults')
 
     if is_secret
-      message = "シークレットダイス"
+      message = 'シークレットダイス'
     end
 
     rand_results = rand_results(rand_results, is_secret)
 
     if rand_results.nil?
-      logging("randResults is nil")
+      logging('randResults is nil')
       return message
     end
 
 
     data = {
-        "chatMessage" => message,
-        "randResults" => rand_results,
-        "uniqueId"    => params['uniqueId'],
+        'chatMessage' => message,
+        'randResults' => rand_results,
+        'uniqueId' => params['uniqueId'],
     }
 
-    text = "###CutInCommand:rollVisualDice###" + DodontoFServer::build_json(data)
-    logging(text, "getChatRolledMessage End text")
+    text = '###CutInCommand:rollVisualDice###' + DodontoFServer::build_json(data)
+    logging(text, 'getChatRolledMessage End text')
 
     text
   end
@@ -4218,38 +4213,38 @@ class DodontoFServer
 
 
   def send_chat_message_all
-    logging("sendChatMessageAll Begin")
+    logging('sendChatMessageAll Begin')
 
-    result = { 'result' => "NG" }
+    result = { :result => 'NG' }
 
     return result if (Configure.mentenance_mode_password.nil?)
     chat_data = params
 
-    password = chat_data["password"]
-    logging(password, "password check...")
+    password = chat_data['password']
+    logging(password, 'password check...')
     return result unless (password == Configure.mentenance_mode_password)
 
-    logging("adminPoassword check OK.")
+    logging('adminPoassword check OK.')
 
     rooms = []
 
     Configure.save_data_max_count.times do |roomNumber|
-      logging(roomNumber, "loop roomNumber")
+      logging(roomNumber, 'loop roomNumber')
 
       init_savefiles(roomNumber)
 
       true_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
       next unless (File.exist?(true_savefile_name))
 
-      logging(roomNumber, "sendChatMessageAll to No.")
+      logging(roomNumber, 'sendChatMessageAll to No.')
       send_chat_message_by_chat_data(chat_data)
 
       rooms << roomNumber
     end
 
-    result['result'] = "OK"
+    result['result'] = 'OK'
     result['rooms']  = rooms
-    logging(result, "sendChatMessageAll End, result")
+    logging(result, 'sendChatMessageAll End, result')
 
     result
   end
@@ -4276,7 +4271,7 @@ class DodontoFServer
       chat_message_data_log.push(chat_message_data)
       chat_message_data_log.sort!
 
-      logging(chat_message_data_log, "chatMessageDataLog")
+      logging(chat_message_data_log, 'chatMessageDataLog')
       logging(saveData['chatMessageDataLog'], "saveData['chatMessageDataLog']")
     end
 
@@ -4301,7 +4296,7 @@ class DodontoFServer
     true_savefile_name = @savefiles['chatMessageDataLog']
     delete_chat_log_by_savefile(true_savefile_name)
 
-    { 'result' => "OK" }
+    { :result => 'OK' }
   end
 
   def delete_chat_log_by_savefile(true_savefile_name)
@@ -4314,10 +4309,10 @@ class DodontoFServer
   end
 
   def delete_chat_log_all
-    logging("deleteChatLogAll Begin")
+    logging('deleteChatLogAll Begin')
 
     file = @savedir_info.real_savefile_name(SaveDirInfo::CHAT_LONG_LINE_FILE)
-    logging(file, "file")
+    logging(file, 'file')
 
     if File.exist?(file)
       locker = savefile_lock(file)
@@ -4326,7 +4321,7 @@ class DodontoFServer
       end
     end
 
-    logging("deleteChatLogAll End")
+    logging('deleteChatLogAll End')
   end
 
 
@@ -4365,7 +4360,7 @@ class DodontoFServer
 
   def change_map
     map_data = params
-    logging(map_data, "mapData")
+    logging(map_data, 'mapData')
 
     change_map_savedata(map_data)
 
@@ -4373,7 +4368,7 @@ class DodontoFServer
   end
 
   def change_map_savedata(map_data)
-    logging("changeMap start.")
+    logging('changeMap start.')
 
     change_save_data(@savefiles['map']) do |saveData|
       draws = draws(saveData)
@@ -4439,7 +4434,7 @@ class DodontoFServer
 
   def undo_draw_on_map
     result = {
-        'data' => nil
+        :data => nil
     }
 
     change_save_data(@savefiles['map']) do |saveData|
@@ -4487,19 +4482,19 @@ class DodontoFServer
       effects             = saveData['effects']
 
       effect_data_list.each do |effectData|
-        logging(effectData, "addEffectData target effectData")
+        logging(effectData, 'addEffectData target effectData')
 
         if effectData['type'] == 'standingGraphicInfos'
-          keys  = ['type', 'name', 'state']
+          keys  = %w(type name state)
           found = find_effect(effects, keys, effectData)
 
           if found
-            logging(found, "addEffectData is already exist, found data is => ")
+            logging(found, 'addEffectData is already exist, found data is => ')
             next
           end
         end
 
-        effectData['effectId'] = create_character_img_id("effects_")
+        effectData['effectId'] = create_character_img_id('effects_')
         effects << effectData
       end
     end
@@ -4599,7 +4594,7 @@ class DodontoFServer
       tag_info = image_tags.delete(source)
       return false if (tag_info.nil?)
 
-      small_image = tag_info["smallImage"]
+      small_image = tag_info['smallImage']
       begin
         delete_file(small_image)
       rescue => e
@@ -4622,7 +4617,7 @@ class DodontoFServer
     result['imageList'] = image_list
     result['imageDir']  = Configure.image_upload_dir
 
-    logging("getImageTagsAndImageList result", result)
+    logging('getImageTagsAndImageList result', result)
 
     result
   end
@@ -4641,7 +4636,7 @@ class DodontoFServer
     image_tags
   end
 
-  def create_character_img_id(prefix = "character_")
+  def create_character_img_id(prefix = 'character_')
     @imgIdIndex ||= 0
     @imgIdIndex += 1
 
@@ -4669,13 +4664,13 @@ class DodontoFServer
 
     return false if (already_exist.nil?)
 
-    logging("target characterData is already exist. no creation.", "isAlreadyExistCharacter?")
+    logging('target characterData is already exist. no creation.', 'isAlreadyExistCharacter?')
     character_data['name']
   end
 
   def add_character_data(character_data_list)
     result = {
-        "addFailedCharacterNames" => []
+        :addFailedCharacterNames => []
     }
 
     change_save_data(@savefiles['characters']) do |saveData|
@@ -4683,18 +4678,18 @@ class DodontoFServer
       characters             = characters(saveData)
 
       character_data_list.each do |characterData|
-        logging(characterData, "characterData")
+        logging(characterData, 'characterData')
 
         characterData['imgId'] = create_character_img_id
 
         failed_name = already_exist_character_in_room?(saveData, characterData)
 
         if failed_name
-          result["addFailedCharacterNames"] << failed_name
+          result[:addFailedCharacterNames] << failed_name
           next
         end
 
-        logging("add characterData to characters")
+        logging('add characterData to characters')
         characters << characterData
       end
     end
@@ -4707,13 +4702,13 @@ class DodontoFServer
     waiting_room   = waiting_room(save_data)
     all_characters = (characters + waiting_room)
 
-    failed_name = already_exist_character?(all_characters, character_data)
+    already_exist_character?(all_characters, character_data)
   end
 
 
   def change_character
     character_data = params
-    logging(character_data.inspect, "characterData")
+    logging(character_data.inspect, 'characterData')
 
     change_character_data(character_data)
 
@@ -4722,7 +4717,7 @@ class DodontoFServer
 
   def change_character_data(character_data)
     change_save_data(@savefiles['characters']) do |saveData|
-      logging("changeCharacterData called")
+      logging('changeCharacterData called')
 
       characters = characters(saveData)
 
@@ -4735,7 +4730,7 @@ class DodontoFServer
       end
 
       if index.nil?
-        logging("invalid character name")
+        logging('invalid character name')
         return
       end
 
@@ -4746,34 +4741,34 @@ class DodontoFServer
         end
 
         if already_exist
-          logging("same name character alread exist")
+          logging('same name character alread exist')
           return
         end
       end
 
-      logging(character_data.inspect, "character data change")
+      logging(character_data.inspect, 'character data change')
       characters[index] = character_data
     end
   end
 
   def card_type
-    "Card"
+    'Card'
   end
 
   def card_mount_type
-    "CardMount"
+    'CardMount'
   end
 
   def random_dungeon_card_mount_type
-    "RandomDungeonCardMount"
+    'RandomDungeonCardMount'
   end
 
   def card_trash_mount_type
-    "CardTrushMount"
+    'CardTrushMount'
   end
 
   def random_dungeon_card_trash_mount_type
-    "RandomDungeonCardTrushMount"
+    'RandomDungeonCardTrushMount'
   end
 
   def rotation(is_up_down)
@@ -4788,32 +4783,32 @@ class DodontoFServer
 
   def card_data(is_text, image_name, image_name_back, mount_name, is_up_down = false, can_delete = false)
 
-    card_data = {
-        "imageName"     => image_name,
-        "imageNameBack" => image_name_back,
-        "isBack"        => true,
-        "rotation"      => rotation(is_up_down),
-        "isUpDown"      => is_up_down,
-        "isText"        => is_text,
-        "isOpen"        => false,
-        "owner"         => "",
-        "ownerName"     => "",
-        "mountName"     => mount_name,
-        "canDelete"     => can_delete,
+    {
+        'imageName' => image_name,
+        'imageNameBack' => image_name_back,
+        'isBack' => true,
+        'rotation' => rotation(is_up_down),
+        'isUpDown' => is_up_down,
+        'isText' => is_text,
+        'isOpen' => false,
+        'owner' => '',
+        'ownerName' => '',
+        'mountName' => mount_name,
+        'canDelete' => can_delete,
 
-        "name"          => "",
-        "imgId"         => create_character_img_id,
-        "type"          => card_type,
-        "x"             => 0,
-        "y"             => 0,
-        "draggable"     => true,
+        'name' => '',
+        'imgId' => create_character_img_id,
+        'type' => card_type,
+        'x' => 0,
+        'y' => 0,
+        'draggable' => true,
     }
 
   end
 
 
   def add_card_zone
-    logging("addCardZone Begin")
+    logging('addCardZone Begin')
 
     data = params
 
@@ -4824,19 +4819,19 @@ class DodontoFServer
 
     change_save_data(@savefiles['characters']) do |saveData|
       characters = characters(saveData)
-      logging(characters, "addCardZone characters")
+      logging(characters, 'addCardZone characters')
 
       card_data = card_zone_data(owner, owner_name, x, y)
       characters << card_data
     end
 
-    logging("addCardZone End")
+    logging('addCardZone End')
     return nil
   end
 
 
   def init_cards
-    logging("initCards Begin")
+    logging('initCards Begin')
 
     set_record_empty
 
@@ -4848,7 +4843,7 @@ class DodontoFServer
     clear_character_by_type_local(random_dungeon_card_trash_mount_type)
 
     card_type_infos = params['cardTypeInfos']
-    logging(card_type_infos, "cardTypeInfos")
+    logging(card_type_infos, 'cardTypeInfos')
 
     change_save_data(@savefiles['characters']) do |saveData|
       saveData['cardTrushMount'] = {}
@@ -4857,32 +4852,32 @@ class DodontoFServer
       card_mounts           = saveData['cardMount']
 
       characters = characters(saveData)
-      logging(characters, "initCards saveData.characters")
+      logging(characters, 'initCards saveData.characters')
 
       card_type_infos.each_with_index do |cardTypeInfo, index|
         mount_name = cardTypeInfo['mountName']
-        logging(mount_name, "initCards mountName")
+        logging(mount_name, 'initCards mountName')
 
         cards_list_file_name = cards_info.getCardFileName(mount_name)
-        logging(cards_list_file_name, "initCards cardsListFileName")
+        logging(cards_list_file_name, 'initCards cardsListFileName')
 
         cards_list = []
         File.readlines(cards_list_file_name).each_with_index do |i, lineIndex|
           cards_list << i.chomp.toutf8
         end
 
-        logging(cards_list, "initCards cardsList")
+        logging(cards_list, 'initCards cardsList')
 
         card_data  = cards_list.shift.split(/,/)
-        is_text    = (card_data.shift == "text")
-        is_up_down = (card_data.shift == "upDown")
-        logging("isUpDown", is_up_down)
+        is_text    = (card_data.shift == 'text')
+        is_up_down = (card_data.shift == 'upDown')
+        logging('isUpDown', is_up_down)
         image_name_back = cards_list.shift
 
         cards_list, is_sorted   = initialize_card_set(cards_list, cardTypeInfo)
         card_mounts[mount_name] = initialized_card_mount(cards_list, mount_name, is_text, is_up_down, image_name_back, is_sorted)
 
-        card_mount_data = createCardMountData(card_mounts, is_text, image_name_back, mount_name, index, is_up_down, cardTypeInfo, cards_list)
+        card_mount_data = create_card_mount_data(card_mounts, is_text, image_name_back, mount_name, index, is_up_down, cardTypeInfo, cards_list)
         characters << card_mount_data
 
         card_trash_mount_data = card_trash_mount_data(is_text, mount_name, index, cardTypeInfo)
@@ -4893,10 +4888,10 @@ class DodontoFServer
       sleep(wait_for_refresh)
     end
 
-    logging("initCards End")
+    logging('initCards End')
 
     card_exist = (not card_type_infos.empty?)
-    { "result" => "OK", "cardExist" => card_exist }
+    { :result => 'OK', :cardExist => card_exist }
   end
 
 
@@ -4909,7 +4904,7 @@ class DodontoFServer
         next
       end
 
-      logging(imageName, "initCards imageName")
+      logging(imageName, 'initCards imageName')
       card_data = card_data(is_text, imageName, image_name_back, mount_name, is_up_down)
       card_mount << card_data
     end
@@ -4925,7 +4920,7 @@ class DodontoFServer
 
 
   def add_card
-    logging("addCard begin")
+    logging('addCard begin')
 
     add_card_data = params
 
@@ -4940,16 +4935,16 @@ class DodontoFServer
 
     change_save_data(@savefiles['characters']) do |saveData|
       card_data      = card_data(is_text, image_name, image_name_back, mount_name, is_up_down, can_delete)
-      card_data["x"] = add_card_data['x']
-      card_data["y"] = add_card_data['y']
-      card_data["isOpen"] = is_open unless (is_open.nil?)
-      card_data["isBack"] = is_back unless (is_back.nil?)
+      card_data['x'] = add_card_data['x']
+      card_data['y'] = add_card_data['y']
+      card_data['isOpen'] = is_open unless (is_open.nil?)
+      card_data['isBack'] = is_back unless (is_back.nil?)
 
       characters = characters(saveData)
       characters << card_data
     end
 
-    logging("addCard end")
+    logging('addCard end')
 
     return nil
   end
@@ -4978,17 +4973,17 @@ class DodontoFServer
   end
 
   def init_card_set_for_random_dungen_trump(card_list, card_type_info)
-    logging("getInitCardSetForRandomDungenTrump start")
+    logging('getInitCardSetForRandomDungenTrump start')
 
-    logging(card_list.length, "cardList.length")
-    logging(card_type_info, "cardTypeInfo")
+    logging(card_list.length, 'cardList.length')
+    logging(card_type_info, 'cardTypeInfo')
 
     use_count    = card_type_info['cardCount']
     jorker_count = card_type_info['jorkerCount']
 
     use_line_count = 13 * 4 + jorker_count
     card_list      = card_list[0...use_line_count]
-    logging(card_list.length, "cardList.length")
+    logging(card_list.length, 'cardList.length')
 
     ace_list    = []
     no_ace_list = []
@@ -5002,9 +4997,9 @@ class DodontoFServer
       no_ace_list << card
     end
 
-    logging(ace_list, "aceList")
-    logging(ace_list.length, "aceList.length")
-    logging(no_ace_list.length, "noAceList.length")
+    logging(ace_list, 'aceList')
+    logging(ace_list.length, 'aceList.length')
+    logging(no_ace_list.length, 'noAceList.length')
 
     card_type_info['aceList'] = ace_list.clone
 
@@ -5012,8 +5007,8 @@ class DodontoFServer
 
     ace_list = ace_list.sort_by { rand }
     result << ace_list.shift
-    logging(ace_list, "aceList shifted")
-    logging(result, "result")
+    logging(ace_list, 'aceList shifted')
+    logging(result, 'result')
 
     no_ace_list = no_ace_list.sort_by { rand }
 
@@ -5023,8 +5018,8 @@ class DodontoFServer
     end
 
     result = result.sort_by { rand }
-    logging(result, "result.sorted")
-    logging(no_ace_list, "noAceList is empty? please check")
+    logging(result, 'result.sorted')
+    logging(no_ace_list, 'noAceList is empty? please check')
 
     while ace_list.length > 0
       result << ace_list.shift
@@ -5034,21 +5029,21 @@ class DodontoFServer
       result << no_ace_list.shift
     end
 
-    logging(result, "getInitCardSetForRandomDungenTrump end, result")
+    logging(result, 'getInitCardSetForRandomDungenTrump end, result')
 
     result
   end
 
 
   def card_zone_type
-    "CardZone"
+    'CardZone'
   end
 
   def card_zone_data(owner, owner_name, x, y)
     # cardMount, isText, imageNameBack, mountName, index, isUpDown)
     is_text         = true
-    card_text       = ""
-    card_mount_data = card_data(is_text, card_text, card_text, "noneMountName")
+    card_text       = ''
+    card_mount_data = card_data(is_text, card_text, card_text, 'noneMountName')
 
     card_mount_data['type']      = card_zone_type
     card_mount_data['owner']     = owner
@@ -5060,7 +5055,7 @@ class DodontoFServer
   end
 
 
-  def createCardMountData(card_mount, is_text, image_name_back, mount_name, index, is_up_down, card_type_info, cards)
+  def create_card_mount_data(card_mount, is_text, image_name_back, mount_name, index, is_up_down, card_type_info, cards)
     card_mount_data = card_data(is_text, image_name_back, image_name_back, mount_name)
 
     card_mount_data['type'] = card_mount_type
@@ -5121,16 +5116,16 @@ class DodontoFServer
     return if (card_mount_image_data.nil?)
 
     card_mount_image_data['cardCount']     = cards.size
-    card_mount_image_data["imageName"]     = image_name
-    card_mount_image_data["imageNameBack"] = image_name
-    card_mount_image_data["isText"]        = is_text
+    card_mount_image_data['imageName']     = image_name
+    card_mount_image_data['imageNameBack'] = image_name
+    card_mount_image_data['isText']        = is_text
   end
 
   def card_trash_mount_image_name(mount_name, cards = [])
     card_data = cards.last
 
-    image_name      = ""
-    image_name_back = ""
+    image_name      = ''
+    image_name_back = ''
     is_text         = true
 
     if card_data.nil?
@@ -5140,11 +5135,11 @@ class DodontoFServer
       image_name      = "<font size=\"40\">#{card_title}用<br>カード捨て場</font>"
       image_name_back = image_name
     else
-      is_text         = card_data["isText"]
-      image_name      = card_data["imageName"]
-      image_name_back = card_data["imageNameBack"]
+      is_text         = card_data['isText']
+      image_name      = card_data['imageName']
+      image_name_back = card_data['imageNameBack']
 
-      if card_data["owner"] == "nobody"
+      if card_data['owner'] == 'nobody'
         image_name = image_name_back
       end
     end
@@ -5162,21 +5157,21 @@ class DodontoFServer
 
 
   def return_card
-    logging("returnCard Begin")
+    logging('returnCard Begin')
 
     set_no_body_sender
 
     mount_name = params['mountName']
-    logging(mount_name, "mountName")
+    logging(mount_name, 'mountName')
 
     change_save_data(@savefiles['characters']) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
       card_data = trash_cards.pop
-      logging(card_data, "cardData")
+      logging(card_data, 'cardData')
       if card_data.nil?
-        logging("returnCard trushCards is empty. END.")
+        logging('returnCard trushCards is empty. END.')
         return
       end
 
@@ -5188,28 +5183,26 @@ class DodontoFServer
       characters.push(card_data)
 
       trash_mount_data = find_card_data(characters, params['imgId'])
-      logging(trash_mount_data, "returnCard trushMountData")
+      logging(trash_mount_data, 'returnCard trushMountData')
 
       return if (trash_mount_data.nil?)
 
       set_trash_mount_data_cards_info(saveData, trash_mount_data, trash_cards)
     end
 
-    logging("returnCard End")
+    logging('returnCard End')
 
     return nil
   end
 
   def draw_card
-    logging("drawCard Begin")
+    logging('drawCard Begin')
 
     set_no_body_sender
 
     logging(params, 'params')
 
-    result = {
-        "result" => "NG"
-    }
+    result = { :result => 'NG' }
 
     change_save_data(@savefiles['characters']) do |saveData|
       count = params['count']
@@ -5218,10 +5211,10 @@ class DodontoFServer
         draw_card_data_one(params, saveData)
       end
 
-      result["result"] = "OK"
+      result[:result] = 'OK'
     end
 
-    logging("drawCard End")
+    logging('drawCard End')
 
     result
   end
@@ -5261,19 +5254,19 @@ class DodontoFServer
 
 
   def draw_target_trash_card
-    logging("drawTargetTrushCard Begin")
+    logging('drawTargetTrushCard Begin')
 
     set_no_body_sender
 
     mount_name = params['mountName']
-    logging(mount_name, "mountName")
+    logging(mount_name, 'mountName')
 
     change_save_data(@savefiles['characters']) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
       card_data = remove_from_array(trash_cards) { |i| i['imgId'] === params['targetCardId'] }
-      logging(card_data, "cardData")
+      logging(card_data, 'cardData')
       return if (card_data.nil?)
 
       card_data['x'] = params['x']
@@ -5283,20 +5276,20 @@ class DodontoFServer
       characters.push(card_data)
 
       trash_mount_data = find_card_data(characters, params['mountId'])
-      logging(trash_mount_data, "returnCard trushMountData")
+      logging(trash_mount_data, 'returnCard trushMountData')
 
       return if (trash_mount_data.nil?)
 
       set_trash_mount_data_cards_info(saveData, trash_mount_data, trash_cards)
     end
 
-    logging("drawTargetTrushCard End")
+    logging('drawTargetTrushCard End')
 
-    { "result" => "OK" }
+    { :result => 'OK' }
   end
 
   def draw_target_card
-    logging("drawTargetCard Begin")
+    logging('drawTargetCard Begin')
 
     set_no_body_sender
 
@@ -5339,9 +5332,9 @@ class DodontoFServer
       set_card_count_and_back_image(card_mount_data, cards)
     end
 
-    logging("drawTargetCard End")
+    logging('drawTargetCard End')
 
-    { "result" => "OK" }
+    { :result => 'OK' }
   end
 
   def find_card_mount_data(save_data, mount_id)
@@ -5356,14 +5349,14 @@ class DodontoFServer
     card = cards.last
     return if (card.nil?)
 
-    image = card["imageNameBack"]
+    image = card['imageNameBack']
     return if (image.nil?)
 
-    card_mount_data["imageNameBack"] = image
+    card_mount_data['imageNameBack'] = image
   end
 
   def dump_trash_cards
-    logging("dumpTrushCards Begin")
+    logging('dumpTrushCards Begin')
 
     set_no_body_sender
 
@@ -5380,12 +5373,12 @@ class DodontoFServer
       characters = characters(saveData)
 
       dumped_card_id = dump_trash_cards['dumpedCardId']
-      logging(dumped_card_id, "dumpedCardId")
+      logging(dumped_card_id, 'dumpedCardId')
 
-      logging(characters.size, "characters.size before")
+      logging(characters.size, 'characters.size before')
       card_data = delete_find_one(characters) { |i| i['imgId'] === dumped_card_id }
       trash_cards << card_data
-      logging(characters.size, "characters.size after")
+      logging(characters.size, 'characters.size after')
 
       trash_mount_data = characters.find { |i| i['imgId'] === dump_trash_cards['trushMountId'] }
       if trash_mount_data.nil?
@@ -5400,7 +5393,7 @@ class DodontoFServer
       set_trash_mount_data_cards_info(saveData, trash_mount_data, trash_cards)
     end
 
-    logging("dumpTrushCards End")
+    logging('dumpTrushCards End')
     return nil
   end
 
@@ -5413,18 +5406,18 @@ class DodontoFServer
     end
 
     if find_index.nil?
-      throw Exception.new("deleteFindOne target is NOT found inspect:") #+ array.inspect)
+      throw Exception.new('deleteFindOne target is NOT found inspect:') #+ array.inspect)
     end
 
-    logging(array.size, "array.size before")
+    logging(array.size, 'array.size before')
     item = array.delete_at(find_index)
-    logging(array.size, "array.size before")
+    logging(array.size, 'array.size before')
 
     item
   end
 
   def shuffle_cards
-    logging("shuffleCard Begin")
+    logging 'shuffleCard Begin'
 
     set_record_empty
 
@@ -5468,13 +5461,13 @@ class DodontoFServer
       set_card_count_and_back_image(card_mount_data, mount_cards)
     end
 
-    logging("shuffleCard End")
+    logging 'shuffleCard End'
     return nil
   end
 
 
   def shuffle_next_random_dungeon
-    logging("shuffleForNextRandomDungeon Begin")
+    logging 'shuffleForNextRandomDungeon Begin'
 
     set_record_empty
 
@@ -5487,7 +5480,7 @@ class DodontoFServer
     change_save_data(@savefiles['characters']) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
-      logging(trash_cards.length, "trushCards.length")
+      logging(trash_cards.length, 'trushCards.length')
 
       saveData['cardMount']  ||= {}
       card_mount             = saveData['cardMount']
@@ -5499,7 +5492,7 @@ class DodontoFServer
       return if (card_mount_data.nil?)
 
       ace_list = card_mount_data['aceList']
-      logging(ace_list, "aceList")
+      logging(ace_list, 'aceList')
 
       ace_cards = []
       ace_cards += delete_ace_from_cards(trash_cards, ace_list)
@@ -5507,9 +5500,9 @@ class DodontoFServer
       ace_cards += delete_ace_from_cards(characters, ace_list)
       ace_cards = ace_cards.sort_by { rand }
 
-      logging(ace_cards, "aceCards")
-      logging(trash_cards.length, "trushCards.length")
-      logging(mount_cards.length, "mountCards.length")
+      logging(ace_cards, 'aceCards')
+      logging(trash_cards.length, 'trushCards.length')
+      logging(mount_cards.length, 'mountCards.length')
 
       use_count = card_mount_data['useCount']
       if (mount_cards.size + 1) < use_count
@@ -5519,12 +5512,12 @@ class DodontoFServer
       mount_cards = mount_cards.sort_by { rand }
 
       insert_point = rand(use_count)
-      logging(insert_point, "insertPoint")
+      logging(insert_point, 'insertPoint')
       mount_cards[insert_point, 0] = ace_cards.shift
 
       while ace_cards.length > 0
         mount_cards[use_count, 0] = ace_cards.shift
-        logging(use_count, "useCount")
+        logging(use_count, 'useCount')
       end
 
       mount_cards = mount_cards.reverse
@@ -5534,7 +5527,7 @@ class DodontoFServer
 
       new_diff = mount_cards.size - use_count
       new_diff = 3 if (new_diff < 3)
-      logging(new_diff, "newDiff")
+      logging(new_diff, 'newDiff')
       card_mount_data['cardCountDisplayDiff'] = new_diff
 
 
@@ -5545,7 +5538,7 @@ class DodontoFServer
       set_card_count_and_back_image(card_mount_data, mount_cards)
     end
 
-    logging("shuffleForNextRandomDungeon End")
+    logging('shuffleForNextRandomDungeon End')
 
     return nil
   end
@@ -5570,7 +5563,7 @@ class DodontoFServer
   def shuffle_mount(mount_cards, is_up_down)
     mount_cards = mount_cards.sort_by { rand }
     mount_cards.each do |i|
-      i["rotation"] = rotation(is_up_down)
+      i['rotation'] = rotation(is_up_down)
     end
 
     mount_cards
@@ -5579,8 +5572,8 @@ class DodontoFServer
   def init_trash_card_for_return_mount(card_data)
     card_data['isOpen']    = false
     card_data['isBack']    = true
-    card_data['owner']     = ""
-    card_data['ownerName'] = ""
+    card_data['owner']     = ''
+    card_data['ownerName'] = ''
   end
 
 
@@ -5609,8 +5602,8 @@ class DodontoFServer
       card_mount_data         = find_card_mount_data(saveData, mount_id)
       card_count_display_diff = card_mount_data['cardCountDisplayDiff']
 
-      logging(card_count_display_diff, "cardCountDisplayDiff")
-      logging(cards.length, "before cards.length")
+      logging(card_count_display_diff, 'cardCountDisplayDiff')
+      logging(cards.length, 'before cards.length')
 
       unless card_count_display_diff.nil?
         unless cards.empty?
@@ -5620,7 +5613,7 @@ class DodontoFServer
 
     end
 
-    logging(cards.length, "getMountCardInfos cards.length")
+    logging(cards.length, 'getMountCardInfos cards.length')
 
     cards
   end
@@ -5644,7 +5637,7 @@ class DodontoFServer
 
 
   def clear_character_by_type
-    logging "clearCharacterByType Begin"
+    logging 'clearCharacterByType Begin'
 
     set_record_empty
 
@@ -5658,13 +5651,13 @@ class DodontoFServer
       clear_character_by_type_local(targetType)
     end
 
-    logging "clearCharacterByType End"
+    logging 'clearCharacterByType End'
 
     return nil
   end
 
   def clear_character_by_type_local(target_type)
-    logging(target_type, "clearCharacterByTypeLocal targetType")
+    logging(target_type, 'clearCharacterByTypeLocal targetType')
 
     change_save_data(@savefiles['characters']) do |saveData|
       characters = characters(saveData)
@@ -5674,7 +5667,7 @@ class DodontoFServer
       end
     end
 
-    logging("clearCharacterByTypeLocal End")
+    logging('clearCharacterByTypeLocal End')
   end
 
 
@@ -5687,18 +5680,18 @@ class DodontoFServer
 
 
   def remove_character_by_remove_character_data_list(remove_character_list) #TODO:FIXME 正直、どういうことを意図しているメソッドなのか分からない。。。
-    logging(remove_character_list, "removeCharacterDataList")
+    logging(remove_character_list, 'removeCharacterDataList')
 
     change_save_data(@savefiles['characters']) do |saveData|
       characters = characters(saveData)
 
       remove_character_list.each do |removeCharacterData|
-        logging(removeCharacterData, "removeCharacterData")
+        logging(removeCharacterData, 'removeCharacterData')
 
         remove_character_id = removeCharacterData['imgId']
-        logging(remove_character_id, "removeCharacterId")
+        logging(remove_character_id, 'removeCharacterId')
         is_goto_graveyard = removeCharacterData['isGotoGraveyard']
-        logging(is_goto_graveyard, "isGotoGraveyard")
+        logging(is_goto_graveyard, 'isGotoGraveyard')
 
         characters.delete_if do |i|
           deleted = (i['imgId'] == remove_character_id)
@@ -5711,7 +5704,7 @@ class DodontoFServer
         end
       end
 
-      logging(characters, "character deleted result")
+      logging(characters, 'character deleted result')
     end
   end
 
@@ -5733,9 +5726,9 @@ class DodontoFServer
 
     character_id = params['characterId']
 
-    logging(character_id, "enterWaitingRoomCharacter characterId")
+    logging(character_id, 'enterWaitingRoomCharacter characterId')
 
-    result = { "result" => "NG" }
+    result = { :result => 'NG' }
     change_save_data(@savefiles['characters']) do |saveData|
       characters = characters(saveData)
 
@@ -5746,14 +5739,14 @@ class DodontoFServer
       waiting_room << enter_character_data
     end
 
-    result["result"] = "OK"
+    result[:result] = 'OK'
     result
   end
 
 
   def resurrect_character
     img_id = params['imgId']
-    logging(img_id, "resurrectCharacterId")
+    logging(img_id, 'resurrectCharacterId')
 
     change_save_data(@savefiles['characters']) do |saveData|
       _graveyard = graveyard(saveData)
@@ -5762,7 +5755,7 @@ class DodontoFServer
         character['imgId'] == img_id
       end
 
-      logging(character_data, "resurrectCharacter CharacterData")
+      logging(character_data, 'resurrectCharacter CharacterData')
       return if (character_data.nil?)
 
       characters = characters(saveData)
@@ -5773,7 +5766,7 @@ class DodontoFServer
   end
 
   def clear_graveyard
-    logging("clearGraveyard begin")
+    logging('clearGraveyard begin')
 
     change_save_data(@savefiles['characters']) do |saveData|
       graveyard = graveyard(saveData)
@@ -5824,7 +5817,7 @@ class DodontoFServer
     y            = params['y']
     logging(character_id, 'exitWaitingRoomCharacter targetCharacterId')
 
-    result = { "result" => "NG" }
+    result = { :result => 'NG' }
     change_save_data(@savefiles['characters']) do |saveData|
       waiting_room = waiting_room(saveData)
 
@@ -5832,7 +5825,7 @@ class DodontoFServer
         character['imgId'] == character_id
       end
 
-      logging(character_data, "exitWaitingRoomCharacter CharacterData")
+      logging(character_data, 'exitWaitingRoomCharacter CharacterData')
       return result if (character_data.nil?)
 
       character_data['x'] = x
@@ -5842,7 +5835,7 @@ class DodontoFServer
       characters << character_data
     end
 
-    result["result"] = "OK"
+    result[:result] = 'OK'
     result
   end
 
@@ -5850,10 +5843,10 @@ class DodontoFServer
   def remove_from_array(array)
     index = nil
     array.each_with_index do |i, targetIndex|
-      logging(i, "i")
-      logging(targetIndex, "targetIndex")
+      logging(i, 'i')
+      logging(targetIndex, 'targetIndex')
       b = yield(i)
-      logging(b, "yield(i)")
+      logging(b, 'yield(i)')
       if b
         index = targetIndex
       end
@@ -5883,9 +5876,9 @@ class DodontoFServer
     change_save_data(@savefiles['characters']) do |saveData|
 
       character_move_data = params
-      logging(character_move_data, "moveCharacter() characterMoveData")
+      logging(character_move_data, 'moveCharacter() characterMoveData')
 
-      logging(character_move_data['imgId'], "character.imgId")
+      logging(character_move_data['imgId'], 'character.imgId')
 
       characters = characters(saveData)
 
@@ -5898,7 +5891,7 @@ class DodontoFServer
         break
       end
 
-      logging(characters, "after moved characters")
+      logging(characters, 'after moved characters')
 
     end
 
@@ -5907,11 +5900,8 @@ class DodontoFServer
 
   #override
   def savefile_timestamp(savefile_name)
-    unless File.exist?(savefile_name)
-      return 0
-    end
-
-    timestamp = File.mtime(savefile_name).to_f
+    return 0 unless File.exist?(savefile_name)
+    File.mtime(savefile_name).to_f
   end
 
   def savefile_timestamp_millisec(savefile_name)
@@ -5923,10 +5913,10 @@ class DodontoFServer
     savefile_timestamp = savefile_timestamp_millisec(savefile_name)
     changed            = (savefile_timestamp != last_update_time)
 
-    logging(savefile_name, "saveFileName")
-    logging(savefile_timestamp.inspect, "saveFileTimeStamp")
-    logging(last_update_time.inspect, "lastUpdateTime   ")
-    logging(changed, "changed")
+    logging(savefile_name, 'saveFileName')
+    logging(savefile_timestamp.inspect, 'saveFileTimeStamp')
+    logging(last_update_time.inspect, 'lastUpdateTime   ')
+    logging(changed, 'changed')
 
     changed
   end
@@ -5935,7 +5925,7 @@ class DodontoFServer
     if isJsonResult
       DodontoFServer::build_json(execute_command)
     else
-      DodontoFsServer::build_msgpack(execute_command)
+      DodontoFServer::build_msgpack(execute_command)
     end
   end
 end
@@ -5955,7 +5945,7 @@ def compress?(result, server)
   return false if (Configure.gzip_target_size <= 0)
   return false if (server.jsonp_callback)
 
-  (/gzip/ =~ ENV["HTTP_ACCEPT_ENCODING"]) and (result.length > Configure.gzip_target_size)
+  (/gzip/ =~ ENV['HTTP_ACCEPT_ENCODING']) and (result.length > Configure.gzip_target_size)
 end
 
 def compress_response(result)
@@ -5970,20 +5960,20 @@ def compress_response(result)
   end
 
   compressed = io.string
-  logging(compressed.length.to_s, "CGI response zipped length  ")
+  logging(compressed.length.to_s, 'CGI response zipped length  ')
 
   compressed
 end
 
 
 def main(params)
-  logging "main called"
+  logging 'main called'
 
   server = DodontoFServer.new(SaveDirInfo.new, params)
-  logging "server created"
+  logging 'server created'
 
   print_response(server)
-  logging "printResult called"
+  logging 'printResult called'
 end
 
 def response_header(server)
@@ -6004,9 +5994,9 @@ def response_header(server)
 end
 
 def print_response(server)
-  logging "========================================>CGI begin."
+  logging '========================================>CGI begin.'
 
-  body   = "empty"
+  body   = 'empty'
   header = response_header(server)
 
   begin
@@ -6014,7 +6004,7 @@ def print_response(server)
     result = "#D@EM>##{result}#<D@EM#" if server.is_add_marker
     result = "#{server.jsonp_callback}(#{result})" if server.jsonp_callback
 
-    logging(result.length.to_s, "CGI response original length")
+    logging(result.length.to_s, 'CGI response original length')
 
     if compress?(result, server)
       if Configure.is_mod_ruby
@@ -6029,7 +6019,7 @@ def print_response(server)
     end
   rescue Exception => e
     error_message = error_response_body(e)
-    loggingForce(error_message, "errorMessage")
+    loggingForce(error_message, 'errorMessage')
 
     body = "\n"
     body << "= ERROR ====================\n"
@@ -6037,36 +6027,35 @@ def print_response(server)
     body << "============================\n"
   end
 
-  logging(header, "RESPONSE header")
+  logging(header, 'RESPONSE header')
 
   output = $stdout
   output.binmode if (defined?(output.binmode))
   output.print(header + "\n")
   output.print(body)
 
-  logging "========================================>CGI end."
+  logging '========================================>CGI end.'
 end
 
 
 def extract_params_in_cgi
-  logging "getCgiParams Begin"
+  logging 'getCgiParams Begin'
 
   content_length = ENV['CONTENT_LENGTH'].to_i
 
-  logging content_length, "getCgiParams length"
+  logging content_length, 'getCgiParams length'
 
-  input = nil
-  if ENV['REQUEST_METHOD'] == "POST"
-    input = $stdin.read(content_length)
+  input = if ENV['REQUEST_METHOD'] == 'POST'
+    $stdin.read(content_length)
   else
-    input = ENV['QUERY_STRING']
+    ENV['QUERY_STRING']
   end
 
-  logging input, "getCgiParams input"
+  logging input, 'getCgiParams input'
   params = DodontoFServer::parse_msgpack(input)
 
-  logging params, "messagePackedData"
-  logging "getCgiParams End"
+  logging params, 'messagePackedData'
+  logging 'getCgiParams End'
 
   params
 end
@@ -6076,7 +6065,7 @@ if $0 === __FILE__
   initLog
 
   case Configure.db_type
-    when "mysql"
+    when 'mysql'
       #mod_ruby でも再読み込みするようにloadに
       require 'DodontoFServerMySql.rb'
       mainMySql(extract_params_in_cgi)

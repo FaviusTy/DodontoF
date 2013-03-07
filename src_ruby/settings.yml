@@ -1,87 +1,291 @@
-# システムのバージョン情報
-Version:
- numbering: Ver.1.37.05
- date: 2012/06/18
- codename: Deeper Deeper
+#デバッグログ出力設定 trueで出力。falseで非出力(ただしエラー処理は常に出力されます。)
+debug: false
 
-# サーバ全体の設定項目
-Server:
- # サーバ全体で利用できるユーザの上限数です(表示情報としてしか使用されませんので実際はこの数値以上のユーザのログインが可能です)
- user_capacity: 30
 
- # rackアプリケーションとしてマウントするインターフェースを設定します
- rack_type: thin
+#サーバで許容できると思うログイン人数を指定。大体でいいです。
+#この人数以上になると、人数が多いと警告が表示されるようになります。
+about_max_login_count: 30
 
- # ログレベルを設定します.
- log_level: debug
+#サーバにログインする事のできる限界人数。
+#この人数以上になると、ログインが全くできなくなります。
+#制限しないなら -1 と指定ください。
+# 例) $limitLoginCount = 100
+#     $limitLoginCount = -1
+limit_login_count: 100
 
- # Onに設定した場合、このファイルの設定情報を設定値を参照する度に読み込み直します
- # その分、負荷が高くなるため本稼働時にはOffを推奨します
- hot_configuration: Off
+#サーバCGIとクライアントFlashのバージョン一致確認用
+version_only: Ver.1.40.07
+version_date: 2013/01/06
 
- # クライアントのFPS値です. nullの場合はswfの初期値(30)で動作します
- fps: null
+#サーバがデータの更新をサーバ内で定期チェックして待つ最大待機時間（秒）
+#再接続が連発する場合には数値を「減らして」下さい。 $refreshTimeout = 1 とかに。
+refresh_timeout: 2
 
- # Onに設定するとrefresh処理をComet通信にします.
- # Offの場合は待機時間無しでレスポンスします
- comet_mode: On
+#サーバの一時チャットログの保存時間上限（秒）
+#上記の $refreshTimeout よりも大きい必要があり、
+#さらに言えば再接続後でも表示できるように十分な余裕が必要。
+old_message_timeout: 180
 
- # Comet通信モード時のrefresh処理の際にサーバ内で更新待ちを行う時間を指定します
- comet_wait_second: 2
+#擬似Comet時のセーブファイル定期チェック時間（秒）
+refresh_interval: 0.5
 
- # refresh処理の更新待ち時間中に部屋情報の更新確認を実施する間隔を指定します
- refresh_intarval_second: 0.5
+#プレイルームの最大数
+save_data_max_count: 10
 
- # Onに設定するとデバッグモードとして動作します
- debug_mode: Off
+#ログイン画面で一括取得できる最大プレイルーム数
+play_room_get_range_max: 10
 
- # Onに設定するとメンテナンスモードとして動作します
- maintenance_mode: Off
+#墓場に保存されるキャラクターの最大数
+graveyard_limit: 30
 
- # Onに設定するとダイスボットが有効になります
- use_dicebot: On
+#チャットの過去ログ大量保管を許可するかの設定
+is_save_lomg_chat_log: true
 
- # Onに設定すると読み上げ機能が有効になります(読み上げ機能の使用には別途PHP環境が必要なようです…)
- use_speech: Off
+#チャットログ大量保管時の保管ライン数
+chat_message_data_log_all_line_max: 500
 
- # 作成できるプレイルームの上限値です
- room_limit: 1000
+#アップロード可能な画像ファイルのファイルサイズ上限(MB)
+upload_image_max_size: 10.0
 
- # プレイルームリストの１ページ辺りの表示数の上限値です
- room_max_par_page: 100
+#保持する画像の上限数(上限を超えた場合古いものから削除)
+upload_image_max_count: 2000
 
- # 壁紙として表示する画像ファイルのURLです.nullに設定した場合は何も表示されません
- skin_img_path: null
+#アップロード可能なリプレイデータのファイルサイズ上限(MB)
+upload_replay_data_max_size: 5.0
 
- # Onに設定するとリアルタイムパフォーマンスを表示するモニタワイプが表示されます
- use_paformance_monitor: Off
+#アップロード可能な一時アップロードのファイルサイズ上限(MB)
+upload_file_max_size: 10.0
 
- # チャット送信が失敗した時に再送処理を行う上限回数です
- retry_send_limit: 3
+#プレイルームデータ(saveData)の相対パス。
+save_data_dir: ../..
 
- # 画像アップロードディレクトリを示すマーカー文字列
- # TODO 用途が不明なのでコメントは原文ママ. #の部分は外出しにする方が良いかも:YAML定義的に
- img_upload_space_marker: "###IMAGE_UPLOADL_SPACE###"
+#ロックファイル作成先のチューニング用。nilなら $SAVE_DATA_DIR と同一になります。
+save_data_lock_file_dir: null
 
- #各画像(キャラクター・マップ)の保存パス
- img_uplaod_space_path: ../imageUploadSpace
+#各画像(キャラクター・マップ)の保存パス
+image_upload_dir: ../imageUploadSpace
 
-# プレイルームのデフォルト設定
-PlayRoom:
- # プレイルームのデータを保存するディレクトリまでの相対パス
- rooms_store_path: rooms
- map_width_limit: 150
- map_height_limit: 150
- graveyard_limit: 30
- use_back_log: On
- log_line_capacity: 500
- use_welcome_message: On
+#イメージディレクトリを示すマーカー文字列
+local_upload_dir_marker: "###IMAGE_UPLOADL_SPACE###"
 
- #ログインしていられる最大時間。
- # 1 以上の数値を指定するとその秒数経過でサーバからたたき出されます
- #（開発環境用なので、通常は変更不要）
- login_limit_second: 600
 
- unremovable_indexes: [0]
- unloadable_indexes: [0]
- unlockable_indexes: [0]
+#シナリオ読み込み機能用のマーカー文字列(変更してはいけません)
+image_upload_dir_marker: "###ROOM_LOCAL_SPACE###"
+
+#削除対象から外す画像ディレクトリ名一覧
+protect_image_paths: []
+
+#リプレイデータの保存パス
+replay_data_upload_dir: ./replayDataUploadSpace
+
+#セーブデータの一時保存パス
+save_data_temp_dir: ./saveDataTempSpace
+
+#ファイルアップローダーのパス
+file_upload_dir: fileUploadSpace
+
+#ログイン画面に表示される「お知らせ」メッセージの定義ファイル名
+login_message_file: loginMessage.html
+
+#ログイン画面に表示される「更新履歴」の定義ファイル名
+login_message_base_file: loginMessageBase.html
+
+#古いセーブファイルの自動削除を行うかを判定するための基準経過時間(秒)
+old_save_file_delte_seconds: 180
+
+#プレイルームを削除してもよい経過時間(秒)
+deletable_passed_seconds: 10
+
+#ダイスボットの有効(true)、無効(false)の設定
+is_dicebot: On
+
+#デバッグ用：メンテナンス用の管理用パスワード。nilなら指定なしでメンテナンスモードに移行できません。
+#　設定している場合 DodontoF.swf?mode=admin　にアクセスすることで、「管理用パスワード」を入力できるようになります。
+#　パスワードを正しく入力すると、パスワードの掛かった部屋でもログインし、内部の状況を確認する事ができます。
+#パスワードは以下の様に指定します。
+# $mentenanceModePassword = "pasuwaado"
+mentenance_mode_password: null
+
+#デバッグ用：0以上の値を設定するとそのプレイルームへ自動的にログインします
+# $autoLoginRoom = -1
+# → この機能は削除されました。今後はURLの末尾に DodontoF.swf?loginRoom=1
+# のように追記することで自動ログインできるようになります。
+
+#ログイン時の「＊＊さんがログインしました」メッセージの表示（false:非表示）
+#ログアウト時のメッセージも抑止
+is_welcome_message: On
+
+#セーブデータの管理方法(nil/"mysql")
+# $dbType = nil
+db_type: null
+
+#MySQLを使用する場合のDB設定。
+database_host_name: localhost
+database_name: databaseName
+database_username: user
+database_password: password
+
+#サーバ更新中の場合はtrueへ。ログイン中のメンバーは遮断され、新規ログインもできなくなります。
+is_mentenance: Off
+
+#サーバの応答データをGZIP圧縮する場合の閾値(単位：byte)。
+# 0 を指定するとGZIP圧縮しなくなります。
+gzip_target_size: 0
+
+#削除不可能なプレイルーム番号を指定
+#たとえばプレイルーム0と1を削除できなくするなら
+# $unremovablePlayRoomNumbers = [0, 1]
+#となります。デフォルトは指定なし。
+unremovable_play_room_numbers: [0]
+
+#上記と同様に、ロード不可の指定
+unloadable_play_room_numbers: [0]
+
+#上記と同様に、パスワード設定不可の指定
+no_password_play_room_numbers: [0]
+
+#FirstCGIを使用する場合にはtrueに設定。通常のCGIであればfalseのまま。
+is_fast_cgi: Off
+
+#mod_rubyを使用する場合にはtrueに設定。通常のCGIであればfalseのまま。
+is_mod_ruby: Off
+
+#画面に使用するスキン画像 nil なら指定無し
+skin_image: null
+
+#マップ左上に性能管理を表示するかの指定。(参照：https://github.com/mrdoob/Hi-ReS-Stats）
+is_paformance_monitor: Off
+
+#画面の更新速度。nilなら従来通りFlexの初期固定値(30)のまま。
+fps: 60
+
+#マップの横幅・縦幅として設定できる最大マス数
+map_max_width: 150
+map_max_heigth: 150
+
+#アップロード可能なシナリオデータの上限(MB)
+scenario_data_max_size: 100.0
+
+#読み上げ機能の有効／無効(true/false)。サーバに負荷が掛かるので有効化は慎重に
+#あ、あとPHP環境必須なんでその辺は頑張って下さい。
+can_talk: On
+
+#差分記録方式で保存する保存件数
+record_max_count: 5
+
+#通信方式を擬似Comet方式にするなら true に。
+#サーバ応答時に即座にクライアントに返答するには falseに。
+is_comet: On
+
+#擬似Commetを使わない場合のクライアント側での再読み込み待ち時間
+refresh_interval_for_not_Comet: 2.0
+
+#チャットの送信失敗時の再送上限回数。これを超えると送信失敗扱いになります。
+retry_count_limit: 3
+
+#ログインしていられる最大時間。
+# 1 以上の数値を指定するとその秒数経過でサーバからたたき出されます
+#（開発環境用なので、通常は変更不要）
+login_time_limit_second: 0
+
+#簡易アップロード機能でアップロードしたファイルの保持時間（秒）
+upload_file_time_limit_seconds: 360
+
+#古いプレイルームを一括削除する時の指定日数（日である点に注意）
+# 0 以下の値の場合、処理されません。
+remove_old_play_room_limit_days: 5
+
+#キャラクターの情報を前回との差分レベルで管理する方式（Record方式と勝手に命名）
+#コマの連続移動で移動したコマが手戻りする事がなくなり使いやすい反面、
+#サーバの負荷が高くなります。
+#運用負荷を見て、有効(true)無効（false)を切り替えて下さい。
+is_use_record: On
+
+#プレイルーム作成時に認証パスワードを要求するかどうかの指定。
+#指定すると認証パスワードが合致しない限り新しい部屋を作製できません。
+#指定方法は下記の通り。空白文字列だとパスワード無し。
+# $createPlayRoomPassword="abc"
+create_play_room_password: ""
+
+
+#レンタルサーバではなく自前サーバ等でRubyスクリプトのインストールが可能な場合、
+# gem install msgpack
+#を実行し、下記の設定を
+# $isMessagePackInstalled = true
+#に変更してください。処理が早くなります。
+is_message_pack_installed: Off
+
+#デフォルトで表示されるユーザー名
+#配列なので、 ["abc", "def"] のように複数記述すると、どれかがランダムで表示されます。
+#基本変更する必要はありません。誰得機能。
+default_user_names:
+  - ななしさん
+
+#部屋削除時にパスワード入力が必要かどうかを設定します
+# true ： パスワード必要、 false : パスワード不要。
+is_password_need_delete_play_room: On
+
+#ダイスボット一覧に表示するダイスボットの名前順序
+#標準添付ののダイスボットで表示したくない物ははここから削除して下さい。
+#
+#独自のダイスボットのファイルを src_bcdice/diceBot に置いた場合は、
+#そのダイスボットの名前をここに書いておけば任意の順序で表示できます。
+#書いてない場合は末尾に並びます。
+#
+dicebot_order: |-
+  ダイスボット(指定無し)
+  アースドーン
+  アリアンロッド
+  アルスマギカ
+  ウィッチクエスト
+  ウォーハンマー
+  エルリック！
+  エムブリオマシン
+  カードランカー
+  カオスフレア
+  ガンドッグ
+  ガンドッグ・ゼロ
+  クトゥルフ
+  クトゥルフテック
+  ゲヘナ・アナスタシス
+  サタスペ
+  シノビガミ
+  シャドウラン
+  シャドウラン第４版
+  真空学園
+  真・女神転生TRPG　覚醒編
+  絶対隷奴
+  ソードワールド
+  ソードワールド2.0
+  ダークブレイズ
+  ダブルクロス2nd,3rd
+  墜落世界
+  デモンパラサイト
+  トーグ
+  特命転攻生
+  トンネルズ＆トロールズ
+  ナイトウィザード
+  ナイトメアハンター=ディープ
+  ネクロニカ
+  バトルテック
+  パラサイトブラッド
+  バルナ・クロニカ
+  ハンターズムーン
+  ピーカーブー
+  ファンタズムアドベンチャー
+  ブラッド・クルセイド
+  ペンドラゴン
+  マギカロギア
+  迷宮デイズ
+  迷宮キングダム
+  モノトーン・ミュージアム
+  りゅうたま
+  ルーンクエスト
+  六門世界2nd
+  ロールマスター
+  ワープス
+  比叡山炎上
+  無限のファンタジア
+  Chill
+  Eclipse Phase
+  NJSLYRBATTLE

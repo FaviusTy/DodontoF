@@ -190,34 +190,34 @@ module ServerCommands
     card_infos = cards_info.collectCardTypeAndTypeName
 
     result = {
-        :loginMessage => login_message,
-        :cardInfos => card_infos,
-        :isDiceBotOn => Configure.is_dicebot,
-        :uniqueId => unique_id,
-        :refreshTimeout => Configure.refresh_timeout,
-        :refreshInterval => refresh_interval,
-        :isCommet => Configure.is_comet,
-        :version => Configure.version,
-        :playRoomMaxNumber => (Configure.save_data_max_count - 1),
-        :warning => login_warning,
-        :playRoomGetRangeMax => Configure.play_room_get_range_max,
-        :allLoginCount => all_login_count.to_i,
-        :limitLoginCount => Configure.limit_login_count,
-        :loginUserCountList => login_user_count_list,
-        :maxLoginCount => Configure.about_max_login_count,
-        :skinImage => Configure.skin_image,
-        :isPaformanceMonitor => Configure.is_paformance_monitor,
-        :fps => Configure.fps,
-        :loginTimeLimitSecond => Configure.login_time_limit_second,
+        :loginMessage               => login_message,
+        :cardInfos                  => card_infos,
+        :isDiceBotOn                => Configure.is_dicebot,
+        :uniqueId                   => unique_id,
+        :refreshTimeout             => Configure.refresh_timeout,
+        :refreshInterval            => refresh_interval,
+        :isCommet                   => Configure.is_comet,
+        :version                    => Configure.version,
+        :playRoomMaxNumber          => (Configure.save_data_max_count - 1),
+        :warning                    => login_warning,
+        :playRoomGetRangeMax        => Configure.play_room_get_range_max,
+        :allLoginCount              => all_login_count.to_i,
+        :limitLoginCount            => Configure.limit_login_count,
+        :loginUserCountList         => login_user_count_list,
+        :maxLoginCount              => Configure.about_max_login_count,
+        :skinImage                  => Configure.skin_image,
+        :isPaformanceMonitor        => Configure.is_paformance_monitor,
+        :fps                        => Configure.fps,
+        :loginTimeLimitSecond       => Configure.login_time_limit_second,
         :removeOldPlayRoomLimitDays => Configure.remove_old_play_room_limit_days,
-        :canTalk => Configure.can_talk,
-        :retryCountLimit => Configure.retry_count_limit,
-        :imageUploadDirInfo => { Configure.local_upload_dir_marker => Configure.image_upload_dir },
-        :mapMaxWidth => Configure.map_max_width,
-        :mapMaxHeigth => Configure.map_max_heigth,
-        :diceBotInfos => dicebot_infos,
-        :isNeedCreatePassword => (not Configure.create_play_room_password.empty?),
-        :defaultUserNames => Configure.default_user_names,
+        :canTalk                    => Configure.can_talk,
+        :retryCountLimit            => Configure.retry_count_limit,
+        :imageUploadDirInfo         => { Configure.local_upload_dir_marker => Configure.image_upload_dir },
+        :mapMaxWidth                => Configure.map_max_width,
+        :mapMaxHeigth               => Configure.map_max_heigth,
+        :diceBotInfos               => dicebot_infos,
+        :isNeedCreatePassword       => (not Configure.create_play_room_password.empty?),
+        :defaultUserNames           => Configure.default_user_names,
     }
 
     logging(result, 'result')
@@ -233,8 +233,8 @@ module ServerCommands
     play_room_states = play_room_states_local(min_room, max_room)
 
     result = {
-        :min_room => min_room,
-        :max_room => max_room,
+        :min_room       => min_room,
+        :max_room       => max_room,
         :playRoomStates => play_room_states,
     }
 
@@ -367,7 +367,7 @@ module ServerCommands
     base_name     = get_new_savefile_base_name(DodontoFServer::FULL_BACKUP_BASE_NAME)
     scenario_file = make_scenario_file(dir, base_name)
 
-    result                 = {}
+    result                = {}
     result[:result]       = 'OK'
     result[:saveFileName] = scenario_file
 
@@ -459,7 +459,7 @@ module ServerCommands
         :resultText => 'OK',
     }
 
-    dir                  = dicebot_extra_table_dir_name
+    dir                 = dicebot_extra_table_dir_name
     result[:tableInfos] = get_bot_table_infos_from_dir(dir)
 
     logging(result, 'result')
@@ -468,7 +468,7 @@ module ServerCommands
   end
 
   def add_bot_table
-    result               = {}
+    result              = {}
     result[:resultText] = add_bot_table_main
 
     if result[:resultText] != 'OK'
@@ -484,7 +484,7 @@ module ServerCommands
   end
 
   def change_bot_table
-    result               = {}
+    result              = {}
     result[:resultText] = change_bot_table_main
 
     if result[:resultText] != 'OK'
@@ -548,7 +548,7 @@ module ServerCommands
 
         replay_data_list.delete_if do |i|
           if (i['url'] == replay_data['url']) and (i['title'] == replay_data['title'])
-            delete_file(i['fileName'])
+            File.delete(i['fileName'])
             true
           else
             false
@@ -612,15 +612,15 @@ module ServerCommands
     logging(:isPasswordLocked, is_password_locked)
 
     result = {
-        :isRoomExist => is_exist_playroom_info,
-        :roomName => play_room_name,
-        :roomNumber => room_number,
-        :chatChannelNames => chat_channel_names,
+        :isRoomExist         => is_exist_playroom_info,
+        :roomName            => play_room_name,
+        :roomNumber          => room_number,
+        :chatChannelNames    => chat_channel_names,
         :canUseExternalImage => can_use_external_image,
-        :canVisit => can_visit,
-        :isPasswordLocked => is_password_locked,
-        :isMentenanceModeOn => is_maintenance_on,
-        :isWelcomeMessageOn => is_welcome_message_on,
+        :canVisit            => can_visit,
+        :isPasswordLocked    => is_password_locked,
+        :isMentenanceModeOn  => is_maintenance_on,
+        :isWelcomeMessageOn  => is_welcome_message_on,
     }
 
     logging(result, 'checkRoomStatus End result')
@@ -650,7 +650,7 @@ module ServerCommands
       file_upload_url = base_url + fileNameFullPath
 
       result[:uploadFileInfo] = {
-          :fileName => fileNameOriginal,
+          :fileName      => fileNameOriginal,
           :fileUploadUrl => file_upload_url,
       }
     end
@@ -682,7 +682,7 @@ module ServerCommands
       image_file_base_name = new_file_name(image_file_name, 'img')
       logging(image_file_base_name, 'imageFileNameBase')
 
-      upload_image_file_name = file_join(save_dir, image_file_base_name)
+      upload_image_file_name = File.join(save_dir, image_file_base_name)
       logging(upload_image_file_name, 'uploadImageFileName')
 
       open(upload_image_file_name, 'wb+') do |file|
@@ -733,7 +733,8 @@ module ServerCommands
       @savedir_info.remove_dir(play_room_index)
       logging('@saveDirInfo.removeSaveDir(playRoomIndex) End')
 
-      create_dir(play_room_index)
+      @savedir_info.dir_index(play_room_index)
+      @savedir_info.create_dir
 
       play_room_changed_password = changed_password(play_room_password)
       logging(play_room_changed_password, 'playRoomChangedPassword')
@@ -763,7 +764,7 @@ module ServerCommands
     end
 
     result = {
-        :resultText => result_text,
+        :resultText    => result_text,
         :playRoomIndex => play_room_index,
     }
     logging(result, 'result')
@@ -832,8 +833,8 @@ module ServerCommands
   end
 
   def remove_old_play_room
-    all_range     = (0 .. Configure.save_data_max_count)
-    access_times = save_data_lastaccess_times(all_range)
+    all_range    = (0 .. Configure.save_data_max_count)
+    access_times = SaveDirInfo::save_data_last_access_times(SaveDirInfo::FILE_NAME_SET.values, all_range)
     remove_old_room_for_access_times(access_times)
   end
 
@@ -1000,7 +1001,7 @@ module ServerCommands
     }
 
     change_save_data(@savefiles.map) do |saveData|
-      draws          = draws(saveData)
+      draws         = draws(saveData)
       result[:data] = draws.pop
     end
 
@@ -1260,12 +1261,12 @@ module ServerCommands
 
     set_record_empty
 
-    clear_character_by_type_local(card_type)
-    clear_character_by_type_local(card_mount_type)
-    clear_character_by_type_local(random_dungeon_card_mount_type)
-    clear_character_by_type_local(card_zone_type)
-    clear_character_by_type_local(card_trash_mount_type)
-    clear_character_by_type_local(random_dungeon_card_trash_mount_type)
+    clear_character_by_type_local(DodontoFServer::CARD_TYPE)
+    clear_character_by_type_local(DodontoFServer::CARD_MOUNT_TYPE)
+    clear_character_by_type_local(DodontoFServer::DUNGEON_MOUNT_TYPE)
+    clear_character_by_type_local(DodontoFServer::CARD_ZONE_TYPE)
+    clear_character_by_type_local(DodontoFServer::CARD_TRASH_TYPE)
+    clear_character_by_type_local(DodontoFServer::DUNGEON_TRASH_TYPE)
 
     card_type_infos = params['cardTypeInfos']
     logging(card_type_infos, 'cardTypeInfos')
@@ -1389,7 +1390,7 @@ module ServerCommands
       return if (trash_mount_data.nil?)
       set_trash_mount_data_cards_info(saveData, trash_mount_data, trash_cards)
 
-      card_mount_data = find_card_mount_data_by_type(characters, mount_name, card_mount_type)
+      card_mount_data = find_card_mount_data_by_type(characters, mount_name, DodontoFServer::CARD_MOUNT_TYPE)
       return if (card_mount_data.nil?)
 
       if is_shuffle
@@ -1429,7 +1430,7 @@ module ServerCommands
       mount_cards            = card_mount[mount_name]
 
       characters      = characters(saveData)
-      card_mount_data = find_card_mount_data_by_type(characters, mount_name, random_dungeon_card_mount_type)
+      card_mount_data = find_card_mount_data_by_type(characters, mount_name, DodontoFServer::DUNGEON_MOUNT_TYPE)
       return if (card_mount_data.nil?)
 
       ace_list = card_mount_data['aceList']
@@ -1629,7 +1630,7 @@ module ServerCommands
 
   def change_effect
     change_save_data(@savefiles.effects) do |saveData|
-      effect_data     = params
+      effect_data      = params
       target_cut_in_id = effect_data['effectId']
 
       saveData['effects'] ||= []

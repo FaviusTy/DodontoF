@@ -51,12 +51,18 @@ class DodontoFServer
   include ServerCommands
 
   FULL_BACKUP_BASE_NAME = 'DodontoFFullBackup'
-  DICEBOT_TABLE_PREFIX = 'diceBotTable_'
-  SCENARIO_FILE_EXT = '.tar.gz'
+  DICEBOT_TABLE_PREFIX  = 'diceBotTable_'
+  SCENARIO_FILE_EXT     = '.tar.gz'
+  CARD_TYPE = 'Card'
+  CARD_MOUNT_TYPE = 'CardMount'
+  DUNGEON_MOUNT_TYPE = 'RandomDungeonCardMount'
+  CARD_TRASH_TYPE = 'CardTrushMount'
+  DUNGEON_TRASH_TYPE = 'RandomDungeonCardTrushMount'
+  CARD_ZONE_TYPE = 'CardZone'
+  TEST_RESPONSE = '「どどんとふ」の動作環境は正常に起動しています。'
 
-  attr :is_add_marker
-  attr :jsonp_callback
-  attr :is_json_result
+
+  attr_accessor :is_add_marker, :jsonp_callback, :is_json_result, :is_record_empty
 
   def initialize(savedir_info, request_params)
     @request_params = request_params
@@ -70,7 +76,7 @@ class DodontoFServer
     @is_web_interface = false
     @is_json_result   = true
     @is_record_empty  = false
-    @card                  = nil
+    @card             = nil
   end
 
   def init_savefiles(room_index)
@@ -109,14 +115,6 @@ class DodontoFServer
     @card ||= Card.new
   end
 
-  def savefile_lock_readonly(file_name)
-    savefile_lock(file_name, true)
-  end
-
-  def real_savefile_lock_readonly(file_name)
-    real_savefile_lock(file_name, true)
-  end
-
   def self.lockfile_name(savefile_name)
     default_name = (savefile_name + '.lock')
 
@@ -151,7 +149,7 @@ class DodontoFServer
 
   def load_long_chatlog(type_name, savefile_name)
     savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::CHAT_LONG_LINE_FILE)
-    lockfile      = savefile_lock_readonly(savefile_name)
+    lockfile      = savefile_lock(savefile_name, true)
 
     lines = []
     lockfile.lock do
@@ -322,7 +320,7 @@ class DodontoFServer
   end
 
   def load_default_savefile(type_name, file_name)
-    lockfile = savefile_lock_readonly(file_name)
+    lockfile = savefile_lock(file_name, true)
 
     text_data = ''
     lockfile.lock do
@@ -385,7 +383,7 @@ class DodontoFServer
 
     real_savefile_name = @savedir_info.real_savefile_name($record)
     change_save_data(real_savefile_name) do |_save_data|
-      if @is_record_empty
+      if is_record_empty
         clear_record(_save_data)
       else
         write_record(_save_data, 'removeCharacter', removed_ids)
@@ -656,7 +654,7 @@ class DodontoFServer
 
   def response_for_none_command
     logging 'getResponseTextWhenNoCommandName Begin'
-    execute_webif_command || test_response
+    execute_webif_command || TEST_RESPONSE
   end
 
   def execute_webif_command
@@ -755,10 +753,6 @@ class DodontoFServer
     return if callback.empty?
 
     @jsonp_callback = callback
-  end
-
-  def test_response
-    '「どどんとふ」の動作環境は正常に起動しています。'
   end
 
   def current_save_data
@@ -867,7 +861,7 @@ class DodontoFServer
 
     {
         :result => 'OK',
-        :color => color }
+        :color  => color }
   end
 
   def chat_color_in_save_data(name)
@@ -885,17 +879,13 @@ class DodontoFServer
     nil
   end
 
-  def default_color
-    '000000'
-  end
-
   def busy_info
     {
-            "loginCount"    => File.readlines(Configure.login_count_file).join.to_i,
-            "maxLoginCount" => Configure.about_max_login_count,
-            "version"       => Configure.version,
-            "result"        => 'OK',
-        }
+        "loginCount"    => File.readlines(Configure.login_count_file).join.to_i,
+        "maxLoginCount" => Configure.about_max_login_count,
+        "version"       => Configure.version,
+        "result"        => 'OK',
+    }
   end
 
   def server_info_for_webif
@@ -946,7 +936,7 @@ class DodontoFServer
     message.gsub!(/\r\n/, "\r")
     logging(message, 'message')
 
-    color = request_text_for_webif('color', default_color)
+    color = request_text_for_webif('color', '000000')
     logging(color, 'color')
 
     channel = request_int_for_webif('channel')
@@ -971,7 +961,7 @@ class DodontoFServer
 
     send_chat_message_by_chat_data(chat_data)
 
-    result           = {}
+    result          = {}
     result[:result] = 'OK'
     result
   end
@@ -1043,7 +1033,7 @@ class DodontoFServer
   def send_memo_for_webif
     logging('sendWebIfAddMemo begin')
 
-    result           = {}
+    result          = {}
     result[:result] = 'OK'
 
     result_context = {
@@ -1069,7 +1059,7 @@ class DodontoFServer
   def send_add_character_for_webif
     logging('sendWebIfAddCharacter begin')
 
-    result           = {}
+    result          = {}
     result[:result] = 'OK'
 
     character_data = {
@@ -1129,7 +1119,7 @@ class DodontoFServer
   def change_character_for_webif
     logging('sendWebIfChangeCharacter begin')
 
-    result           = {}
+    result          = {}
     result[:result] = 'OK'
 
     begin
@@ -1202,12 +1192,12 @@ class DodontoFServer
   def room_info_for_webif
     logging('getWebIfRoomInfo begin')
 
-    result           = {}
+    result          = {}
     result[:result] = 'OK'
 
     save_data(@savefiles.time) do |data|
       logging(data, 'saveData')
-      round_time_data   = data['roundTimeData'] || {}
+      round_time_data  = data['roundTimeData'] || {}
       result[:counter] = data['counterNames'] || []
     end
 
@@ -1238,7 +1228,7 @@ class DodontoFServer
   def set_room_info_for_webif
     logging('setWebIfRoomInfo begin')
 
-    result           = {}
+    result          = {}
     result[:result] = 'OK'
 
     set_counter_names_in_room_info_webif
@@ -1301,11 +1291,11 @@ class DodontoFServer
     chat_time = request_number_for_webif('chat', -1)
 
     @last_update_times = {
-        'chatMessageDataLog'      => chat_time,
-        'map'                     => request_number_for_webif('map', -1),
-        'characters'              => request_number_for_webif('characters', -1),
-        'time'                    => request_number_for_webif('time', -1),
-        'effects'                 => request_number_for_webif('effects', -1),
+        'chatMessageDataLog'        => chat_time,
+        'map'                       => request_number_for_webif('map', -1),
+        'characters'                => request_number_for_webif('characters', -1),
+        'time'                      => request_number_for_webif('time', -1),
+        'effects'                   => request_number_for_webif('effects', -1),
         SaveDirInfo::PLAY_ROOM_INFO => request_number_for_webif('roomInfo', -1),
     }
 
@@ -1442,7 +1432,7 @@ class DodontoFServer
     return if (is_logout)
 
     user_info = {
-        :userName => user_name,
+        :userName    => user_name,
         :timeSeconds => now_seconds,
     }
 
@@ -1503,13 +1493,9 @@ class DodontoFServer
     login_user_list
   end
 
-  def save_data_lastaccess_times(target_range)
-    @savedir_info.save_data_last_access_times(SaveDirInfo::FILE_NAME_SET.values, target_range)
-  end
-
   def save_data_lastaccess_time(file_name, room_no)
-    data = @savedir_info.save_data_last_access_times([file_name], [room_no])
-    time = data[room_no]
+    data = SaveDirInfo::save_data_last_access_times([file_name], [room_no])
+    data[room_no]
   end
 
   def remove_old_room_for_access_times(access_times)
@@ -1776,7 +1762,7 @@ class DodontoFServer
     text = "#{all_login_count}"
 
     savefile_name = Configure.login_count_file
-    lockfile      = real_savefile_lock_readonly(savefile_name)
+    lockfile      = real_savefile_lock(savefile_name, true)
 
     lockfile.lock do
       File.open(savefile_name, 'w+') do |file|
@@ -1788,7 +1774,7 @@ class DodontoFServer
   def login_warning
     unless File.exist?(small_image_dir)
       return {
-          :key => 'noSmallImageDir',
+          :key    => 'noSmallImageDir',
           :params => [small_image_dir],
       }
     end
@@ -1885,11 +1871,6 @@ class DodontoFServer
     command_infos
   end
 
-  def create_dir(play_room_index)
-    @savedir_info.dir_index(play_room_index)
-    @savedir_info.create_dir
-  end
-
   def check_create_play_room_password(password)
     logging('checkCreatePlayRoomPassword Begin')
     logging(password, 'password')
@@ -1975,7 +1956,7 @@ class DodontoFServer
       return 'unremovablePlayRoomNumber'
     end
 
-    last_access_times = save_data_lastaccess_times(room_number_range)
+    last_access_times = SaveDirInfo::save_data_last_access_times(SaveDirInfo::FILE_NAME_SET.values, room_number_range)
     last_access_time  = last_access_times[room_number]
     logging(last_access_time, 'lastAccessTime')
 
@@ -2041,10 +2022,10 @@ class DodontoFServer
     end
 
     result = {
-        :deletedRoomNumbers => deleted_room_numbers,
+        :deletedRoomNumbers   => deleted_room_numbers,
         :askDeleteRoomNumbers => ask_delete_room_numbers,
-        :passwordRoomNumbers => password_room_numbers,
-        :errorMessages => error_messages,
+        :passwordRoomNumbers  => password_room_numbers,
+        :errorMessages        => error_messages,
     }
     logging(result, 'result')
 
@@ -2054,10 +2035,6 @@ class DodontoFServer
   def remove_local_space_dir(room_number)
     dir = room_local_space_dir_name_by_room_no(room_number)
     SaveDirInfo.remove_dir(dir)
-  end
-
-  def real_savefile_name(file_name)
-    @savedir_info.real_savefile_name(file_name)
   end
 
   def savedata_all_for_scenario
@@ -2264,7 +2241,7 @@ class DodontoFServer
   end
 
   def save_select_files_from_all_savedata(all_savedata, extension)
-    result           = {}
+    result          = {}
     result[:result] = 'unknown error'
 
     if all_savedata.empty?
@@ -2304,7 +2281,7 @@ class DodontoFServer
     end
 
     if is_add_playroom_info
-      true_savefile_name                            = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
+      true_savefile_name                              = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
       @last_update_times[SaveDirInfo::PLAY_ROOM_INFO] = 0
       if savefile_changed?(0, true_savefile_name)
         all_savedata[SaveDirInfo::PLAY_ROOM_INFO] = load_savefile(SaveDirInfo::PLAY_ROOM_INFO, true_savefile_name)
@@ -2316,15 +2293,10 @@ class DodontoFServer
     all_savedata
   end
 
-  #override
-  def file_join(*parts)
-    File.join(*parts)
-  end
-
   def get_new_savefile_name(extension)
     base_name     = get_new_savefile_base_name('DodontoF')
     savefile_name = base_name + ".#{extension}"
-    file_join(Configure.save_data_temp_dir, savefile_name).untaint
+    File.join(Configure.save_data_temp_dir, savefile_name).untaint
   end
 
   def get_new_savefile_base_name(prefix)
@@ -2365,7 +2337,7 @@ class DodontoFServer
         next if (diff < Configure.old_save_file_delete_seconds)
 
         begin
-          delete_file(saveFileName)
+          File.delete(saveFileName)
         rescue => e
           logging_exception(e)
         end
@@ -2401,9 +2373,9 @@ class DodontoFServer
     dir_name = @savedir_info.data_dir_path
 
     result = {
-        :resultText => '',
+        :resultText  => '',
         :visiterMode => false,
-        :roomNumber => room_number,
+        :roomNumber  => room_number,
     }
 
     is_room_exist = (File.exist?(dir_name))
@@ -2561,7 +2533,7 @@ class DodontoFServer
   end
 
   def get_replay_data_info_file_name
-    file_join(Configure.replay_data_up_load_dir, 'replayDataInfo.json')
+    File.join(Configure.replay_data_up_load_dir, 'replayDataInfo.json')
   end
 
   #image_info_file_name() ) do |saveData|
@@ -2609,7 +2581,7 @@ class DodontoFServer
   def upload_base_file(file_upload_dir, max_size, is_rename = true)
     logging('uploadFile() Begin')
 
-    result = {:resultText => 'NG'}
+    result = { :resultText => 'NG' }
 
     begin
 
@@ -2633,7 +2605,7 @@ class DodontoFServer
         file_name = new_file_name(org_file_name)
       end
 
-      full_path = file_join(file_upload_dir, file_name).untaint
+      full_path = File.join(file_upload_dir, file_name).untaint
       logging(full_path, 'fileNameFullPath')
 
       yield(full_path, org_file_name, result)
@@ -2968,7 +2940,7 @@ class DodontoFServer
   end
 
   def small_image_dir
-    file_join(Configure.image_upload_dir, 'smallImages')
+    File.join(Configure.image_upload_dir, 'smallImages')
   end
 
   def save_small_image(small_image_data, file_base_name, upload_image_file_name)
@@ -2976,7 +2948,7 @@ class DodontoFServer
     logging(file_base_name, 'imageFileNameBase')
     logging(upload_image_file_name, 'uploadImageFileName')
 
-    upload_file_full_path = file_join(small_image_dir, file_base_name)
+    upload_file_full_path = File.join(small_image_dir, file_base_name)
     upload_file_full_path += '.png'
     upload_file_full_path.untaint
     logging(upload_file_full_path, 'uploadSmallImageFileName')
@@ -3047,7 +3019,7 @@ class DodontoFServer
     logging(image_url, 'deleteTargetImageUrl(imageUrl)')
 
     if image_files.include?(image_url) && File.exist?(image_url)
-      delete_file(image_url)
+      File.delete(image_url)
       return true
     end
 
@@ -3245,7 +3217,7 @@ class DodontoFServer
     data = {
         'chatMessage' => message,
         'randResults' => rand_results,
-        'uniqueId' => params['uniqueId'],
+        'uniqueId'    => params['uniqueId'],
     }
 
     text = '###CutInCommand:rollVisualDice###' + DodontoFServer::build_json(data)
@@ -3328,7 +3300,7 @@ class DodontoFServer
   end
 
   def chat_message_data_log(save_data)
-    array_info(save_data, 'chatMessageDataLog')
+    save_data['chatMessageDataLog'] ||= []
   end
 
   def save_all_chat_message(chat_message_data)
@@ -3445,7 +3417,7 @@ class DodontoFServer
   end
 
   def image_info_file_name
-    image_info_file_name = file_join(Configure.image_upload_dir, 'imageInfo.json')
+    image_info_file_name = File.join(Configure.image_upload_dir, 'imageInfo.json')
 
     logging(image_info_file_name, 'imageInfoFileName')
 
@@ -3486,7 +3458,7 @@ class DodontoFServer
 
       small_image = tag_info['smallImage']
       begin
-        delete_file(small_image)
+        File.delete(small_image)
       rescue => e
         error_message = error_response_body(e)
         logging_exception(e)
@@ -3494,10 +3466,6 @@ class DodontoFServer
     end
 
     true
-  end
-
-  def delete_file(file)
-    File.delete(file)
   end
 
   def image_tags
@@ -3610,26 +3578,6 @@ class DodontoFServer
     end
   end
 
-  def card_type
-    'Card'
-  end
-
-  def card_mount_type
-    'CardMount'
-  end
-
-  def random_dungeon_card_mount_type
-    'RandomDungeonCardMount'
-  end
-
-  def card_trash_mount_type
-    'CardTrushMount'
-  end
-
-  def random_dungeon_card_trash_mount_type
-    'RandomDungeonCardTrushMount'
-  end
-
   def rotation(is_up_down)
     rotation = 0
 
@@ -3643,24 +3591,24 @@ class DodontoFServer
   def card_data(is_text, image_name, image_name_back, mount_name, is_up_down = false, can_delete = false)
 
     {
-        'imageName' => image_name,
+        'imageName'     => image_name,
         'imageNameBack' => image_name_back,
-        'isBack' => true,
-        'rotation' => rotation(is_up_down),
-        'isUpDown' => is_up_down,
-        'isText' => is_text,
-        'isOpen' => false,
-        'owner' => '',
-        'ownerName' => '',
-        'mountName' => mount_name,
-        'canDelete' => can_delete,
+        'isBack'        => true,
+        'rotation'      => rotation(is_up_down),
+        'isUpDown'      => is_up_down,
+        'isText'        => is_text,
+        'isOpen'        => false,
+        'owner'         => '',
+        'ownerName'     => '',
+        'mountName'     => mount_name,
+        'canDelete'     => can_delete,
 
-        'name' => '',
-        'imgId' => create_character_img_id,
-        'type' => card_type,
-        'x' => 0,
-        'y' => 0,
-        'draggable' => true,
+        'name'          => '',
+        'imgId'         => create_character_img_id,
+        'type'          => card_type,
+        'x'             => 0,
+        'y'             => 0,
+        'draggable'     => true,
     }
 
   end
@@ -3773,10 +3721,6 @@ class DodontoFServer
     result
   end
 
-  def card_zone_type
-    'CardZone'
-  end
-
   def card_zone_data(owner, owner_name, x, y)
     # cardMount, isText, imageNameBack, mountName, index, isUpDown)
     is_text         = true
@@ -3795,7 +3739,7 @@ class DodontoFServer
   def create_card_mount_data(card_mount, is_text, image_name_back, mount_name, index, is_up_down, card_type_info, cards)
     card_mount_data = card_data(is_text, image_name_back, image_name_back, mount_name)
 
-    card_mount_data['type'] = card_mount_type
+    card_mount_data['type'] = DodontoFServer::CARD_MOUNT_TYPE
     set_card_count_and_back_image(card_mount_data, card_mount[mount_name])
     card_mount_data['mountName'] = mount_name
     card_mount_data['isUpDown']  = is_up_down
@@ -3808,7 +3752,7 @@ class DodontoFServer
 
     if random_dungeon_trump?(card_type_info)
       card_count                              = card_type_info['cardCount']
-      card_mount_data['type']                 = random_dungeon_card_mount_type
+      card_mount_data['type']                 = DodontoFServer::DUNGEON_MOUNT_TYPE
       card_mount_data['cardCountDisplayDiff'] = cards.length - card_count
       card_mount_data['useCount']             = card_count
       card_mount_data['aceList']              = card_type_info['aceList']
@@ -3849,7 +3793,7 @@ class DodontoFServer
 
     image_name, image_name_back, is_text = card_trash_mount_image_name(mount_name, cards)
 
-    card_mount_image_data = find_card_mount_data_by_type(characters, mount_name, card_trash_mount_type)
+    card_mount_image_data = find_card_mount_data_by_type(characters, mount_name, DodontoFServer::CARD_TRASH_TYPE)
     return if (card_mount_image_data.nil?)
 
     card_mount_image_data['cardCount']     = cards.size
@@ -3886,10 +3830,10 @@ class DodontoFServer
 
   def card_trash_mount_type_from_card_type_info(card_type_info)
     if random_dungeon_trump?(card_type_info)
-      return random_dungeon_card_trash_mount_type
+      return DodontoFServer::DUNGEON_TRASH_TYPE
     end
 
-    card_trash_mount_type
+    DodontoFServer::CARD_TRASH_TYPE
   end
 
   def draw_card_data_one(params, save_data)
@@ -4059,33 +4003,23 @@ class DodontoFServer
   end
 
   def graveyard(save_data)
-    array_info(save_data, 'graveyard')
+    save_data['graveyard'] ||= []
   end
 
   def waiting_room(save_data)
-    array_info(save_data, 'waitingRoom')
+    save_data['waitingRoom'] ||= []
   end
 
   def characters(save_data)
-    array_info(save_data, 'characters')
+    save_data['characters'] ||= []
   end
 
   def cards(card_mount, mount_name)
-    array_info(card_mount, mount_name)
-  end
-
-  def array_info(hash, key)
-    hash[key] ||= []
-    hash[key]
+    card_mount[mount_name] ||= []
   end
 
   def card_mount(save_data)
-    hash_info(save_data, 'cardMount')
-  end
-
-  def hash_info(hash, key)
-    hash[key] ||= {}
-    hash[key]
+    save_data['cardMount'] ||= {}
   end
 
   def remove_from_array(array)
@@ -4255,10 +4189,10 @@ def extract_params_in_cgi
   logging content_length, 'getCgiParams length'
 
   input = if ENV['REQUEST_METHOD'] == 'POST'
-    $stdin.read(content_length)
-  else
-    ENV['QUERY_STRING']
-  end
+            $stdin.read(content_length)
+          else
+            ENV['QUERY_STRING']
+          end
 
   logging input, 'getCgiParams input'
   params = DodontoFServer::parse_msgpack(input)

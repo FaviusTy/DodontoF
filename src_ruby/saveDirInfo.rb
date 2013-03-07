@@ -10,36 +10,36 @@ class SaveDirInfo
   attr_accessor :dir_index, :sample_mode
 
   # ディレクトリ名の共通プリフィクス
-  PREFIX_DIR_NAME = 'data_'
+  PREFIX_DIR_NAME     = 'data_'
   # TODO:RESEARCH 元$saveFileNamesさん. 用途不特定
-  SAVE_FILE_NAMES = File.join(Configure.save_data_temp_dir, 'saveFileNames.json')
+  SAVE_FILE_NAMES     = File.join(Configure.save_data_temp_dir, 'saveFileNames.json')
   # TODO:RESEARCH 元$imageUrlTextさん. 用途不特定
-  IMG_URL_TEXT = File.join(Configure.image_upload_dir, 'imageUrl.txt')
+  IMG_URL_TEXT        = File.join(Configure.image_upload_dir, 'imageUrl.txt')
   # TODO:RESEARCH 元$chatMessageDataLogAllさん. 用途不特定
   CHAT_LONG_LINE_FILE = 'chatLongLines.txt'
   # TODO:RESEARCH 元$loginUserInfoさん
-  LOGIN_FILE = 'login.json'
+  LOGIN_FILE          = 'login.json'
   # TODO:RESEARCH 元$playRoomInfoさん
-  PLAY_ROOM_INFO = 'playRoomInfo'
+  PLAY_ROOM_INFO      = 'playRoomInfo'
   # TODO:RESEARCH 元$playRoomInfoTypeNameさん
-  PLAY_ROOM_INFO_FILE  = "#{PLAY_ROOM_INFO}.json"
+  PLAY_ROOM_INFO_FILE = "#{PLAY_ROOM_INFO}.json"
   # TODO:RESEARCH 元$saveFilesさん
-  FILE_NAME_SET = {
-      :chatMessageDataLog => 'chat.json',
-      :map => 'map.json',
-      :characters => 'characters.json',
-      :time => 'time.json',
-      :effects => 'effects.json',
+  FILE_NAME_SET       = {
+      :chatMessageDataLog  => 'chat.json',
+      :map                 => 'map.json',
+      :characters          => 'characters.json',
+      :time                => 'time.json',
+      :effects             => 'effects.json',
       :"#{PLAY_ROOM_INFO}" => PLAY_ROOM_INFO_FILE,
   }
 
   def init(dir_index_obj, max_number = 0, sub_dir = '.')
-    @sub_dir       = sub_dir
-    @max_number    = max_number
-    @sample_mode   = false
+    @sub_dir     = sub_dir
+    @max_number  = max_number
+    @sample_mode = false
 
     # dir_index_objから@dir_indexを生成
-    _dir_index = dir_index_obj.instance_of?(StringIO) ? dir_index_obj.string : dir_index_obj
+    _dir_index   = dir_index_obj.instance_of?(StringIO) ? dir_index_obj.string : dir_index_obj
     unless @sample_mode
       if _dir_index.to_i > @max_number
         raise "saveDataDirIndex:#{_dir_index} is over Limit:(#@max_number)"
@@ -49,7 +49,7 @@ class SaveDirInfo
   end
 
   # saveDataのアクセスパスを返す => 通常は ./saveData
-  def root_dir_path
+  def self.root_dir_path
     File.join(@sub_dir, 'saveData')
   end
 
@@ -60,7 +60,7 @@ class SaveDirInfo
       next unless (/#{PREFIX_DIR_NAME}(\d+)\Z/ === directory)
 
       room_index = $1.to_i
-      save_files  = names_exist_file(directory, file_names)
+      save_files = names_exist_file(directory, file_names)
 
       yield(save_files, room_index)
     end
@@ -68,18 +68,18 @@ class SaveDirInfo
 
   # file_namesのうち、引数dir内に存在するファイルのファイル名のみをフィルタリングして返す
   def names_exist_file(dir, file_names)
-    file_names.map {|file_name| File.join(dir, file_name) }
-              .find_all {|file| FileTest.exist? file }
+    file_names.map { |file_name| File.join(dir, file_name) }
+    .find_all { |file| FileTest.exist? file }
   end
 
   # target_range範囲内のindexのうち、ディレクトリが存在するものを返す
-  def exist_data_dirs(target_range)
-    dir_names = target_range.map{|i| "data_#{i}" }
+  def self.exist_data_dirs(target_range)
+    dir_names = target_range.map { |i| "data_#{i}" }
     names_exist_file(root_dir_path, dir_names) #TODO:FIXME ディレクトリ抽出にfileとあるメソッド名を使うのはちょっと微妙
   end
 
   # target_rangeの範囲内のdataディレクトリ別にfile_namesにあるファイル中で最新のtimestampを配列にして返す
-  def save_data_last_access_times(file_names, target_range) #TODO:FIXME 委譲関係が逆.単体分の処理をtimeメソッドに委譲する方が自然
+  def self.save_data_last_access_times(file_names, target_range) #TODO:FIXME 委譲関係が逆.単体分の処理をtimeメソッドに委譲する方が自然
     logging(file_names, 'getSaveDataLastAccessTimes fileNames')
 
     data_dirs = exist_data_dirs(target_range)

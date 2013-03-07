@@ -14,4 +14,5 @@ end
 
 if $0 === __FILE__
   puts "version: #{Configure.Version.numbering}"
+  puts "undefined: #{Configure.undefined}"
 end

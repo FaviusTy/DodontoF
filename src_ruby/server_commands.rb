@@ -136,7 +136,7 @@ module ServerCommands
     logging('getGraveyardCharacterData start.')
     result = []
 
-    save_data(@savefiles.characters) do |saveData|
+    save_data(@savedir_info.save_files.characters) do |saveData|
       graveyard = saveData['graveyard']
       graveyard ||= []
 
@@ -150,7 +150,7 @@ module ServerCommands
     img_id = params['imgId']
     logging(img_id, 'resurrectCharacterId')
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       _graveyard = graveyard(saveData)
 
       character_data = remove_from_array(_graveyard) do |character|
@@ -170,7 +170,7 @@ module ServerCommands
   def clear_graveyard
     logging('clearGraveyard begin')
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       graveyard = graveyard(saveData)
       graveyard.clear
     end
@@ -272,7 +272,7 @@ module ServerCommands
     add_local_image_to_list(image_files)
     logging(image_files, 'imageFiles')
 
-    url_file_name = SaveDirInfo::IMG_URL_TEXT
+    url_file_name = SaveData::IMG_URL_TEXT
     logging(url_file_name, 'imageUrlFileName')
 
     complete_count = 0
@@ -314,7 +314,7 @@ module ServerCommands
     image_url = image_data['imageUrl']
     logging(image_url, 'imageUrl')
 
-    image_url_text = SaveDirInfo::IMG_URL_TEXT
+    image_url_text = SaveData::IMG_URL_TEXT
     logging(image_url_text, 'imageUrlFileName')
 
     result_text = '画像URLのアップロードに失敗しました。'
@@ -341,7 +341,7 @@ module ServerCommands
   def save
     is_add_playroom_info = true
     extension            = request_data('extension')
-    save_select_files(SaveDirInfo::FILE_NAME_SET.keys, extension, is_add_playroom_info)
+    save_select_files(SaveData::FILE_NAME_SET.keys, extension, is_add_playroom_info)
   end
 
   def save_map
@@ -585,7 +585,7 @@ module ServerCommands
     can_use_external_image = false
     can_visit              = false
     is_password_locked     = false
-    true_savefile_name     = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
+    true_savefile_name     = @savedir_info.real_savefile_name(SaveData::PLAY_ROOM_INFO_FILE)
     is_exist_playroom_info = (File.exist?(true_savefile_name))
 
     if is_exist_playroom_info
@@ -742,7 +742,7 @@ module ServerCommands
       view_states = params['viewStates']
       logging('viewStates', view_states)
 
-      real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
+      real_savefile_name = @savedir_info.real_savefile_name(SaveData::PLAY_ROOM_INFO_FILE)
 
       change_save_data(real_savefile_name) do |saveData|
         saveData['playRoomName']            = play_room_name
@@ -790,7 +790,7 @@ module ServerCommands
       view_states = params['viewStates']
       logging('viewStates', view_states)
 
-      real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
+      real_savefile_name = @savedir_info.real_savefile_name(SaveData::PLAY_ROOM_INFO_FILE)
 
       change_save_data(real_savefile_name) do |saveData|
         saveData['playRoomName']            = params['playRoomName']
@@ -834,7 +834,7 @@ module ServerCommands
 
   def remove_old_play_room
     all_range    = (0 .. Configure.save_data_max_count)
-    access_times = SaveDirInfo::save_data_last_access_times(SaveDirInfo::FILE_NAME_SET.values, all_range)
+    access_times = SaveData::save_data_last_access_times(SaveData::FILE_NAME_SET.values, all_range)
     remove_old_room_for_access_times(access_times)
   end
 
@@ -861,7 +861,7 @@ module ServerCommands
     logging('getWaitingRoomInfo start.')
     result = []
 
-    save_data(@savefiles.characters) do |saveData|
+    save_data(@savedir_info.save_files.characters) do |saveData|
       waiting_room = waiting_room(saveData)
       result       = waiting_room
     end
@@ -879,7 +879,7 @@ module ServerCommands
     logging(character_id, 'exitWaitingRoomCharacter targetCharacterId')
 
     result = { :result => 'NG' }
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       waiting_room = waiting_room(saveData)
 
       character_data = remove_from_array(waiting_room) do |character|
@@ -909,7 +909,7 @@ module ServerCommands
     logging(character_id, 'enterWaitingRoomCharacter characterId')
 
     result = { :result => 'NG' }
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       characters = characters(saveData)
 
       enter_character_data = remove_from_array(characters) { |i| (i['imgId'] == character_id) }
@@ -952,7 +952,7 @@ module ServerCommands
   end
 
   def delete_chat_log
-    true_savefile_name = @savefiles.chatMessageDataLog
+    true_savefile_name = @savedir_info.save_files.chatMessageDataLog
     delete_chat_log_by_savefile(true_savefile_name)
 
     { :result => 'OK' }
@@ -979,7 +979,7 @@ module ServerCommands
 
       init_savefiles(roomNumber)
 
-      true_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
+      true_savefile_name = @savedir_info.real_savefile_name(SaveData::PLAY_ROOM_INFO_FILE)
       next unless (File.exist?(true_savefile_name))
 
       logging(roomNumber, 'sendChatMessageAll to No.')
@@ -1000,7 +1000,7 @@ module ServerCommands
         :data => nil
     }
 
-    change_save_data(@savefiles.map) do |saveData|
+    change_save_data(@savedir_info.save_files.map) do |saveData|
       draws         = draws(saveData)
       result[:data] = draws.pop
     end
@@ -1015,7 +1015,7 @@ module ServerCommands
     unique_id = logout_data['uniqueId']
     logging(unique_id, 'uniqueId')
 
-    true_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::LOGIN_FILE)
+    true_savefile_name = @savedir_info.real_savefile_name(SaveData::LOGIN_FILE)
     change_save_data(true_savefile_name) do |saveData|
       saveData.each do |existUserId, userInfo|
         logging(existUserId, 'existUserId in logout check')
@@ -1056,7 +1056,7 @@ module ServerCommands
 
     cards = []
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       card_mount = card_mount(saveData)
       cards      = cards(card_mount, mount_name)
 
@@ -1088,7 +1088,7 @@ module ServerCommands
 
     cards = []
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
       cards                    = trash_cards
     end
@@ -1106,7 +1106,7 @@ module ServerCommands
     mount_name = params['mountName']
     logging(mount_name, 'mountName')
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       card_mount = card_mount(saveData)
       cards      = cards(card_mount, mount_name)
       card_data  = cards.find { |i| i['imgId'] === params['targetCardId'] }
@@ -1153,7 +1153,7 @@ module ServerCommands
     mount_name = params['mountName']
     logging(mount_name, 'mountName')
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
@@ -1189,7 +1189,7 @@ module ServerCommands
 
     result = { :result => 'NG' }
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       count = params['count']
 
       count.times do
@@ -1218,7 +1218,7 @@ module ServerCommands
     is_open         = add_card_data['isOpen']
     is_back         = add_card_data['isBack']
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       card_data      = card_data(is_text, image_name, image_name_back, mount_name, is_up_down, can_delete)
       card_data['x'] = add_card_data['x']
       card_data['y'] = add_card_data['y']
@@ -1244,7 +1244,7 @@ module ServerCommands
     owner      = data['owner']
     owner_name = data['ownerName']
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       characters = characters(saveData)
       logging(characters, 'addCardZone characters')
 
@@ -1271,7 +1271,7 @@ module ServerCommands
     card_type_infos = params['cardTypeInfos']
     logging(card_type_infos, 'cardTypeInfos')
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
       saveData['cardTrushMount'] = {}
 
       saveData['cardMount'] = {}
@@ -1328,7 +1328,7 @@ module ServerCommands
     mount_name = params['mountName']
     logging(mount_name, 'mountName')
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
@@ -1371,7 +1371,7 @@ module ServerCommands
     logging(mount_name, 'mountName')
     logging(trash_mount_id, 'trushMountId')
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
@@ -1419,7 +1419,7 @@ module ServerCommands
     logging(mount_name, 'mountName')
     logging(trash_mount_id, 'trushMountId')
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
       logging(trash_cards.length, 'trushCards.length')
@@ -1496,7 +1496,7 @@ module ServerCommands
     mount_name = dump_trash_cards['mountName']
     logging(mount_name, 'mountName')
 
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
@@ -1548,7 +1548,7 @@ module ServerCommands
   end
 
   def move_character
-    change_save_data(@savefiles.characters) do |saveData|
+    change_save_data(@savedir_info.save_files.characters) do |saveData|
 
       character_move_data = params
       logging(character_move_data, 'moveCharacter() characterMoveData')
@@ -1588,7 +1588,7 @@ module ServerCommands
     data = params['data']
     logging(data, 'data')
 
-    change_save_data(@savefiles.map) do |saveData|
+    change_save_data(@savedir_info.save_files.map) do |saveData|
       set_draws(saveData, data)
     end
 
@@ -1598,7 +1598,7 @@ module ServerCommands
   end
 
   def clear_draw_on_map
-    change_save_data(@savefiles.map) do |saveData|
+    change_save_data(@savedir_info.save_files.map) do |saveData|
       draws = draws(saveData)
       draws.clear
     end
@@ -1629,7 +1629,7 @@ module ServerCommands
   end
 
   def change_effect
-    change_save_data(@savefiles.effects) do |saveData|
+    change_save_data(@savedir_info.save_files.effects) do |saveData|
       effect_data      = params
       target_cut_in_id = effect_data['effectId']
 
@@ -1656,7 +1656,7 @@ module ServerCommands
   def remove_effect
     logging('removeEffect Begin')
 
-    change_save_data(@savefiles.effects) do |saveData|
+    change_save_data(@savedir_info.save_files.effects) do |saveData|
 
       effect_id = params['effectId']
       logging(effect_id, 'effectId')

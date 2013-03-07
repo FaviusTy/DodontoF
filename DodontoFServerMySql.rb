@@ -242,7 +242,7 @@ SQL
   
   def insertNewData(dirName)
     sourceDir = 'saveData_forNewCreation'
-    saveFileNames = SaveDirInfo::FILE_NAME_SET.values
+    saveFileNames = SaveData::FILE_NAME_SET.values
     
     saveFileNames.each do |saveFileName|
       
@@ -575,7 +575,7 @@ end
 
 
 
-class SaveDirInfoMySql < SaveDirInfo
+class SaveDirInfoMySql < SaveData
   def self.setSaveDataManager(manager)
     @@saveDataManager = manager
   end

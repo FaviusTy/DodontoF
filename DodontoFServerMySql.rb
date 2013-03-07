@@ -730,7 +730,7 @@ class DodontoFServer_MySql < DodontoFServer
   
   def sendChatMessageByChatData(chatData)
     logging(chatData, "sendChatMessage chatData")
-    saveFileName = @savefiles['chatMessageDataLog']
+    saveFileName = @savefiles.chatMessageDataLog
     getDataAccesser().sendChatMessage(chatData, saveFileName)
   end
   

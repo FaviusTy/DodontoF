@@ -11,10 +11,12 @@ $LOAD_PATH << File.dirname(__FILE__) + '/src_bcdice'
 
 if RUBY_VERSION >= '1.9.0'
   Encoding.default_external = 'utf-8'
+  require 'json'
 else
   require 'rubygems'
   require 'jcode'
   require 'kconv'
+  require 'json/jsonParser'
 end
 
 require 'cgi'
@@ -22,7 +24,7 @@ require 'stringio'
 require 'logger'
 require 'uri'
 require 'fileutils'
-require 'json/jsonParser'
+require 'n_ostruct'
 require 'configure'
 
 require 'cgiPatch_forFirstCgi' if Configure.is_fast_cgi
@@ -73,13 +75,13 @@ class DodontoFServer
   def init_savefiles(room_index)
     @savedir_info.init(room_index, Configure.save_data_max_count, Configure.save_data_dir)
 
-    @savefiles = {}
+    _savefiles = {}
     SaveDirInfo::FILE_NAME_SET.each do |key_name, file_name|
       logging(key_name, 'saveDataKeyName')
       logging(file_name, 'saveFileName')
-      @savefiles[key_name] = @savedir_info.real_savefile_name(file_name)
+      _savefiles[key_name] = @savedir_info.real_savefile_name(file_name)
     end
-
+    @savefiles = NestedOpenStruct.new(_savefiles)
   end
 
 
@@ -345,7 +347,7 @@ class DodontoFServer
 
   def change_save_data(savefile_name)
 
-    character_data = (@savefiles['characters'] == savefile_name)
+    character_data = (@savefiles.characters == savefile_name)
 
     lockfile = savefile_lock(savefile_name)
 
@@ -1240,7 +1242,7 @@ class DodontoFServer
     end
 
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
 
       character_data = character_by_name(saveData, target_name)
       logging(character_data, 'characterData')
@@ -1294,7 +1296,7 @@ class DodontoFServer
     result           = {}
     result[:result] = 'OK'
 
-    save_data(@savefiles['time']) do |data|
+    save_data(@savefiles.time) do |data|
       logging(data, 'saveData')
       round_time_data   = data['roundTimeData'] || {}
       result[:counter] = data['counterNames'] || []
@@ -1357,7 +1359,7 @@ class DodontoFServer
 
   def change_counter_names(counter_names)
     logging(counter_names, 'changeCounterNames(counterNames)')
-    change_save_data(@savefiles['time']) do |saveData|
+    change_save_data(@savefiles.time) do |saveData|
       saveData['roundTimeData']       ||= {}
       round_time_data                 = saveData['roundTimeData']
       round_time_data['counterNames'] = counter_names
@@ -3966,7 +3968,7 @@ class DodontoFServer
     logging('getGraveyardCharacterData start.')
     result = []
 
-    save_data(@savefiles['characters']) do |saveData|
+    save_data(@savefiles.characters) do |saveData|
       graveyard = saveData['graveyard']
       graveyard ||= []
 
@@ -3980,7 +3982,7 @@ class DodontoFServer
     logging('getWaitingRoomInfo start.')
     result = []
 
-    save_data(@savefiles['characters']) do |saveData|
+    save_data(@savefiles.characters) do |saveData|
       waiting_room = waiting_room(saveData)
       result       = waiting_room
     end
@@ -3989,7 +3991,7 @@ class DodontoFServer
   end
 
   def set_waiting_room_info(data)
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       waiting_room = waiting_room(saveData)
       waiting_room.concat(data)
     end
@@ -4260,7 +4262,7 @@ class DodontoFServer
 
     chat_message_data = nil
 
-    change_save_data(@savefiles['chatMessageDataLog']) do |saveData|
+    change_save_data(@savefiles.chatMessageDataLog) do |saveData|
       chat_message_data_log = chat_message_data_log(saveData)
 
       delete_old_chat_message_data(chat_message_data_log)
@@ -4293,7 +4295,7 @@ class DodontoFServer
 
 
   def delete_chat_log
-    true_savefile_name = @savefiles['chatMessageDataLog']
+    true_savefile_name = @savefiles.chatMessageDataLog
     delete_chat_log_by_savefile(true_savefile_name)
 
     { :result => 'OK' }
@@ -4370,7 +4372,7 @@ class DodontoFServer
   def change_map_savedata(map_data)
     logging('changeMap start.')
 
-    change_save_data(@savefiles['map']) do |saveData|
+    change_save_data(@savefiles.map) do |saveData|
       draws = draws(saveData)
       set_map_data(saveData, map_data)
       draws.each { |i| set_draws(saveData, i) }
@@ -4395,7 +4397,7 @@ class DodontoFServer
     data = params['data']
     logging(data, 'data')
 
-    change_save_data(@savefiles['map']) do |saveData|
+    change_save_data(@savefiles.map) do |saveData|
       set_draws(saveData, data)
     end
 
@@ -4424,7 +4426,7 @@ class DodontoFServer
   end
 
   def clear_draw_on_map
-    change_save_data(@savefiles['map']) do |saveData|
+    change_save_data(@savefiles.map) do |saveData|
       draws = draws(saveData)
       draws.clear
     end
@@ -4437,9 +4439,9 @@ class DodontoFServer
         :data => nil
     }
 
-    change_save_data(@savefiles['map']) do |saveData|
+    change_save_data(@savefiles.map) do |saveData|
       draws          = draws(saveData)
-      result['data'] = draws.pop
+      result[:data] = draws.pop
     end
 
     result
@@ -4477,7 +4479,7 @@ class DodontoFServer
   end
 
   def add_effect_data(effect_data_list)
-    change_save_data(@savefiles['effects']) do |saveData|
+    change_save_data(@savefiles.effects) do |saveData|
       saveData['effects'] ||= []
       effects             = saveData['effects']
 
@@ -4501,7 +4503,7 @@ class DodontoFServer
   end
 
   def change_effect
-    change_save_data(@savefiles['effects']) do |saveData|
+    change_save_data(@savefiles.effects) do |saveData|
       effect_data     = params
       target_cutin_id = effect_data['effectId']
 
@@ -4528,7 +4530,7 @@ class DodontoFServer
   def remove_effect
     logging('removeEffect Begin')
 
-    change_save_data(@savefiles['effects']) do |saveData|
+    change_save_data(@savefiles.effects) do |saveData|
 
       effect_id = params['effectId']
       logging(effect_id, 'effectId')
@@ -4673,7 +4675,7 @@ class DodontoFServer
         :addFailedCharacterNames => []
     }
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       saveData['characters'] ||= []
       characters             = characters(saveData)
 
@@ -4716,7 +4718,7 @@ class DodontoFServer
   end
 
   def change_character_data(character_data)
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       logging('changeCharacterData called')
 
       characters = characters(saveData)
@@ -4817,7 +4819,7 @@ class DodontoFServer
     owner      = data['owner']
     owner_name = data['ownerName']
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       characters = characters(saveData)
       logging(characters, 'addCardZone characters')
 
@@ -4845,7 +4847,7 @@ class DodontoFServer
     card_type_infos = params['cardTypeInfos']
     logging(card_type_infos, 'cardTypeInfos')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       saveData['cardTrushMount'] = {}
 
       saveData['cardMount'] = {}
@@ -4933,7 +4935,7 @@ class DodontoFServer
     is_open         = add_card_data['isOpen']
     is_back         = add_card_data['isBack']
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       card_data      = card_data(is_text, image_name, image_name_back, mount_name, is_up_down, can_delete)
       card_data['x'] = add_card_data['x']
       card_data['y'] = add_card_data['y']
@@ -5164,7 +5166,7 @@ class DodontoFServer
     mount_name = params['mountName']
     logging(mount_name, 'mountName')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
@@ -5204,7 +5206,7 @@ class DodontoFServer
 
     result = { :result => 'NG' }
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       count = params['count']
 
       count.times do
@@ -5261,7 +5263,7 @@ class DodontoFServer
     mount_name = params['mountName']
     logging(mount_name, 'mountName')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
@@ -5298,7 +5300,7 @@ class DodontoFServer
     mount_name = params['mountName']
     logging(mount_name, 'mountName')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       card_mount = card_mount(saveData)
       cards      = cards(card_mount, mount_name)
       card_data  = cards.find { |i| i['imgId'] === params['targetCardId'] }
@@ -5366,7 +5368,7 @@ class DodontoFServer
     mount_name = dump_trash_cards['mountName']
     logging(mount_name, 'mountName')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
@@ -5428,7 +5430,7 @@ class DodontoFServer
     logging(mount_name, 'mountName')
     logging(trash_mount_id, 'trushMountId')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
 
@@ -5477,7 +5479,7 @@ class DodontoFServer
     logging(mount_name, 'mountName')
     logging(trash_mount_id, 'trushMountId')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
 
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
       logging(trash_cards.length, 'trushCards.length')
@@ -5595,7 +5597,7 @@ class DodontoFServer
 
     cards = []
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       card_mount = card_mount(saveData)
       cards      = cards(card_mount, mount_name)
 
@@ -5627,7 +5629,7 @@ class DodontoFServer
 
     cards = []
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       trash_mount, trash_cards = find_trash_mount_and_cards(saveData, mount_name)
       cards                    = trash_cards
     end
@@ -5659,7 +5661,7 @@ class DodontoFServer
   def clear_character_by_type_local(target_type)
     logging(target_type, 'clearCharacterByTypeLocal targetType')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       characters = characters(saveData)
 
       characters.delete_if do |i|
@@ -5682,7 +5684,7 @@ class DodontoFServer
   def remove_character_by_remove_character_data_list(remove_character_list) #TODO:FIXME 正直、どういうことを意図しているメソッドなのか分からない。。。
     logging(remove_character_list, 'removeCharacterDataList')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       characters = characters(saveData)
 
       remove_character_list.each do |removeCharacterData|
@@ -5729,7 +5731,7 @@ class DodontoFServer
     logging(character_id, 'enterWaitingRoomCharacter characterId')
 
     result = { :result => 'NG' }
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       characters = characters(saveData)
 
       enter_character_data = remove_from_array(characters) { |i| (i['imgId'] == character_id) }
@@ -5748,7 +5750,7 @@ class DodontoFServer
     img_id = params['imgId']
     logging(img_id, 'resurrectCharacterId')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       _graveyard = graveyard(saveData)
 
       character_data = remove_from_array(_graveyard) do |character|
@@ -5768,7 +5770,7 @@ class DodontoFServer
   def clear_graveyard
     logging('clearGraveyard begin')
 
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       graveyard = graveyard(saveData)
       graveyard.clear
     end
@@ -5818,7 +5820,7 @@ class DodontoFServer
     logging(character_id, 'exitWaitingRoomCharacter targetCharacterId')
 
     result = { :result => 'NG' }
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
       waiting_room = waiting_room(saveData)
 
       character_data = remove_from_array(waiting_room) do |character|
@@ -5866,14 +5868,14 @@ class DodontoFServer
   end
 
   def change_initiative_data(round_time_data)
-    change_save_data(@savefiles['time']) do |saveData|
+    change_save_data(@savefiles.time) do |saveData|
       saveData['roundTimeData'] = round_time_data
     end
   end
 
 
   def move_character
-    change_save_data(@savefiles['characters']) do |saveData|
+    change_save_data(@savefiles.characters) do |saveData|
 
       character_move_data = params
       logging(character_move_data, 'moveCharacter() characterMoveData')

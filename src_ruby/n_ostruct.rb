@@ -38,6 +38,11 @@ class NestedOpenStruct < OpenStruct
 
     self
   end
+
+  # TODO 要実装. fieldとvalueを返す
+  def each
+
+  end
 end
 
 # テストハーネス

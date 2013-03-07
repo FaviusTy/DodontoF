@@ -1,6 +1,7 @@
 # encoding: utf-8
 
 require 'fileutils'
+require File.dirname(__FILE__) + '/configure'
 
 
 class SaveDirInfo
@@ -10,6 +11,27 @@ class SaveDirInfo
 
   # ディレクトリ名の共通プリフィクス
   PREFIX_DIR_NAME = 'data_'
+  # TODO:RESEARCH 元$saveFileNamesさん. 用途不特定
+  SAVE_FILE_NAMES = File.join(Configure.save_data_temp_dir, 'saveFileNames.json')
+  # TODO:RESEARCH 元$imageUrlTextさん. 用途不特定
+  IMG_URL_TEXT = File.join(Configure.image_upload_dir, 'imageUrl.txt')
+  # TODO:RESEARCH 元$chatMessageDataLogAllさん. 用途不特定
+  CHAT_LONG_LINE_FILE = 'chatLongLines.txt'
+  # TODO:RESEARCH 元$loginUserInfoさん
+  LOGIN_FILE = 'login.json'
+  # TODO:RESEARCH 元$playRoomInfoさん
+  PLAY_ROOM_INFO = 'playRoomInfo'
+  # TODO:RESEARCH 元$playRoomInfoTypeNameさん
+  PLAY_ROOM_INFO_FILE  = "#{PLAY_ROOM_INFO}.json"
+  # TODO:RESEARCH 元$saveFilesさん
+  FILE_NAME_SET = {
+      :chatMessageDataLog => 'chat.json',
+      :map => 'map.json',
+      :characters => 'characters.json',
+      :time => 'time.json',
+      :effects => 'effects.json',
+      :"#{PLAY_ROOM_INFO}" => PLAY_ROOM_INFO_FILE,
+  }
 
   def init(dir_index_obj, max_number = 0, sub_dir = '.')
     @sub_dir       = sub_dir
@@ -129,16 +151,15 @@ class SaveDirInfo
   def all_save_file_names
     file_names = []
 
-    #TODO:BUG ここが動作しなくなった！
-    save_files = $save_files_name_set.values + [
-        $loginUserInfo,
-        $playRoomInfo,
-        $chatMessageDataLogAll,
+    save_files = FILE_NAME_SET.values + [
+        LOGIN_FILE,
+        PLAY_ROOM_INFO_FILE,
+        CHAT_LONG_LINE_FILE,
     ]
 
     save_files.each do |i|
       file_names << i
-      file_names << i + '.lock'
+      file_names << "#{i}.lock"
     end
 
     file_names
@@ -189,13 +210,25 @@ end
 if $0 === __FILE__
   require './loggingFunction'
   require 'stringio'
-  require '../DodontoFServer'
+
   # カレントディレクトリをDodontoFServer.rbの位置に変更
   Dir.chdir('../')
 
 
   save_data = SaveDirInfo.new
   puts "saveData initialized : #{save_data}"
+
+  puts "statics call..."
+  puts "SAVE_FILE_NAMES: #{SaveDirInfo::SAVE_FILE_NAMES}"
+  puts "IMG_URL_TEXT: #{SaveDirInfo::IMG_URL_TEXT}"
+  puts "CHAT_LONG_LINE_FILE: #{SaveDirInfo::CHAT_LONG_LINE_FILE}"
+  puts "LOGIN_FILE: #{SaveDirInfo::LOGIN_FILE}"
+  puts "PLAY_ROOM_INFO: #{SaveDirInfo::PLAY_ROOM_INFO}"
+  puts "PLAY_ROOM_INFO_FILE: #{SaveDirInfo::PLAY_ROOM_INFO_FILE}"
+  puts "FILE_NAME_SET: #{SaveDirInfo::FILE_NAME_SET}"
+
+
+  puts "method call..."
   puts "all_save_file_names : #{save_data.all_save_file_names}"
   save_data.init(0)
   puts 'init called'

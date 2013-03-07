@@ -22,15 +22,12 @@ require 'logger'
 require 'uri'
 require 'fileutils'
 require 'json/jsonParser'
+require 'configure'
 
-if $isFirstCgi
-  require 'cgiPatch_forFirstCgi'
-end
-
-require 'config.rb'
+require 'cgiPatch_forFirstCgi' if Configure.is_fast_cgi
 
 
-if $isMessagePackInstalled
+if Configure.is_message_pack_installed
   # gem install msgpack バージョン
   require 'rubygems'
   require 'msgpack'
@@ -40,28 +37,9 @@ else
 end
 
 
-require "loggingFunction.rb"
-require "FileLock.rb"
-# require "FileLock2.rb"
-require "saveDirInfo.rb"
-
-$save_file_names = File.join($saveDataTempDir, 'saveFileNames.json')
-$image_url_text  = File.join($imageUploadDir, 'imageUrl.txt')
-
-$chat_long_line_file_name = 'chatLongLines.txt'
-
-$login_user_info_file_name = 'login.json'
-$play_room_info_file_name  = 'playRoomInfo.json'
-$play_room_info_type_name  = 'playRoomInfo'
-
-$save_files_name_set = {
-    'chatMessageDataLog'      => 'chat.json',
-    'map'                     => 'map.json',
-    'characters'              => 'characters.json',
-    'time'                    => 'time.json',
-    'effects'                 => 'effects.json',
-    $play_room_info_type_name => $play_room_info_file_name,
-}
+require 'loggingFunction.rb'
+require 'FileLock.rb'
+require 'saveDirInfo.rb'
 
 $record_key = 'record'
 $record     = 'record.json'
@@ -96,7 +74,7 @@ class DodontoFServer
     @savedir_info.init(room_index, $saveDataMaxCount, $SAVE_DATA_DIR)
 
     @savefiles = {}
-    $save_files_name_set.each do |key_name, file_name|
+    SaveDirInfo::FILE_NAME_SET.each do |key_name, file_name|
       logging(key_name, 'saveDataKeyName')
       logging(file_name, 'saveFileName')
       @savefiles[key_name] = @savedir_info.real_savefile_name(file_name)
@@ -170,7 +148,7 @@ class DodontoFServer
   end
 
   def load_long_chatlog(type_name, savefile_name)
-    savefile_name = @savedir_info.real_savefile_name($chat_long_line_file_name)
+    savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::CHAT_LONG_LINE_FILE)
     lockfile      = savefile_lock_readonly(savefile_name)
 
     lines = []
@@ -523,8 +501,8 @@ class DodontoFServer
     logging(file_name, 'createSaveFile saveFileName')
     exist_files = nil
 
-    logging($save_file_names, "$saveFileNames")
-    change_save_data($save_file_names) do |save_data|
+    logging(SaveDirInfo::SAVE_FILE_NAMES, "$saveFileNames")
+    change_save_data(SaveDirInfo::SAVE_FILE_NAMES) do |save_data|
       exist_files = save_data["fileNames"]
       exist_files ||= []
       logging(exist_files, 'pre existFiles')
@@ -1333,7 +1311,7 @@ class DodontoFServer
   def _room_info_for_webif
     result = {}
 
-    real_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
+    real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
 
     save_data(real_savefile_name) do |data|
       result['roomName']   = data['playRoomName'] || ''
@@ -1354,7 +1332,7 @@ class DodontoFServer
 
     set_counter_names_in_room_info_webif
 
-    real_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
+    real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
 
     room_info = _room_info_for_webif
     change_save_data(real_savefile_name) do |saveData|
@@ -1418,7 +1396,7 @@ class DodontoFServer
         'characters'              => request_number_for_webif('characters', -1),
         'time'                    => request_number_for_webif('time', -1),
         'effects'                 => request_number_for_webif('effects', -1),
-        $play_room_info_type_name => request_number_for_webif('roomInfo', -1),
+        SaveDirInfo::PLAY_ROOM_INFO => request_number_for_webif('roomInfo', -1),
     }
 
     @last_update_times.delete_if { |type, time| time == -1 }
@@ -1498,7 +1476,7 @@ class DodontoFServer
   end
 
   def login_user_info(user_name, unique_id, is_visitor)
-    current_login_user_info = @savedir_info.real_savefile_name($login_user_info_file_name)
+    current_login_user_info = @savedir_info.real_savefile_name(SaveDirInfo::LOGIN_FILE)
     update_login_user_info(current_login_user_info, user_name, unique_id, is_visitor)
   end
 
@@ -1628,7 +1606,7 @@ class DodontoFServer
     result_list = {}
     target_range.each { |i| result_list[i] = 0 }
 
-    @savedir_info.each_with_index(target_range, $login_user_info_file_name) do |saveFiles, index|
+    @savedir_info.each_with_index(target_range, SaveDirInfo::LOGIN_FILE) do |saveFiles, index|
       next unless (target_range.include?(index))
 
       if saveFiles.size != 1
@@ -1650,7 +1628,7 @@ class DodontoFServer
     login_user_list = {}
     target_range.each { |i| login_user_list[i] = [] }
 
-    @savedir_info.each_with_index(target_range, $login_user_info_file_name) do |saveFiles, index|
+    @savedir_info.each_with_index(target_range, SaveDirInfo::LOGIN_FILE) do |saveFiles, index|
       next unless (target_range.include?(index))
 
       if saveFiles.size != 1
@@ -1674,7 +1652,7 @@ class DodontoFServer
 
 
   def save_data_lastaccess_times(target_range)
-    @savedir_info.save_data_last_access_times($save_files_name_set.values, target_range)
+    @savedir_info.save_data_last_access_times(SaveDirInfo::FILE_NAME_SET.values, target_range)
   end
 
   def save_data_lastaccess_time(file_name, room_no)
@@ -1742,7 +1720,7 @@ class DodontoFServer
 
     room_number_range.each do |roomNumber|
       @savedir_info.dir_index(roomNumber)
-      real_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
+      real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
 
       next if (File.exist?(real_savefile_name))
 
@@ -1814,7 +1792,7 @@ class DodontoFServer
   end
 
   def play_room_state_local(room_no, play_room_state)
-    play_room_info_file = @savedir_info.real_savefile_name($play_room_info_file_name)
+    play_room_info_file = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
 
     return play_room_state unless (File.exist?(play_room_info_file))
 
@@ -1830,7 +1808,7 @@ class DodontoFServer
     password_lock_state = (not play_room_data['playRoomChangedPassword'].nil?)
     can_visit           = play_room_data['canVisit']
     game_type           = play_room_data['gameType']
-    timestamp           = save_data_lastaccess_time($save_files_name_set['chatMessageDataLog'], room_no)
+    timestamp           = save_data_lastaccess_time(SaveDirInfo::FILE_NAME_SET[:chatMessageDataLog], room_no)
 
     time_display = ""
     unless timestamp.nil?
@@ -1852,7 +1830,7 @@ class DodontoFServer
   def login_user_names
     user_names = []
 
-    real_savefile_name = @savedir_info.real_savefile_name($login_user_info_file_name)
+    real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::LOGIN_FILE)
     logging(real_savefile_name, "getLoginUserNames real_savefile_name")
 
     unless File.exist?(real_savefile_name)
@@ -2217,7 +2195,7 @@ class DodontoFServer
       view_states = params['viewStates']
       logging("viewStates", view_states)
 
-      real_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
+      real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
 
       change_save_data(real_savefile_name) do |saveData|
         saveData['playRoomName']            = play_room_name
@@ -2301,7 +2279,7 @@ class DodontoFServer
       view_states = params['viewStates']
       logging("viewStates", view_states)
 
-      real_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
+      real_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
 
       change_save_data(real_savefile_name) do |saveData|
         saveData['playRoomName']            = params['playRoomName']
@@ -2411,7 +2389,7 @@ class DodontoFServer
     return true unless ($isPasswordNeedFroDeletePlayRoom)
 
     @savedir_info.dir_index(room_number)
-    real_savefile_name   = @savedir_info.real_savefile_name($play_room_info_file_name)
+    real_savefile_name   = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
     exist_play_room_info = (File.exist?(real_savefile_name))
 
     return true unless (exist_play_room_info)
@@ -2511,7 +2489,7 @@ class DodontoFServer
   end
 
   def savedata_all_for_scenario
-    select_types = $save_files_name_set.keys
+    select_types = SaveDirInfo::FILE_NAME_SET.keys
     select_types.delete_if { |i| i == 'chatMessageDataLog' }
 
     is_add_play_room_info = true
@@ -2713,7 +2691,7 @@ class DodontoFServer
   def save
     is_add_playroom_info = true
     extension            = request_data('extension')
-    save_select_files($save_files_name_set.keys, extension, is_add_playroom_info)
+    save_select_files(SaveDirInfo::FILE_NAME_SET.keys, extension, is_add_playroom_info)
   end
 
   def save_map
@@ -2770,10 +2748,10 @@ class DodontoFServer
     end
 
     if is_add_playroom_info
-      true_savefile_name                            = @savedir_info.real_savefile_name($play_room_info_file_name)
-      @last_update_times[$play_room_info_type_name] = 0
+      true_savefile_name                            = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
+      @last_update_times[SaveDirInfo::PLAY_ROOM_INFO] = 0
       if savefile_changed?(0, true_savefile_name)
-        all_savedata[$play_room_info_type_name] = load_savefile($play_room_info_type_name, true_savefile_name)
+        all_savedata[SaveDirInfo::PLAY_ROOM_INFO] = load_savefile(SaveDirInfo::PLAY_ROOM_INFO, true_savefile_name)
       end
     end
 
@@ -2812,7 +2790,7 @@ class DodontoFServer
 
   def delete_old_savefile_catched
 
-    change_save_data($save_file_names) do |saveData|
+    change_save_data(SaveDirInfo::SAVE_FILE_NAMES) do |saveData|
       exist_file_names = saveData["fileNames"]
       exist_file_names ||= []
       logging(exist_file_names, 'existSaveFileNames')
@@ -2882,7 +2860,7 @@ class DodontoFServer
     can_use_external_image = false
     can_visit              = false
     is_password_locked     = false
-    true_savefile_name     = @savedir_info.real_savefile_name($play_room_info_file_name)
+    true_savefile_name     = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
     is_exist_playroom_info = (File.exist?(true_savefile_name))
 
     if is_exist_playroom_info
@@ -2955,7 +2933,7 @@ class DodontoFServer
     end
 
 
-    true_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
+    true_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
 
     save_data(true_savefile_name) do |saveData|
       can_visit = saveData['canVisit']
@@ -2988,7 +2966,7 @@ class DodontoFServer
     unique_id = logout_data['uniqueId']
     logging(unique_id, 'uniqueId')
 
-    true_savefile_name = @savedir_info.real_savefile_name($login_user_info_file_name)
+    true_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::LOGIN_FILE)
     change_save_data(true_savefile_name) do |saveData|
       saveData.each do |existUserId, userInfo|
         logging(existUserId, "existUserId in logout check")
@@ -3728,10 +3706,10 @@ class DodontoFServer
       load_savefile_data_each_type(fileTypeName, trueSaveFileName, save_data_type)
     end
 
-    if all_save_data.include?($play_room_info_type_name)
-      real_save_file_name = @savedir_info.real_savefile_name($play_room_info_file_name)
-      save_data_type      = all_save_data[$play_room_info_type_name]
-      load_savefile_data_each_type($play_room_info_type_name, real_save_file_name, save_data_type)
+    if all_save_data.include?(SaveDirInfo::PLAY_ROOM_INFO)
+      real_save_file_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
+      save_data_type      = all_save_data[SaveDirInfo::PLAY_ROOM_INFO]
+      load_savefile_data_each_type(SaveDirInfo::PLAY_ROOM_INFO, real_save_file_name, save_data_type)
     end
 
     logging("loadSaveFileDataAll(saveDataAll) end")
@@ -3877,7 +3855,7 @@ class DodontoFServer
     add_local_image_to_list(image_files)
     logging(image_files, "imageFiles")
 
-    url_file_name = $image_url_text
+    url_file_name = SaveDirInfo::IMG_URL_TEXT
     logging(url_file_name, "imageUrlFileName")
 
     complete_count = 0
@@ -3962,7 +3940,7 @@ class DodontoFServer
     image_url = image_data['imageUrl']
     logging(image_url, "imageUrl")
 
-    image_url_text = $image_url_text
+    image_url_text = SaveDirInfo::IMG_URL_TEXT
     logging(image_url_text, "imageUrlFileName")
 
     result_text = "画像URLのアップロードに失敗しました。"
@@ -4026,7 +4004,7 @@ class DodontoFServer
     image_list = all_image_file_name_from_tag_info_file
     logging(image_list, "imageList all result")
 
-    add_texts_character_image_list(image_list, $image_url_text)
+    add_texts_character_image_list(image_list, SaveDirInfo::IMG_URL_TEXT)
     add_local_image_to_list(image_list)
 
     delete_invalid_image_filename(image_list)
@@ -4258,7 +4236,7 @@ class DodontoFServer
 
       init_savefiles(roomNumber)
 
-      true_savefile_name = @savedir_info.real_savefile_name($play_room_info_file_name)
+      true_savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
       next unless (File.exist?(true_savefile_name))
 
       logging(roomNumber, "sendChatMessageAll to No.")
@@ -4336,7 +4314,7 @@ class DodontoFServer
   def delete_chat_log_all
     logging("deleteChatLogAll Begin")
 
-    file = @savedir_info.real_savefile_name($chat_long_line_file_name)
+    file = @savedir_info.real_savefile_name(SaveDirInfo::CHAT_LONG_LINE_FILE)
     logging(file, "file")
 
     if File.exist?(file)
@@ -4362,7 +4340,7 @@ class DodontoFServer
       return
     end
 
-    savefile_name = @savedir_info.real_savefile_name($chat_long_line_file_name)
+    savefile_name = @savedir_info.real_savefile_name(SaveDirInfo::CHAT_LONG_LINE_FILE)
 
     locker = savefile_lock(savefile_name)
     locker.lock do

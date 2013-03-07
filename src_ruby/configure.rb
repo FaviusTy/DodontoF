@@ -1,8 +1,8 @@
 # encoding:utf-8
-
 require 'yaml'
-require './n_ostruct'
+require File.dirname(__FILE__) + '/n_ostruct'
 
+# Applicationの共通設定項目をymlファイルから生成したNestedOpenStruct経由でアクセス可能にする
 class Configure
   DEFAULT_FILE_PATH = 'settings.yml'
   @@base ||= NestedOpenStruct.new(YAML.load_file(DEFAULT_FILE_PATH))
@@ -28,6 +28,7 @@ class Configure
   end
 end
 
+# テストハーネス
 if $0 === __FILE__
   puts "version: #{Configure.version}"
   puts "refresh_timeout: #{Configure.refresh_timeout}:#{Configure.refresh_timeout.class}"

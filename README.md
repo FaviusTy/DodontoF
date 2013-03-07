@@ -22,6 +22,11 @@
 * Rack互換アプリケーションとして改修(SinatraないしはGrapeをコアフレームワークに採用することも検討に含める)
 
 # 履歴
+* 2013/03/07 DodontoFServerのRack互換改修着手
+    * ServerApplication本体を単体テスト駆動可能なようにここらでRack互換改修を行う
+* 2013/03/07 n_ostruct,configureを追加
+    * 環境設定をconfig.rbのグローバル変数宣言方式からymlファイルで設定し、Configureクラス経由で構造体アクセスして取得する方式に変更(定義ファイルと実装部分を切り離す事で機能改修・追加以降もローカルのymlファイルを使用し続けられるように)
+    * ひとまずsaveDirInfoとDodontoFServerはconfig.rbからの移行作業は完了
 * 2013/02/22 saveDirInfo周りの改修に着手
     * saveDataディレクトリ配下のアクセス処理は全てここに集約する事を検討
     * クラスメソッドでsaveData全体的な処理,インスタンスメソッドでdata_X系の部屋ディレクトリ1つ分の処理に切り分ける

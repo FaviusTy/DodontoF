@@ -1,0 +1,87 @@
+# システムのバージョン情報
+Version:
+ numbering: Ver.1.37.05
+ date: 2012/06/18
+ codename: Deeper Deeper
+
+# サーバ全体の設定項目
+Server:
+ # サーバ全体で利用できるユーザの上限数です(表示情報としてしか使用されませんので実際はこの数値以上のユーザのログインが可能です)
+ user_capacity: 30
+
+ # rackアプリケーションとしてマウントするインターフェースを設定します
+ rack_type: thin
+
+ # ログレベルを設定します.
+ log_level: debug
+
+ # Onに設定した場合、このファイルの設定情報を設定値を参照する度に読み込み直します
+ # その分、負荷が高くなるため本稼働時にはOffを推奨します
+ hot_configuration: Off
+
+ # クライアントのFPS値です. nullの場合はswfの初期値(30)で動作します
+ fps: null
+
+ # Onに設定するとrefresh処理をComet通信にします.
+ # Offの場合は待機時間無しでレスポンスします
+ comet_mode: On
+
+ # Comet通信モード時のrefresh処理の際にサーバ内で更新待ちを行う時間を指定します
+ comet_wait_second: 2
+
+ # refresh処理の更新待ち時間中に部屋情報の更新確認を実施する間隔を指定します
+ refresh_intarval_second: 0.5
+
+ # Onに設定するとデバッグモードとして動作します
+ debug_mode: Off
+
+ # Onに設定するとメンテナンスモードとして動作します
+ maintenance_mode: Off
+
+ # Onに設定するとダイスボットが有効になります
+ use_dicebot: On
+
+ # Onに設定すると読み上げ機能が有効になります(読み上げ機能の使用には別途PHP環境が必要なようです…)
+ use_speech: Off
+
+ # 作成できるプレイルームの上限値です
+ room_limit: 1000
+
+ # プレイルームリストの１ページ辺りの表示数の上限値です
+ room_max_par_page: 100
+
+ # 壁紙として表示する画像ファイルのURLです.nullに設定した場合は何も表示されません
+ skin_img_path: null
+
+ # Onに設定するとリアルタイムパフォーマンスを表示するモニタワイプが表示されます
+ use_paformance_monitor: Off
+
+ # チャット送信が失敗した時に再送処理を行う上限回数です
+ retry_send_limit: 3
+
+ # 画像アップロードディレクトリを示すマーカー文字列
+ # TODO 用途が不明なのでコメントは原文ママ. #の部分は外出しにする方が良いかも:YAML定義的に
+ img_upload_space_marker: "###IMAGE_UPLOADL_SPACE###"
+
+ #各画像(キャラクター・マップ)の保存パス
+ img_uplaod_space_path: ../imageUploadSpace
+
+# プレイルームのデフォルト設定
+PlayRoom:
+ # プレイルームのデータを保存するディレクトリまでの相対パス
+ rooms_store_path: rooms
+ map_width_limit: 150
+ map_height_limit: 150
+ graveyard_limit: 30
+ use_back_log: On
+ log_line_capacity: 500
+ use_welcome_message: On
+
+ #ログインしていられる最大時間。
+ # 1 以上の数値を指定するとその秒数経過でサーバからたたき出されます
+ #（開発環境用なので、通常は変更不要）
+ login_limit_second: 600
+
+ unremovable_indexes: [0]
+ unloadable_indexes: [0]
+ unlockable_indexes: [0]

@@ -218,7 +218,7 @@ if $0 === __FILE__
   save_data = SaveDirInfo.new
   puts "saveData initialized : #{save_data}"
 
-  puts "statics call..."
+  puts 'statics call...'
   puts "SAVE_FILE_NAMES: #{SaveDirInfo::SAVE_FILE_NAMES}"
   puts "IMG_URL_TEXT: #{SaveDirInfo::IMG_URL_TEXT}"
   puts "CHAT_LONG_LINE_FILE: #{SaveDirInfo::CHAT_LONG_LINE_FILE}"
@@ -228,7 +228,7 @@ if $0 === __FILE__
   puts "FILE_NAME_SET: #{SaveDirInfo::FILE_NAME_SET}"
 
 
-  puts "method call..."
+  puts 'method call...'
   puts "all_save_file_names : #{save_data.all_save_file_names}"
   save_data.init(0)
   puts 'init called'

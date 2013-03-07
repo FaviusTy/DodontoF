@@ -39,7 +39,7 @@ play_room_get_range_max: 10
 graveyard_limit: 30
 
 #チャットの過去ログ大量保管を許可するかの設定
-is_save_lomg_chat_log: true
+is_save_lomg_chat_log: On
 
 #チャットログ大量保管時の保管ライン数
 chat_message_data_log_all_line_max: 500
@@ -91,7 +91,7 @@ login_message_file: loginMessage.html
 login_message_base_file: loginMessageBase.html
 
 #古いセーブファイルの自動削除を行うかを判定するための基準経過時間(秒)
-old_save_file_delte_seconds: 180
+old_save_file_delete_seconds: 180
 
 #プレイルームを削除してもよい経過時間(秒)
 deletable_passed_seconds: 10

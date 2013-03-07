@@ -71,7 +71,7 @@ class DodontoFServer
   end
 
   def init_savefiles(room_index)
-    @savedir_info.init(room_index, $saveDataMaxCount, $SAVE_DATA_DIR)
+    @savedir_info.init(room_index, Configure.save_data_max_count, Configure.save_data_dir)
 
     @savefiles = {}
     SaveDirInfo::FILE_NAME_SET.each do |key_name, file_name|
@@ -118,17 +118,17 @@ class DodontoFServer
   def self.lockfile_name(savefile_name)
     default_name = (savefile_name + ".lock")
 
-    if $SAVE_DATA_LOCK_FILE_DIR.nil?
+    if Configure.save_data_lock_file_dir.nil?
       return default_name
     end
 
-    if savefile_name.index($SAVE_DATA_DIR) != 0
+    if savefile_name.index(Configure.save_data_dir) != 0
       return default_name
     end
 
-    subdir_name = savefile_name[$SAVE_DATA_DIR.size .. -1]
+    subdir_name = savefile_name[Configure.save_data_dir.size .. -1]
 
-    File.join($SAVE_DATA_LOCK_FILE_DIR, subdir_name) + ".lock"
+    File.join(Configure.save_data_lock_fire_dir, subdir_name) + ".lock"
   end
 
   #override
@@ -177,7 +177,7 @@ class DodontoFServer
     begin
       if long_chatlog?(type_name)
         save_data = load_long_chatlog(type_name, file_name)
-      elsif $isUseRecord and character_file?(type_name)
+      elsif Configure.is_use_record and character_file?(type_name)
         logging("isCharacterType")
         save_data = load_character(type_name, file_name)
       else
@@ -196,7 +196,7 @@ class DodontoFServer
   end
 
   def long_chatlog?(type_name)
-    ($IS_SAVE_LONG_CHAT_LOG and chat_file?(type_name) and @last_update_times[type_name] == 0)
+    (Configure.is_save_long_chat_log and chat_file?(type_name) and @last_update_times[type_name] == 0)
   end
 
   def chat_file?(type_name)
@@ -445,7 +445,7 @@ class DodontoFServer
     record = record_by_save_data(save_data)
     logging(record, "before record")
 
-    while record.length >= $recordMaxCount
+    while record.length >= Configure.record_max_count
       record.shift
       break if (record.length == 0)
     end
@@ -536,7 +536,7 @@ class DodontoFServer
   end
 
   def self.build_msgpack(data)
-    if $isMessagePackInstalled
+    if Configure.is_message_pack_installed
       MessagePack.pack(data)
     else
       MessagePackPure::Packer.new(StringIO.new).write(data).string
@@ -574,7 +574,7 @@ class DodontoFServer
     end
 
     begin
-      if $isMessagePackInstalled
+      if Configure.is_message_pack_installed
         parsed_data = MessagePack.unpack(data)
       else
         parsed_data = MessagePackPure::Unpacker.new(StringIO.new(data, "r")).read
@@ -931,7 +931,7 @@ class DodontoFServer
       when "all"
         return 0
       when nil
-        return Time.now.to_i - $oldMessageTimeout
+        return Time.now.to_i - Configure.old_message_timeout
       else
     end
 
@@ -974,17 +974,17 @@ class DodontoFServer
 
   def busy_info
     json_data = {
-        "loginCount"    => File.readlines($loginCountFile).join.to_i,
-        "maxLoginCount" => $aboutMaxLoginCount,
-        "version"       => $version,
+        "loginCount"    => File.readlines(Configure.login_count_file).join.to_i,
+        "maxLoginCount" => Configure.about_max_login_count,
+        "version"       => Configure.version,
         "result"        => 'OK',
     }
   end
 
   def server_info_for_webif
     result_data = {
-        "max_room"             => ($saveDataMaxCount - 1),
-        'isNeedCreatePassword' => (not $createPlayRoomPassword.empty?),
+        "max_room"             => (Configure.save_data_max_count - 1),
+        'isNeedCreatePassword' => (not Configure.create_play_room_password.empty?),
         'result'               => 'OK',
     }
 
@@ -1005,7 +1005,7 @@ class DodontoFServer
   def room_list_for_webif
     logging("getWebIfRoomList Begin")
     min_room = request_int_for_webif('min_room', 0)
-    max_room = request_int_for_webif('max_room', ($saveDataMaxCount - 1))
+    max_room = request_int_for_webif('max_room', (Configure.save_data_max_count - 1))
 
     room_states = play_room_states_local(min_room, max_room)
 
@@ -1203,8 +1203,8 @@ class DodontoFServer
     logging(image, "image")
 
     if image != default
-      image.gsub!('(local)', $imageUploadDir)
-      image.gsub!('__LOCAL__', $imageUploadDir)
+      image.gsub!('(local)', Configure.image_upload_dir)
+      image.gsub!('__LOCAL__', Configure.image_upload_dir)
     end
 
     logging(image, "getWebIfImageName result")
@@ -1429,7 +1429,7 @@ class DodontoFServer
 
     save_data = {}
 
-    if $isMentenanceNow
+    if Configure.is_mentenance
       save_data["warning"] = { "key" => "canNotRefreshBecauseMentenanceNow" }
       return save_data
     end
@@ -1447,7 +1447,7 @@ class DodontoFServer
 
     @isGetOwnRecord = params['isGetOwnRecord']
 
-    if $isCommet
+    if Configure.is_comet
       refresh_routine(save_data)
     else
       refresh_once(save_data)
@@ -1488,7 +1488,7 @@ class DodontoFServer
 
   def refresh_routine(save_data)
     now              = Time.now
-    while_limit_time = now + $refreshTimeout
+    while_limit_time = now + Configure.refresh_timeout
 
     logging(now, "now")
     logging(while_limit_time, "whileLimitTime")
@@ -1507,10 +1507,10 @@ class DodontoFServer
   end
 
   def refresh_interval
-    if $isCommet
-      $refreshInterval
+    if Configure.is_commet
+      Configure.refresh_interval
     else
-      $refreshIntervalForNotCommet
+      Configure.refresh_interval_for_not_comet
     end
   end
 
@@ -1573,7 +1573,7 @@ class DodontoFServer
 
     time_seconds = user_info['timeSeconds']
     diff_seconds = now_seconds - time_seconds
-    (diff_seconds > $loginTimeOut)
+    (diff_seconds > Configure.login_timeOut)
   end
 
   def change_user_info(save_data, unique_id, now_seconds, user_name, is_visitor)
@@ -1662,14 +1662,14 @@ class DodontoFServer
 
 
   def remove_old_play_room
-    all_range     = (0 .. $saveDataMaxCount)
+    all_range     = (0 .. Configure.save_data_max_count)
     access_times = save_data_lastaccess_times(all_range)
     remove_old_room_for_access_times(access_times)
   end
 
   def remove_old_room_for_access_times(access_times)
     logging("removeOldRoom Begin")
-    if $removeOldPlayRoomLimitDays <= 0
+    if Configure.remove_old_play_room_limit_days <= 0
       return access_times
     end
 
@@ -1699,7 +1699,7 @@ class DodontoFServer
       time_diff_sec = (Time.now - time)
       logging(time_diff_sec, "timeDiffSeconds")
 
-      limit_sec = $removeOldPlayRoomLimitDays * 24 * 60 * 60
+      limit_sec = Configure.remove_old_play_room_limit_days * 24 * 60 * 60
       logging(limit_sec, "limitSeconds")
 
       if time_diff_sec > limit_sec
@@ -1716,7 +1716,7 @@ class DodontoFServer
   def find_empty_room_number
     empty_room_number = -1
 
-    room_number_range = (0..$saveDataMaxCount)
+    room_number_range = (0..Configure.save_data_max_count)
 
     room_number_range.each do |roomNumber|
       @savedir_info.dir_index(roomNumber)
@@ -1880,7 +1880,7 @@ class DodontoFServer
   def play_room_states_by_count_local(start_room_no, count)
     play_room_states = []
 
-    (start_room_no .. ($saveDataMaxCount - 1)).each do |roomNo|
+    (start_room_no .. (Configure.save_data_max_count - 1)).each do |roomNo|
 
       break if (play_room_states.length > count)
 
@@ -1897,7 +1897,7 @@ class DodontoFServer
 
 
   def all_login_count
-    room_number_range     = (0 .. $saveDataMaxCount)
+    room_number_range     = (0 .. Configure.save_data_max_count)
     login_user_count_list = login_user_count_list(room_number_range)
 
     total     = 0
@@ -1918,7 +1918,7 @@ class DodontoFServer
   end
 
   def famous_games
-    room_number_range = (0 .. $saveDataMaxCount)
+    room_number_range = (0 .. Configure.save_data_max_count)
     game_type_list    = getGameTypeList(room_number_range)
 
     counts = {}
@@ -1953,11 +1953,11 @@ class DodontoFServer
 
 
   def min_room(params)
-    [[params['min_room'], 0].max, ($saveDataMaxCount - 1)].min
+    [[params['min_room'], 0].max, (Configure.save_data_max_count - 1)].min
   end
 
   def max_room(params)
-    [[params['max_room'], ($saveDataMaxCount - 1)].min, 0].max
+    [[params['max_room'], (Configure.save_data_max_count - 1)].min, 0].max
   end
 
   def login_info
@@ -1974,32 +1974,32 @@ class DodontoFServer
     result = {
         "loginMessage"               => login_message,
         "cardInfos"                  => card_infos,
-        "isDiceBotOn"                => $isDiceBotOn,
+        "isDiceBotOn"                => Configure.is_dicebot,
         "uniqueId"                   => unique_id,
-        "refreshTimeout"             => $refreshTimeout,
+        "refreshTimeout"             => Configure.refresh_timeout,
         "refreshInterval"            => refresh_interval,
-        "isCommet"                   => $isCommet,
-        "version"                    => $version,
-        "playRoomMaxNumber"          => ($saveDataMaxCount - 1),
+        "isCommet"                   => Configure.is_comet,
+        "version"                    => Configure.version,
+        "playRoomMaxNumber"          => (Configure.save_data_max_count - 1),
         "warning"                    => login_warning,
-        "playRoomGetRangeMax"        => $playRoomGetRangeMax,
+        "playRoomGetRangeMax"        => Configure.play_room_get_range_max,
         "allLoginCount"              => all_login_count.to_i,
-        "limitLoginCount"            => $limitLoginCount,
+        "limitLoginCount"            => Configure.limit_login_count,
         "loginUserCountList"         => login_user_count_list,
-        "maxLoginCount"              => $aboutMaxLoginCount.to_i,
-        "skinImage"                  => $skinImage,
-        "isPaformanceMonitor"        => $isPaformanceMonitor,
-        "fps"                        => $fps,
-        "loginTimeLimitSecond"       => $loginTimeLimitSecond,
-        "removeOldPlayRoomLimitDays" => $removeOldPlayRoomLimitDays,
-        "canTalk"                    => $canTalk,
-        "retryCountLimit"            => $retryCountLimit,
-        "imageUploadDirInfo"         => { $localUploadDirMarker => $imageUploadDir },
-        "mapMaxWidth"                => $mapMaxWidth,
-        "mapMaxHeigth"               => $mapMaxHeigth,
+        "maxLoginCount"              => Configure.about_max_login_count,
+        "skinImage"                  => Configure.skin_image,
+        "isPaformanceMonitor"        => Configure.is_paformance_monitor,
+        "fps"                        => Configure.fps,
+        "loginTimeLimitSecond"       => Configure.login_time_limit_second,
+        "removeOldPlayRoomLimitDays" => Configure.remove_old_play_room_limit_days,
+        "canTalk"                    => Configure.can_talk,
+        "retryCountLimit"            => Configure.retry_count_limit,
+        "imageUploadDirInfo"         => { Configure.local_upload_dir_marker => Configure.image_upload_dir },
+        "mapMaxWidth"                => Configure.map_max_width,
+        "mapMaxHeigth"               => Configure.map_max_heigth,
         'diceBotInfos'               => dicebot_infos,
-        'isNeedCreatePassword'       => (not $createPlayRoomPassword.empty?),
-        'defaultUserNames'           => $defaultUserNames,
+        'isNeedCreatePassword'       => (not Configure.create_play_room_password.empty?),
+        'defaultUserNames'           => Configure.default_user_names,
     }
 
     logging(result, "result")
@@ -2016,7 +2016,7 @@ class DodontoFServer
   def write_all_login_info(all_login_count)
     text = "#{all_login_count}"
 
-    savefile_name = $loginCountFile
+    savefile_name = Configure.login_count_file
     lockfile      = real_savefile_lock_readonly(savefile_name)
 
     lockfile.lock do
@@ -2035,7 +2035,7 @@ class DodontoFServer
       }
     end
 
-    if $isMentenanceNow
+    if Configure.is_mentenance
       return {
           "key" => "canNotLoginBecauseMentenanceNow",
       }
@@ -2054,26 +2054,26 @@ class DodontoFServer
   def login_message_header
     login_message = ""
 
-    if File.exist?($loginMessageFile)
-      File.readlines($loginMessageFile).each do |line|
+    if File.exist?(Configure.login_message_file)
+      File.readlines(Configure.login_message_file).each do |line|
         login_message << line.chomp << "\n"
       end
       logging(login_message, "loginMessage")
     else
-      logging("#{$loginMessageFile} is NOT found.")
+      logging("#{Configure.login_message_file} is NOT found.")
     end
 
     login_message
   end
 
   def login_message_history_part
-    login_message = ""
-    if File.exist?($loginMessageBaseFile)
-      File.readlines($loginMessageBaseFile).each do |line|
+    login_message = ''
+    if File.exist?(Configure.login_message_base_file)
+      File.readlines(Configure.login_message_base_file).each do |line|
         login_message << line.chomp << "\n"
       end
     else
-      logging("#{$loginMessageFile} is NOT found.")
+      logging("#{Configure.login_message_file} is NOT found.")
     end
 
     login_message
@@ -2230,8 +2230,8 @@ class DodontoFServer
     logging('checkCreatePlayRoomPassword Begin')
     logging(password, 'password')
 
-    return if ($createPlayRoomPassword.empty?)
-    return if ($createPlayRoomPassword == password)
+    return if (Configure.create_play_room_password.empty?)
+    return if (Configure.create_play_room_password == password)
 
     raise Exception.new("errorPassword")
   end
@@ -2320,8 +2320,8 @@ class DodontoFServer
       room_number = @savedir_info.dir_index
     end
 
-    if $noPasswordPlayRoomNumbers.include?(room_number)
-      raise Exception.new("noPasswordPlayRoomNumber")
+    if Configure.no_password_play_room_numbers.include?(room_number)
+      raise Exception.new('noPasswordPlayRoomNumber')
     end
   end
 
@@ -2362,7 +2362,7 @@ class DodontoFServer
       end
     end
 
-    if $unremovablePlayRoomNumbers.include?(room_number)
+    if Configure.unremovable_play_room_numbers.include?(room_number)
       return "unremovablePlayRoomNumber"
     end
 
@@ -2375,8 +2375,8 @@ class DodontoFServer
       spend_times = now - last_access_time
       logging(spend_times, "spendTimes")
       logging(spend_times / 60 / 60, "spendTimes / 60 / 60")
-      if spend_times < $deletablePassedSeconds
-        return "プレイルームNo.#{room_number}の最終更新時刻から#{$deletablePassedSeconds}秒が経過していないため削除できません"
+      if spend_times < Configure.deletable_passed_seconds
+        return "プレイルームNo.#{room_number}の最終更新時刻から#{Configure.deletable_passed_seconds}秒が経過していないため削除できません"
       end
     end
 
@@ -2386,7 +2386,7 @@ class DodontoFServer
 
   def check_password(room_number, password)
 
-    return true unless ($isPasswordNeedFroDeletePlayRoom)
+    return true unless (Configure.is_password_need_delete_play_room)
 
     @savedir_info.dir_index(room_number)
     real_savefile_name   = @savedir_info.real_savefile_name(SaveDirInfo::PLAY_ROOM_INFO_FILE)
@@ -2587,7 +2587,7 @@ class DodontoFServer
 
     return unless (result)
 
-    from.gsub!(/.*\//, $imageUploadDirMarker + "/")
+    from.gsub!(/.*\//, Configure.image_upload_dir_marker + "/")
     logging(from, "changeFilePlace result")
   end
 
@@ -2768,7 +2768,7 @@ class DodontoFServer
   def get_new_savefile_name(extension)
     base_name     = get_new_savefile_base_name("DodontoF")
     savefile_name = base_name + ".#{extension}"
-    file_join($saveDataTempDir, savefile_name).untaint
+    file_join(Configure.save_data_temp_dir, savefile_name).untaint
   end
 
   def get_new_savefile_base_name(prefix)
@@ -2807,7 +2807,7 @@ class DodontoFServer
         now          = Time.now.to_i
         diff         = (now - created_time)
         logging(diff, "createdTime diff")
-        next if (diff < $oldSaveFileDelteSeconds)
+        next if (diff < Configure.old_save_file_delete_seconds)
 
         begin
           delete_file(saveFileName)
@@ -2854,7 +2854,7 @@ class DodontoFServer
     @savedir_info.dir_index(room_number)
 
     is_maintenance_on      = false
-    is_welcome_message_on  = $isWelcomeMessageOn
+    is_welcome_message_on  = Configure.is_welcome_message
     play_room_name         = ''
     chat_channel_names     = nil
     can_use_external_image = false
@@ -2876,8 +2876,8 @@ class DodontoFServer
       end
     end
 
-    unless $mentenanceModePassword.nil?
-      if check_room_status_data["adminPassword"] == $mentenanceModePassword
+    unless Configure.mentenance_mode_password.nil?
+      if check_room_status_data["adminPassword"] == Configure.mentenance_mode_password
         is_password_locked    = false
         is_welcome_message_on = false
         is_maintenance_on     = true
@@ -3160,7 +3160,7 @@ class DodontoFServer
   end
 
   def upload_replay_data
-    upload_base_file($replayDataUploadDir, $UPLOAD_REPALY_DATA_MAX_SIZE) do |fileNameFullPath, fileNameOriginal, result|
+    upload_base_file(Configure.replay_data_upload_dir, Configure.upload_replay_data_max_size) do |fileNameFullPath, fileNameOriginal, result|
       logging("uploadReplayData yield Begin")
 
       own_url    = params['ownUrl']
@@ -3188,7 +3188,7 @@ class DodontoFServer
   end
 
   def get_replay_data_info_file_name
-    info_file_name = file_join($replayDataUploadDir, 'replayDataInfo.json')
+    info_file_name = file_join(Configure.replay_data_up_load_dir, 'replayDataInfo.json')
   end
 
 
@@ -3251,7 +3251,7 @@ class DodontoFServer
 
 
   def upload_file
-    upload_base_file($fileUploadDir, $UPLOAD_FILE_MAX_SIZE) do |fileNameFullPath, fileNameOriginal, result|
+    upload_base_file(Configure.file_upload_dir, Configure.upload_file_max_size) do |fileNameFullPath, fileNameOriginal, result|
 
       delete_old_upload_file
 
@@ -3269,7 +3269,9 @@ class DodontoFServer
 
 
   def delete_old_upload_file
-    delete_old_file($fileUploadDir, $uploadFileTimeLimitSeconds, File.join($fileUploadDir, "dummy.txt"))
+    delete_old_file(Configure.file_upload_dir,
+                    Configure.upload_file_time_limit_seconds,
+                    File.join(Configure.file_upload_dir, "dummy.txt"))
   end
 
   def delete_old_file(save_dir, limit_sec, exclude_file_name = nil)
@@ -3355,7 +3357,7 @@ class DodontoFServer
     clear_dir(file_upload_dir)
     make_dir(file_upload_dir)
 
-    file_max_size = $scenarioDataMaxSize # Mbyte
+    file_max_size = Configure.scenario_data_max_size # Mbyte
     scenario_file = nil
     is_rename     = false
 
@@ -3491,7 +3493,7 @@ class DodontoFServer
   end
 
   def room_local_space_dir_name_by_room_no(room_no)
-    dir = File.join($imageUploadDir, "room_#{room_no}")
+    dir = File.join(Configure.image_upload_dir, "room_#{room_no}")
   end
 
   def make_dir(dir)
@@ -3579,7 +3581,7 @@ class DodontoFServer
   def check_load
     room_number = @savedir_info.dir_index
 
-    if $unloadablePlayRoomNumbers.include?(room_number)
+    if Configure.unloadable_play_room_numbers.include?(room_number)
       raise "unloadablePlayRoomNumber"
     end
   end
@@ -3597,7 +3599,7 @@ class DodontoFServer
 
     logging(changed_dir, 'localSpace name')
 
-    text = text.gsub($imageUploadDirMarker, changed_dir)
+    text = text.gsub(Configure.image_upload_dir_marker, changed_dir)
   end
 
 
@@ -3734,7 +3736,7 @@ class DodontoFServer
 
 
   def small_image_dir
-    file_join($imageUploadDir, "smallImages")
+    file_join(Configure.image_upload_dir, "smallImages")
   end
 
   def save_small_image(small_image_Data, file_base_name, upload_image_file_name)
@@ -3800,7 +3802,7 @@ class DodontoFServer
         return result
       end
 
-      save_dir             = $imageUploadDir
+      save_dir             = Configure.image_upload_dir
       image_file_base_name = new_file_name(image_file_name, "img")
       logging(image_file_base_name, "imageFileNameBase")
 
@@ -3823,7 +3825,7 @@ class DodontoFServer
   def image_data_in_params(params, key)
     value = params[key]
 
-    check_result = check_filesize_on_mb(value, $UPLOAD_IMAGE_MAX_SIZE)
+    check_result = check_filesize_on_mb(value, Configure.upload_image_max_size)
     raise check_result unless (check_result.empty?)
 
     value
@@ -3889,7 +3891,7 @@ class DodontoFServer
   end
 
   def protected_image?(image_url)
-    $protectImagePaths.each do |url|
+    Configure.protect_image_paths.each do |url|
       if image_url.index(url) == 0
         return true
       end
@@ -4031,7 +4033,7 @@ class DodontoFServer
   end
 
   def add_local_image_to_list(image_list)
-    files = Dir.glob("#{$imageUploadDir}/*")
+    files = Dir.glob("#{Configure.image_upload_dir}/*")
 
     files.each do |fileName|
       file = file.untaint #TODO:WHAT? このfileはどこから来たのか分からない
@@ -4220,18 +4222,18 @@ class DodontoFServer
 
     result = { 'result' => "NG" }
 
-    return result if ($mentenanceModePassword.nil?)
+    return result if (Configure.mentenance_mode_password.nil?)
     chat_data = params
 
     password = chat_data["password"]
     logging(password, "password check...")
-    return result unless (password == $mentenanceModePassword)
+    return result unless (password == Configure.mentenance_mode_password)
 
     logging("adminPoassword check OK.")
 
     rooms = []
 
-    $saveDataMaxCount.times do |roomNumber|
+    Configure.save_data_max_count.times do |roomNumber|
       logging(roomNumber, "loop roomNumber")
 
       init_savefiles(roomNumber)
@@ -4278,7 +4280,7 @@ class DodontoFServer
       logging(saveData['chatMessageDataLog'], "saveData['chatMessageDataLog']")
     end
 
-    if $IS_SAVE_LONG_CHAT_LOG
+    if Configure.is_save_long_chat_log
       save_all_chat_message(chat_message_data)
     end
   end
@@ -4290,7 +4292,7 @@ class DodontoFServer
       written_time, chat_message, *dummy = chatMessageData
       time_diff                          = now - written_time
 
-      (time_diff > ($oldMessageTimeout))
+      (time_diff > (Configure.old_message_timeout))
     end
   end
 
@@ -4352,7 +4354,7 @@ class DodontoFServer
       lines << DodontoFServer::build_json(chat_message_data)
       lines << "\n"
 
-      while lines.size > $chatMessageDataLogAllLineMax
+      while lines.size > Configure.chat_message_data_log_all_line_max
         lines.shift
       end
 
@@ -4548,7 +4550,7 @@ class DodontoFServer
 
 
   def image_info_file_name
-    image_info_file_name = file_join($imageUploadDir, 'imageInfo.json')
+    image_info_file_name = file_join(Configure.image_upload_dir, 'imageInfo.json')
 
     logging(image_info_file_name, 'imageInfoFileName')
 
@@ -4618,7 +4620,7 @@ class DodontoFServer
 
     result['tagInfos']  = image_tags
     result['imageList'] = image_list
-    result['imageDir']  = $imageUploadDir
+    result['imageDir']  = Configure.image_upload_dir
 
     logging("getImageTagsAndImageList result", result)
 
@@ -5719,7 +5721,7 @@ class DodontoFServer
 
     graveyard << character
 
-    while graveyard.size > $graveyardLimit
+    while graveyard.size > Configure.graveyard_limit
       graveyard.shift
     end
   end
@@ -5950,10 +5952,10 @@ end
 
 
 def compress?(result, server)
-  return false if ($gzipTargetSize <= 0)
+  return false if (Configure.gzip_target_size <= 0)
   return false if (server.jsonp_callback)
 
-  (/gzip/ =~ ENV["HTTP_ACCEPT_ENCODING"]) and (result.length > $gzipTargetSize)
+  (/gzip/ =~ ENV["HTTP_ACCEPT_ENCODING"]) and (result.length > Configure.gzip_target_size)
 end
 
 def compress_response(result)
@@ -5985,9 +5987,9 @@ def main(params)
 end
 
 def response_header(server)
-  header = ""
+  header = ''
 
-  if $isModRuby
+  if Configure.is_mod_ruby
     #Apache::request.content_type = "text/plain; charset=utf-8"
     #Apache::request.send_header
   else
@@ -6015,7 +6017,7 @@ def print_response(server)
     logging(result.length.to_s, "CGI response original length")
 
     if compress?(result, server)
-      if $isModRuby
+      if Configure.is_mod_ruby
         Apache.request.content_encoding = 'gzip'
       else
         header << "Content-Encoding: gzip\n"
@@ -6073,7 +6075,7 @@ if $0 === __FILE__
 
   initLog
 
-  case $dbType
+  case Configure.db_type
     when "mysql"
       #mod_ruby でも再読み込みするようにloadに
       require 'DodontoFServerMySql.rb'

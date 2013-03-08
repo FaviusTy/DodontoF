@@ -107,18 +107,11 @@ class SaveData
 
   #このインスタンスが表すDataディレクトリまでのアクセスパスを返す
   def data_dir_path
-    dir_name_by_index(dir_index)
+    SaveData::data_dir_path(dir_index)
   end
 
-  def dir_name_by_index(_dir_index)
-    save_data_dir_name = ''
-
-    if _dir_index >= 0
-      dir_name           = "data_#{_dir_index}"
-      save_data_dir_name = File.join(SaveData::root_dir_path, dir_name)
-    end
-
-    save_data_dir_name
+  def self.data_dir_path(index)
+    File.join(SaveData::root_dir_path, "data_#{index}") if index >= 0
   end
 
   # 新しいDataディレクトリとファイルセットを作成する
@@ -163,7 +156,7 @@ class SaveData
   end
 
   def remove_dir(dir_index)
-    dir_name = dir_name_by_index(dir_index)
+    dir_name = SaveData::data_dir_path(dir_index)
     SaveData::remove_dir(dir_name)
   end
 
@@ -179,7 +172,6 @@ class SaveData
 
     files = Dir.glob(File.join(dir_name, '*'))
 
-    logging(files, 'removeDir files')
     files.each do |fileName|
       File.delete(fileName.untaint)
     end
@@ -191,12 +183,8 @@ class SaveData
   # 用途を勘違いしてる？
   def real_save_file_name(file_name)
     begin
-      logging(data_dir_path, 'saveDataDirName')
-
       return File.join(data_dir_path, file_name)
     rescue => e
-      loggingForce($!.inspect)
-      loggingForce(e.inspect)
       raise e
     end
   end

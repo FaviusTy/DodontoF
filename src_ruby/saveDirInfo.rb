@@ -10,9 +10,9 @@ class SaveData
   attr_reader :save_files
 
   # saveDataディレクトリまでの相対パス
-  SUB_DIR = Configure.save_data_dir
+  SUB_DIR             = Configure.save_data_dir
   # プレイルームの最大数
-  MAX_NUMBER = Configure.save_data_max_count
+  MAX_NUMBER          = Configure.save_data_max_count
   # ディレクトリ名の共通プリフィクス
   PREFIX_DIR_NAME     = 'data_'
   # TODO:RESEARCH 元$saveFileNamesさん. 用途不特定
@@ -40,27 +40,28 @@ class SaveData
   def initialize(index_obj)
     @sample_mode = false
 
-    dir_index   = index_obj.instance_of?(StringIO) ? index_obj.string : index_obj
+    # dir_index生成
+    dir_index = index_obj.instance_of?(StringIO) ? index_obj.string : index_obj
     unless @sample_mode
-      if dir_index.to_i > MAX_NUMBER
-        raise "saveDataDirIndex:#{dir_index} is over Limit:(#{MAX_NUMBER})"
-      end
+      raise "saveDataDirIndex:#{dir_index} is over Limit:(#{MAX_NUMBER})" if dir_index.to_i > MAX_NUMBER
     end
     @dir_index = dir_index.to_i
 
+    # save_files生成
     files = {}
     SaveData::FILE_NAME_SET.each do |key_name, file_name|
-      files[key_name] = real_save_file_name(file_name)
+      files[key_name] = File.join(data_dir_path, file_name)
     end
     @save_files = NestedOpenStruct.new(files)
   end
 
+  # saveDataディレクトリまでのアクセスパスを返す
   def self.root_dir_path
     File.join(SUB_DIR, 'saveData')
   end
 
   def each_with_index(target_range, *file_names)
-    dirs = exist_data_dirs(target_range)
+    dirs = SaveData::exist_data_dirs(target_range)
 
     dirs.each_with_index do |directory, _|
       next unless (/#{PREFIX_DIR_NAME}(\d+)\Z/ === directory)
@@ -75,15 +76,15 @@ class SaveData
   # file_namesのうち、引数dir内に存在するファイルのファイル名のみをフィルタリングして返す
   def names_exist_file(dir, file_names)
     file_names.map { |file_name| File.join(dir, file_name) }
-              .find_all { |file| FileTest.exist? file }
+    .find_all { |file| FileTest.exist? file }
   end
 
   # target_range範囲内のindexのうち、ディレクトリが存在するものを返す
   def self.exist_data_dirs(target_range)
     dir_names = target_range.map { |i| "data_#{i}" }
 
-    dir_names.map {|dir| File.join(self.root_dir_path, dir)}
-             .find_all {|dir| FileTest.exist? dir}
+    dir_names.map { |dir| File.join(self.root_dir_path, dir) }
+    .find_all { |dir| FileTest.exist? dir }
   end
 
   # target_rangeの範囲内のdataディレクトリ別にfile_namesにあるファイル中で最新のtimestampを配列にして返す
@@ -110,6 +111,7 @@ class SaveData
     SaveData::data_dir_path(dir_index)
   end
 
+  # 引数indexに対応するDataディレクトリまでのアクセスパスを返す
   def self.data_dir_path(index)
     File.join(SaveData::root_dir_path, "data_#{index}") if index >= 0
   end
@@ -117,9 +119,7 @@ class SaveData
   # 新しいDataディレクトリとファイルセットを作成する
   def create_dir
 
-    if FileTest.directory?(data_dir_path)
-      raise 'このプレイルームはすでに作成済みです。'
-    end
+    raise 'このプレイルームはすでに作成済みです。' if FileTest.directory?(data_dir_path)
 
     Dir::mkdir(data_dir_path)
     File.chmod(0777, data_dir_path)
@@ -128,10 +128,8 @@ class SaveData
         :preserve => true,
     }
 
-    source_dir = 'saveData_forNewCreation'
-
     file_names = SaveData::all_save_file_names
-    src_files  = names_exist_file(source_dir, file_names)
+    src_files  = names_exist_file('saveData_forNewCreation', file_names)
 
     FileUtils.cp_r(src_files, data_dir_path, options)
   end

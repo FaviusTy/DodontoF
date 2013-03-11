@@ -3,7 +3,8 @@
 require 'fileutils'
 require File.dirname(__FILE__) + '/configure'
 
-
+# saveData直下のDataディレクトリを表すClass
+# インスタンス化することでindexに対応するDataディレクトリへの操作を提供し、クラスメソッドはDataディレクトリの全体的な操作を提供する
 class SaveData
 
   attr_accessor :dir_index, :sample_mode
@@ -124,14 +125,10 @@ class SaveData
     Dir::mkdir(data_dir_path)
     File.chmod(0777, data_dir_path)
 
-    options = {
-        :preserve => true,
-    }
+    src_files  = names_exist_file('saveData_forNewCreation',
+                                  SaveData::all_save_file_names)
 
-    file_names = SaveData::all_save_file_names
-    src_files  = names_exist_file('saveData_forNewCreation', file_names)
-
-    FileUtils.cp_r(src_files, data_dir_path, options)
+    FileUtils.cp_r(src_files, data_dir_path, { :preserve => true })
   end
 
   # Dataディレクトリ内で管理されるファイル名のリストを返す.
@@ -153,23 +150,23 @@ class SaveData
     file_names
   end
 
-  def remove_dir(dir_index)
-    dir_name = SaveData::data_dir_path(dir_index)
-    SaveData::remove_dir(dir_name)
+  # インスタンスが表すDataディレクトリとその直下のファイルを物理的に削除する
+  def remove_dir
+    SaveData::remove_dir(dir_index)
   end
 
-  # TODO:FIXME dir_nameは実際にはフルパスであることを要求しているが、内部的に求められるはずなのでそのように改修する
-  def self.remove_dir(dir_name)
-    return unless (FileTest.directory?(dir_name))
+  # 引数indexに対応するDataディレクトリとその直下のファイルを物理的に削除する
+  def self.remove_dir(dir_index)
+    dir_name = SaveData::data_dir_path(dir_index)
+
+    return unless FileTest.directory?(dir_name)
 
     # force = true
     # FileUtils.remove_entry_secure(dirName, force)
-
     # 上記のメソッドは一部レンタルサーバ(さくらインターネット等）で禁止されているので、
     # この下の方法で対応しています。
 
     files = Dir.glob(File.join(dir_name, '*'))
-
     files.each do |fileName|
       File.delete(fileName.untaint)
     end

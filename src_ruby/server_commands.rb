@@ -726,7 +726,7 @@ module ServerCommands
       check_set_password(play_room_password, play_room_index)
 
       logging('@saveDirInfo.removeSaveDir(playRoomIndex) Begin')
-      @savedir_info.remove_dir(play_room_index)
+      @savedir_info.remove_dir
       logging('@saveDirInfo.removeSaveDir(playRoomIndex) End')
 
       @savedir_info.create_dir

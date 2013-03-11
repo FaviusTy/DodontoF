@@ -1981,8 +1981,8 @@ class DodontoFServer
 
       case result_text
         when 'OK'
-          @savedir_info.remove_dir(room_number)
-          remove_local_space_dir(room_number)
+          SaveData::remove_dir(room_number)
+          remove_local_image_upload_dir(room_number)
           deleted_room_numbers << room_number
         when 'password'
           password_room_numbers << room_number
@@ -2004,9 +2004,10 @@ class DodontoFServer
     result
   end
 
-  def remove_local_space_dir(room_number)
-    dir = room_local_space_dir_name_by_room_no(room_number)
-    SaveData.remove_dir(dir)
+  #FIXME!!! SaveDataをimageUploadSpaceの操作に流用するのはダメ！絶対！
+  def remove_local_image_upload_dir(room_number)
+    dir = image_upload_local_dir_path(room_number)
+    #SaveData.remove_dir(dir)
   end
 
   def savedata_all_for_scenario
@@ -2705,11 +2706,10 @@ class DodontoFServer
   end
 
   def room_local_space_dir_name
-    room_no = @savedir_info.dir_index
-    room_local_space_dir_name_by_room_no(room_no)
+    image_upload_local_dir_path(@savedir_info.dir_index)
   end
 
-  def room_local_space_dir_name_by_room_no(room_no)
+  def image_upload_local_dir_path(room_no)
     File.join(Configure.image_upload_dir, "room_#{room_no}")
   end
 

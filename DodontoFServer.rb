@@ -124,7 +124,6 @@ class DodontoFServer
     begin
       lockfile_name = DodontoFServer::lockfile_name(file_name)
       return FileLock.new(lockfile_name)
-        #return FileLock2.new(saveFileName + ".lock", isReadOnly)
     rescue => e
       loggingForce(@savedir_info.inspect, 'when getSaveFileLock error : @saveDirInfo.inspect')
       raise
@@ -865,16 +864,16 @@ class DodontoFServer
 
   def busy_info
     {
-        "loginCount"    => File.readlines(Configure.login_count_file).join.to_i,
-        "maxLoginCount" => Configure.about_max_login_count,
-        "version"       => Configure.version,
-        "result"        => 'OK',
+        'loginCount' => File.readlines(Configure.login_count_file).join.to_i,
+        'maxLoginCount' => Configure.about_max_login_count,
+        'version' => Configure.version,
+        'result' => 'OK',
     }
   end
 
   def server_info_for_webif
     result_data = {
-        "max_room"             => (Configure.save_data_max_count - 1),
+        'max_room' => (Configure.save_data_max_count - 1),
         'isNeedCreatePassword' => (not Configure.create_play_room_password.empty?),
         'result'               => 'OK',
     }

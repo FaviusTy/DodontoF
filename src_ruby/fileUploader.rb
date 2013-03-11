@@ -57,7 +57,7 @@ class FileUploader
   def create_upload_file(save_data_index, file_name, sub_dir_name = '.')
     
     save_dir_info = SaveData.new(save_data_index)
-    save_dir_name = save_dir_info.real_save_file_name(sub_dir_name)
+    save_dir_name = save_dir_info.save_file_path(sub_dir_name)
     logging(save_dir_name, 'saveDirName')
     
     unless sub_dir_name == '.'

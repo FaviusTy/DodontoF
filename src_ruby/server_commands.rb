@@ -697,11 +697,12 @@ module ServerCommands
     result
   end
 
+  #新規PlayRoom作成
   def create_play_room
     logging('createPlayRoom begin')
 
     result_text     = 'OK'
-    play_room_index = -1
+    play_room_index = nil
     begin
       logging(params, 'params')
 
@@ -709,16 +710,11 @@ module ServerCommands
 
       play_room_name         = params['playRoomName']
       play_room_password     = params['playRoomPassword']
-      chat_channel_names     = params['chatChannelNames']
-      can_use_external_image = params['canUseExternalImage']
+      play_room_index        = params['playRoomIndex']
 
-      can_visit       = params['canVisit']
-      play_room_index = params['playRoomIndex']
-
-      if play_room_index == -1
+      unless play_room_index
         play_room_index = find_empty_room_number
-        raise Exception.new('noEmptyPlayRoom') if (play_room_index == -1)
-
+        raise Exception.new('noEmptyPlayRoom') unless play_room_index
         logging(play_room_index, 'findEmptyRoomNumber playRoomIndex')
       end
 
@@ -726,33 +722,31 @@ module ServerCommands
       logging('playRoomPassword is get')
       logging(play_room_index, 'playRoomIndex')
 
-      init_savefiles(play_room_index)
+      @savedir_info = SaveData.new(play_room_index)
       check_set_password(play_room_password, play_room_index)
 
       logging('@saveDirInfo.removeSaveDir(playRoomIndex) Begin')
       @savedir_info.remove_dir(play_room_index)
       logging('@saveDirInfo.removeSaveDir(playRoomIndex) End')
 
-      @savedir_info.dir_index(play_room_index)
       @savedir_info.create_dir
 
       play_room_changed_password = changed_password(play_room_password)
       logging(play_room_changed_password, 'playRoomChangedPassword')
 
-      view_states = params['viewStates']
-      logging('viewStates', view_states)
+      logging('viewStates', params['viewStates'])
 
-      real_savefile_name = @savedir_info.real_savefile_name(SaveData::PLAY_ROOM_INFO_FILE)
+      playroom_info_file_path = @savedir_info.save_file_path(SaveData::PLAY_ROOM_INFO_FILE)
 
-      change_save_data(real_savefile_name) do |saveData|
+      change_save_data(playroom_info_file_path) do |saveData|
         saveData['playRoomName']            = play_room_name
         saveData['playRoomChangedPassword'] = play_room_changed_password
-        saveData['chatChannelNames']        = chat_channel_names
-        saveData['canUseExternalImage']     = can_use_external_image
-        saveData['canVisit']                = can_visit
+        saveData['chatChannelNames']        = params['chatChannelNames']
+        saveData['canUseExternalImage']     = params['canUseExternalImage']
+        saveData['canVisit']                = params['canVisit']
         saveData['gameType']                = params['gameType']
 
-        add_view_states_to_savedata(saveData, view_states)
+        add_view_states_to_savedata(saveData, params['viewStates'])
       end
 
       send_room_create_message(play_room_index)

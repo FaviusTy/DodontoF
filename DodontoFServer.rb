@@ -1527,22 +1527,11 @@ class DodontoFServer
     room_numbers
   end
 
+  # まだ作成されていないDataディレクトリの一番小さいindexを返す
   def find_empty_room_number
-    empty_room_number = -1
-
-    room_number_range = (0..Configure.save_data_max_count)
-
-    room_number_range.each do |roomNumber|
-      @savedir_info.dir_index(roomNumber)
-      real_savefile_name = @savedir_info.real_savefile_name(SaveData::PLAY_ROOM_INFO_FILE)
-
-      next if (File.exist?(real_savefile_name))
-
-      empty_room_number = roomNumber
-      break
+    (0..Configure.save_data_max_count).find do |room_index|
+      SaveData::save_file_path(SaveData::PLAY_ROOM_INFO_FILE, room_index).nil?
     end
-
-    empty_room_number
   end
 
   def play_room_states_local(min_room, max_room)
@@ -3901,8 +3890,8 @@ class DodontoFServer
   end
 
   def find_card_mount_data_by_type(characters, mount_name, card_mount_type)
-    card_mount_data = characters.find do |i|
-      ((i['type'] === card_mount_type) && (i['mountName'] == mount_name))
+    characters.find do |i|
+      (i['type'] === card_mount_type) && (i['mountName'] == mount_name)
     end
   end
 
@@ -3923,11 +3912,8 @@ class DodontoFServer
   end
 
   def find_trash_mount_and_cards(save_data, mount_name)
-    save_data['cardTrushMount'] ||= {}
-    trash_mount                 = save_data['cardTrushMount']
-
-    trash_mount[mount_name] ||= []
-    trash_cards             = trash_mount[mount_name]
+    trash_mount = save_data['cardTrushMount'] || {}
+    trash_cards = trash_mount[mount_name] || []
 
     return trash_mount, trash_cards
   end
@@ -4006,7 +3992,7 @@ class DodontoFServer
     save_data['cardMount'] ||= {}
   end
 
-  def remove_from_array(array)
+  def remove_from_array(array) #TODO:FIXME 標準ライブラリで実現できる処理に見えるので削除候補
     index = nil
     array.each_with_index do |i, targetIndex|
       logging(i, 'i')
@@ -4018,7 +4004,7 @@ class DodontoFServer
       end
     end
 
-    return nil if (index.nil?)
+    return nil unless index
 
     array.delete_at(index)
   end
@@ -4030,34 +4016,23 @@ class DodontoFServer
   end
 
   #override
-  def savefile_timestamp(savefile_name)
+  def savefile_timestamp(savefile_name) #TODO:FIXME saveDirInfo.rbへの移譲候補
     return 0 unless File.exist?(savefile_name)
     File.mtime(savefile_name).to_f
   end
 
-  def savefile_timestamp_millisec(savefile_name)
+  def savefile_timestamp_millisec(savefile_name) #TODO:FIXME saveDirInfo.rbへの移譲候補
     (savefile_timestamp(savefile_name) * 1000).to_i
   end
 
-  def savefile_changed?(last_update_time, savefile_name)
-    last_update_time   = last_update_time.to_i
-    savefile_timestamp = savefile_timestamp_millisec(savefile_name)
-    changed            = (savefile_timestamp != last_update_time)
+  def savefile_changed?(last_update_time, save_file_name) #TODO:FIXME saveDirInfo.rbへの移譲候補
+    timestamp = savefile_timestamp_millisec(save_file_name)
 
-    logging(savefile_name, 'saveFileName')
-    logging(savefile_timestamp.inspect, 'saveFileTimeStamp')
-    logging(last_update_time.inspect, 'lastUpdateTime   ')
-    logging(changed, 'changed')
-
-    changed
+    timestamp != last_update_time.to_i
   end
 
   def response_body
-    if isJsonResult
-      DodontoFServer::build_json(execute_command)
-    else
-      DodontoFServer::build_msgpack(execute_command)
-    end
+    @is_json_result ? DodontoFServer::build_json(execute_command) : DodontoFServer::build_msgpack(execute_command)
   end
 end
 
@@ -4105,20 +4080,8 @@ def main(params)
 end
 
 def response_header(server)
-  header = ''
-
-  if Configure.is_mod_ruby
-    #Apache::request.content_type = "text/plain; charset=utf-8"
-    #Apache::request.send_header
-  else
-    if server.is_json_result
-      header = "Content-Type: text/plain; charset=utf-8\n"
-    else
-      header = "Content-Type: application/x-msgpack; charset=x-user-defined\n"
-    end
-  end
-
-  header
+  header = 'Content-Type: '
+  header << server.is_json_result ? "text/plain; charset=utf-8\n" : "application/x-msgpack; charset=x-user-defined\n"
 end
 
 def print_response(server)

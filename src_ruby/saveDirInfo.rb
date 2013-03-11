@@ -112,7 +112,7 @@ class SaveData
   end
 
   # 引数indexに対応するDataディレクトリまでのアクセスパスを返す
-  def self.data_dir_path(index)
+  def self.data_dir_path(index = 0)
     File.join(SaveData::root_dir_path, "data_#{index}") if index >= 0
   end
 
@@ -177,14 +177,14 @@ class SaveData
     Dir.delete(dir_name)
   end
 
-  # TODO:WAHT? このメソッドではfile_nameをフルパスに整形する際にそれが実在することを保証できていない
-  # 用途を勘違いしてる？
-  def real_save_file_name(file_name)
-    begin
-      return File.join(data_dir_path, file_name)
-    rescue => e
-      raise e
-    end
+  # file_nameが実在する場合、そのアクセスパスを返す
+  def save_file_path(file_name)
+    SaveData::save_file_path(file_name, dir_index)
+  end
+
+  def self.save_file_path(file_name, index = 0)
+    file_path = File.join(self.data_dir_path(index), file_name)
+    return file_path if FileTest.exist?(file_path) && FileTest.file?(file_path)
   end
 
 end
@@ -217,5 +217,5 @@ if $0 === __FILE__
   puts "root_dir_path : #{SaveData::root_dir_path}"
   puts "exist_data_dirs : #{SaveData::exist_data_dirs((0 .. 0))}"
   puts "data_dir_path : #{save_data.data_dir_path}"
-  puts "real_save_file_name : #{save_data.real_save_file_name('.')}"
+  puts "real_save_file_name : #{save_data.save_file_path('.')}"
 end

@@ -76,16 +76,16 @@ class SaveData
 
   # file_namesのうち、引数dir内に存在するファイルのファイル名のみをフィルタリングして返す
   def names_exist_file(dir, file_names)
-    file_names.map { |file_name| File.join(dir, file_name) }
-    .find_all { |file| FileTest.exist? file }
+    file_names.map {|file_name| File.join(dir, file_name) }
+              .find_all {|file| FileTest.exist? file }
   end
 
   # target_range範囲内のindexのうち、ディレクトリが存在するものを返す
   def self.exist_data_dirs(target_range)
     dir_names = target_range.map { |i| "data_#{i}" }
 
-    dir_names.map { |dir| File.join(self.root_dir_path, dir) }
-    .find_all { |dir| FileTest.exist? dir }
+    dir_names.map {|dir| File.join(self.root_dir_path, dir) }
+             .find_all {|dir| FileTest.exist? dir }
   end
 
   # target_rangeの範囲内のdataディレクトリ別にfile_namesにあるファイル中で最新のtimestampを配列にして返す
@@ -182,6 +182,15 @@ class SaveData
   def self.save_file_path(file_name, index = 0)
     file_path = File.join(self.data_dir_path(index), file_name)
     return file_path if FileTest.exist?(file_path) && FileTest.file?(file_path)
+  end
+end
+
+class SaveFile
+  attr_reader :save_data, :name
+
+  def initialize(file_name, save_data)
+    @save_data = save_data
+    @name = file_name
   end
 
 end

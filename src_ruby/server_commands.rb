@@ -319,7 +319,7 @@ module ServerCommands
 
     result_text = '画像URLのアップロードに失敗しました。'
     locker      = savefile_lock(image_url_text)
-    locker.lock do
+    locker.in_action do
       exists_urls = File.readlines(image_url_text).collect { |i| i.chomp }
       if exists_urls.include?(image_url)
         result_text = 'すでに登録済みの画像URLです。'

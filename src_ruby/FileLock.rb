@@ -1,22 +1,18 @@
 
 class FileLock
   
-  def initialize(lockFileName)
-    @lockFileName = lockFileName
-    
-    unless( File.exist?(@lockFileName) )
-      createLockFile
-    end
+  def initialize(file_name)
+    @file_name = file_name
+
+    create unless File.exist?(@file_name)
   end
   
-  def createLockFile
-    File.open(@lockFileName, "w+") do |file|
-      file.write("lock")
-    end
+  def create
+    File.open(@file_name, 'w+'){|file| file.write('lock') }
   end
   
-  def lock(&action)
-    open(@lockFileName, "r+") do |f|
+  def in_action(&action)
+    open(@file_name, 'r+') do |f|
       f.flock(File::LOCK_EX)
       begin
         action.call

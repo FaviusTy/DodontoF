@@ -631,12 +631,12 @@ class FileLockMySql < FileLock
   
   
   def initialize(lockFileName, isReadOnly = false)
-    @lockFileName = lockFileName
+    @file_name = lockFileName
     @isReadOnly = isReadOnly
   end
   
   def lock(&action)
-    @@saveDataManager.open(@lockFileName, @isReadOnly) do
+    @@saveDataManager.open(@file_name, @isReadOnly) do
       action.call
     end
   end

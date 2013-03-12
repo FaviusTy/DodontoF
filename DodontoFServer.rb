@@ -110,12 +110,7 @@ class DodontoFServer
     File.join(Configure.save_data_lock_fire_dir, subdir_name) + '.lock'
   end
 
-  #override
-  def savefile_lock(file_name, readonly = false)
-    real_savefile_lock(file_name, readonly)
-  end
-
-  def real_savefile_lock(file_name, readonly = false)
+  def savefile_lock(file_name)
     begin
       lockfile_name = DodontoFServer::lockfile_name(file_name)
       return FileLock.new(lockfile_name)
@@ -127,7 +122,7 @@ class DodontoFServer
 
   def load_long_chatlog(type_name, savefile_name)
     savefile_name = @savedir_info.real_savefile_name(SaveData::CHAT_LONG_LINE_FILE)
-    lockfile      = savefile_lock(savefile_name, true)
+    lockfile      = savefile_lock(savefile_name)
 
     lines = []
     lockfile.in_action do
@@ -297,7 +292,7 @@ class DodontoFServer
   end
 
   def load_default_savefile(type_name, file_name)
-    lockfile = savefile_lock(file_name, true)
+    lockfile = savefile_lock(file_name)
 
     text_data = ''
     lockfile.in_action do
@@ -309,7 +304,7 @@ class DodontoFServer
   end
 
   def save_data(savefile_name)
-    lockfile = savefile_lock(savefile_name, true)
+    lockfile = savefile_lock(savefile_name)
 
     text_data = nil
     lockfile.in_action do
@@ -593,7 +588,7 @@ class DodontoFServer
   def extract_safed_file_text(savefile_name)
     empty = '{}'
 
-    return empty unless (File.exist?(savefile_name))
+    return empty unless File.exist?(savefile_name)
 
     text = ''
     open(savefile_name, 'r') { |file| text = file.read }
@@ -3935,9 +3930,7 @@ class DodontoFServer
       logging(targetIndex, 'targetIndex')
       b = yield(i)
       logging(b, 'yield(i)')
-      if b
-        index = targetIndex
-      end
+      index = targetIndex if b
     end
 
     return nil unless index

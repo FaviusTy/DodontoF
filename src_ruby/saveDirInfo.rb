@@ -2,6 +2,7 @@
 
 require 'fileutils'
 require File.dirname(__FILE__) + '/configure'
+require File.dirname(__FILE__) + '/FileLock'
 
 # saveData直下のDataディレクトリを表すClass
 # インスタンス化することでindexに対応するDataディレクトリへの操作を提供し、クラスメソッドはDataディレクトリの全体的な操作を提供する
@@ -185,12 +186,23 @@ class SaveData
   end
 end
 
+# Dataディレクトリ以下で管理されるファイルを扱うClass
 class SaveFile
-  attr_reader :save_data, :name
+  attr_reader :save_data, :name, :locker_name
 
   def initialize(file_name, save_data)
     @save_data = save_data
     @name = file_name
+    @locker_name = "#{file_name}.lock"
+  end
+
+  def locker
+    return @lock_file if @lock_file
+    @lock_file = if Configure.save_data_lock_file_dir
+      FileLock.new(File.join(Configure.save_data_lock_file_dir, locker_name))
+    else
+      FileLock.new(File.join(@save_data.save_file_path(locker_name)))
+    end
   end
 
 end

@@ -5,10 +5,13 @@ require File.dirname(__FILE__) + '/n_ostruct'
 # Applicationの共通設定項目をymlファイルから生成したNestedOpenStruct経由でアクセス可能にする
 class Configure
   DEFAULT_FILE_PATH = 'settings.yml'
-  @@base ||= NestedOpenStruct.new(YAML.load_file(DEFAULT_FILE_PATH))
+
+  def self.base
+    @base ||= NestedOpenStruct.new(YAML.load_file(DEFAULT_FILE_PATH))
+  end
 
   def self.method_missing(method, *args)
-    @@base.send(method, *args)
+    base.send(method, *args)
   end
 
   def self.version

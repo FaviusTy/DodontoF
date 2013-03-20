@@ -1,5 +1,5 @@
 GEM
-  remote: https://rubygems.org/
+  remote: http://rubygems.org/
   specs:
     msgpack (0.5.3-x86-mingw32)
     rack (1.5.2)

@@ -6,6 +6,7 @@ Encoding.default_external = 'utf-8'
 
 require 'sinatra/base'
 require 'rack-rewrite'
+require 'configure'
 require 'msgpack_params_parser'
 require 'msgpack'
 require 'json'
@@ -18,7 +19,7 @@ class DodontoF < Sinatra::Base
   set :public_folder => File.dirname(__FILE__)
 
   post '/' do
-    'call'
+    p params
   end
 end
 

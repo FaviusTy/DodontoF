@@ -23,6 +23,7 @@ require 'stringio'
 require 'logger'
 require 'uri'
 require 'fileutils'
+require 'card_decks'
 require 'n_ostruct'
 require 'configure'
 require 'server_commands'
@@ -91,12 +92,6 @@ class DodontoFServer
 
     logging(value, 'getRequestData result')
     value
-  end
-
-  def cards_info
-    require 'card.rb'
-
-    @card ||= Card.new
   end
 
   def self.lockfile_name(savefile_name)
@@ -847,7 +842,7 @@ class DodontoFServer
     }
 
     if request_boolean_for_webif('card', false)
-      cards_infos              = cards_info.collectCardTypeAndTypeName
+      cards_infos              = CardDecks.collect_display_infos
       result_data['cardInfos'] = cards_infos
     end
 
@@ -3679,7 +3674,7 @@ class DodontoFServer
     is_text         = true
 
     if card_data.nil?
-      card_title = cards_info.getCardTitleName(mount_name)
+      card_title = CardDecks.title_name(mount_name)
 
       is_text         = true
       image_name      = "<font size=\"40\">#{card_title}用<br>カード捨て場</font>"

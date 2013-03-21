@@ -171,7 +171,7 @@ module ServerCommands
 
     {
         :loginMessage               => login_message,
-        :cardInfos                  => cards_info.collectCardTypeAndTypeName,
+        :cardInfos                  => CardDecks.collect_display_infos,
         :isDiceBotOn                => Configure.is_dicebot,
         :uniqueId                   => unique_id,
         :refreshTimeout             => Configure.refresh_timeout,
@@ -1254,7 +1254,7 @@ module ServerCommands
         mount_name = cardTypeInfo['mountName']
         logging(mount_name, 'initCards mountName')
 
-        cards_list_file_name = cards_info.getCardFileName(mount_name)
+        cards_list_file_name = CardDecks.file_name(mount_name)
         logging(cards_list_file_name, 'initCards cardsListFileName')
 
         cards_list = []

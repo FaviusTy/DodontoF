@@ -1,6 +1,6 @@
 # encoding:utf-8
 require 'ostruct'
-require './nested_hash'
+require_relative 'nested_hash'
 
 class NestedOpenStruct < OpenStruct
   include Enumerable

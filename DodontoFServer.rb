@@ -81,7 +81,7 @@ class DodontoFServer
 
     value = @request_params[key]
     logging(@request_params, '@cgiParams')
-    # logging(value, "getRequestData value")
+
 
     #TODO:WAHT? このCGIインスタンスを生成する処理の理由がわからない
     if value.nil? and @is_web_interface
@@ -341,7 +341,7 @@ class DodontoFServer
   def save_character_history(save_data)
     logging('saveCharacterHistory begin')
 
-    before = deep_copy(save_data['characters'])
+    before = save_data['characters'].dup
     logging(before, 'saveCharacterHistory BEFORE')
     yield
     after = save_data['characters']
@@ -364,10 +364,6 @@ class DodontoFServer
       end
     end
     logging('saveCharacterHistory end')
-  end
-
-  def deep_copy(obj)
-    Marshal.load(Marshal.dump(obj))
   end
 
   def not_exist_characters(first, second)
@@ -442,9 +438,7 @@ class DodontoFServer
   end
 
   def command_sender
-    if @command_sender.nil?
-      @command_sender = request_data('own')
-    end
+    @command_sender ||= request_data('own')
 
     logging(@command_sender, '@commandSender')
 

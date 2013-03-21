@@ -1,6 +1,7 @@
 # A sample Gemfile
 source 'http://rubygems.org'
 
+gem 'thin'
 gem 'rspec'
 gem 'msgpack'
 gem 'sinatra'

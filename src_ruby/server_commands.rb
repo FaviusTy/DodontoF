@@ -1,6 +1,6 @@
 # encoding:utf-8
-require './configure'
-require './loggingFunction'
+require_relative 'configure'
+require_relative 'loggingFunction'
 
 # DodontoFServer.rbからCommand系のメソッドを抽出したModule.
 # 切り分けのたたき台としてとりあえず作成
@@ -82,8 +82,6 @@ module ServerCommands
   }.freeze
 
   def refresh
-    logging('==>Begin refresh')
-
     save_data = {}
 
     if Configure.is_mentenance
@@ -91,18 +89,9 @@ module ServerCommands
       return save_data
     end
 
-    logging(params, 'params')
-
-    @last_update_times = params['times']
-    logging(@last_update_times, '@lastUpdateTimes')
-
-    is_first_chat_refresh = (@last_update_times['chatMessageDataLog'] == 0)
-    logging(is_first_chat_refresh, 'isFirstChatRefresh')
-
-    refresh_index = params['rIndex']
-    logging(refresh_index, 'refreshIndex')
-
-    @isGetOwnRecord = params['isGetOwnRecord']
+    @last_update_times = params[:times]
+    refresh_index = params[:rIndex]
+    @isGetOwnRecord = params[:isGetOwnRecord]
 
     if Configure.is_comet
       refresh_routine(save_data)
@@ -111,23 +100,18 @@ module ServerCommands
     end
 
     unique_id  = command_sender
-    user_name  = params['name']
-    is_visitor = params['isVisiter']
+    user_name  = params[:name]
+    is_visitor = params[:isVisiter]
 
     login_user_info = login_user_info(user_name, unique_id, is_visitor)
 
     unless save_data.empty?
-      save_data['lastUpdateTimes'] = @last_update_times
-      save_data['refreshIndex']    = refresh_index
-      save_data['loginUserInfo']   = login_user_info
+      save_data[:lastUpdateTimes] = @last_update_times
+      save_data[:refreshIndex]    = refresh_index
+      save_data[:loginUserInfo]   = login_user_info
     end
 
-    if is_first_chat_refresh
-      save_data['isFirstChatRefresh'] = is_first_chat_refresh
-    end
-
-    logging(save_data, 'refresh end saveData')
-    logging('==>End refresh')
+    save_data[:isFirstChatRefresh] = true if @last_update_times[:chatMessageDataLog] == 0
 
     save_data
   end
@@ -179,9 +163,8 @@ module ServerCommands
   end
 
   def login_info
-    logging('getLoginInfo begin')
 
-    unique_id = params['uniqueId']
+    unique_id = params[:uniqueId]
     unique_id ||= create_unique_id
 
     all_login_count, login_user_count_list = all_login_count

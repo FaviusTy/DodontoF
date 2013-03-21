@@ -1,6 +1,6 @@
 # encoding:utf-8
 require 'yaml'
-require File.dirname(__FILE__) + '/n_ostruct'
+require_relative 'n_ostruct'
 
 # Applicationの共通設定項目をymlファイルから生成したNestedOpenStruct経由でアクセス可能にする
 class Configure

@@ -1,11 +1,11 @@
 # encoding:utf-8
 
-module TEST
-  def self.test_a
-    puts "test_a"
-  end
-end
+a = [1,2,3,4,5]
+b = a.dup
 
-TEST.send(:test_a)
+b[3] = 6
+
+puts a
+puts b
 
 

@@ -6,20 +6,26 @@ Encoding.default_external = 'utf-8'
 
 require 'sinatra/base'
 require 'rack-rewrite'
-require 'configure'
-require 'msgpack_params_parser'
 require 'msgpack'
 require 'json'
+require 'configure'
+require 'msgpack_params_parser'
+require 'server_commands'
 
 class DodontoF < Sinatra::Base
   use Rack::MsgpackParamsParser
   use Rack::Rewrite do
     rewrite '/DodontoFServer.rb', '/'
   end
+
   set :public_folder => File.dirname(__FILE__)
 
+  def action_params
+    params[:params]
+  end
+
   post '/' do
-    p params
+    p action_params
   end
 end
 

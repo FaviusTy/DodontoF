@@ -24,6 +24,11 @@ class Configure
     refresh_timeout * 1.5 + 10
   end
 
+  #refresh処理のSleep時間を返します
+  def self.refresh_interval
+    base.is_comet ? base.refresh_interval : base.refresh_interval_for_not_comet
+  end
+
   # ログイン状況を記録するファイル
   # TODO:FIXME これはsaveDirInfoに定義すべき
   def self.login_count_file
@@ -40,4 +45,5 @@ if $0 === __FILE__
   puts "save_data_lock_file_dir: #{Configure.save_data_lock_file_dir}:#{Configure.save_data_lock_file_dir.class}"
   puts "dicebot_order: #{Configure.dicebot_order}"
   puts "undefined: #{Configure.undefined}"
+  puts "refresh_interval: #{Configure.refresh_interval}"
 end

@@ -1274,15 +1274,11 @@ class DodontoFServer
 
       break unless (save_data.empty?)
 
-      interval = refresh_interval
+      interval = Configure.refresh_interval
       logging(interval, 'saveData is empty, sleep second')
       sleep(interval)
       logging('awake.')
     end
-  end
-
-  def refresh_interval
-    Configure.is_comet ? Configure.refresh_interval : Configure.refresh_interval_for_not_comet
   end
 
   def refresh_once(save_data)

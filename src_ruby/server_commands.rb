@@ -175,7 +175,7 @@ module ServerCommands
         :isDiceBotOn                => Configure.is_dicebot,
         :uniqueId                   => unique_id,
         :refreshTimeout             => Configure.refresh_timeout,
-        :refreshInterval            => refresh_interval,
+        :refreshInterval            => Configure.refresh_interval,
         :isCommet                   => Configure.is_comet,
         :version                    => Configure.version,
         :playRoomMaxNumber          => Configure.save_data_max_count - 1,

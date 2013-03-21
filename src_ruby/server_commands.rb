@@ -415,7 +415,7 @@ module ServerCommands
     logging('getDiceBotInfos Begin')
 
     require 'diceBotInfos'
-    dicebot_infos = DiceBotInfos.new.getInfos
+    dicebot_infos = DiceBotInfos.new.infos
 
     command_infos = game_command_infos
 

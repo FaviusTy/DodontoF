@@ -1,10 +1,11 @@
-#--*-coding:utf-8-*--
+# encoding:utf-8
+require_relative 'configure'
 
 class DiceBotInfos
-  
+
   def initialize
-    
-    noneDiceBot = {
+
+    none_dicebot = {
     'name' => 'ダイスボット(指定無し)',
     'gameType' => 'DiceBot',
     'fileName' => 'DiceBot',
@@ -40,8 +41,8 @@ class DiceBotInfos
 　S3d6 ： 各コマンドの先頭に「S」を付けると他人結果の見えないシークレットロール
 INFO_MESSAGE_TEXT
     }
-    
-    @infos = [noneDiceBot,
+
+    @infos = [none_dicebot,
 ### DICE_BOT_INFO_BEGIN
   {
     'name' => 'アリアンロッド',
@@ -914,55 +915,49 @@ INFO_MESSAGE_TEXT
 ### DICE_BOT_INFO_END
              ]
   end
-  
-  
-  def getInfos
-    
-    ignoreBotNames = ['DiceBot', 'DiceBotLoader', 'baseBot', '_Template', 'test']
-    ignoreBotNames += @infos.collect {|i| i['fileName']}
-    
-    @orders = getDiceBotOrder
-    deleteInfos()
-    sortInfos()
-    
+
+
+  def infos
+
+    ignore_names = %w(DiceBot DiceBotLoader baseBot _Template test)
+    ignore_names += @infos.collect {|i| i['fileName']}
+
+    @orders = Configure.dicebot_order.split("\n")
+    exclude!
+    sort!
+
     require 'diceBot/DiceBot'
-    
-    botFiles = Dir.glob("src_bcdice/diceBot/*.rb")
-    
-    botNames = botFiles.collect{|i| File.basename(i, ".rb").untaint}
-    botNames.delete_if{|i| ignoreBotNames.include?(i) }
-    
-    botNames.each do |botName|
+
+    src_files = Dir.glob('src_bcdice/diceBot/*.rb')
+    bot_names = src_files.collect{|i| File.basename(i, '.rb').untaint}
+    bot_names.delete_if{|bot_name| ignore_names.include?(bot_name) }
+
+    bot_names.each do |botName|
       logging(botName, 'load unknown dice bot botName')
       require "diceBot/#{botName}"
-      diceBot = Module.const_get(botName).new
-      @infos << diceBot.info
+      dicebot = Module.const_get(botName).new
+      @infos << dicebot.info
     end
-    
+
     @infos.each{|i| i.delete('fileName')}
-    
-    return @infos
+
+    @infos
   end
-  
-  def deleteInfos
+
+  def exclude!
     logging(@orders, '@orders')
-    
+
     @infos.delete_if do |info|
       not @orders.include?(info['name'])
     end
   end
-  
-  def sortInfos
+
+  def sort!
     @infos = @infos.sort_by do |info|
       index = @orders.index(info['name'])
       index ||= 999
       index.to_i
     end
   end
-  
-  def getDiceBotOrder
-    orders = $diceBotOrder.split("\n")
-    return orders
-  end
-  
+
 end

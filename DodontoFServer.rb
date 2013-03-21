@@ -848,7 +848,7 @@ class DodontoFServer
 
     if request_boolean_for_webif('dice', false)
       require 'diceBotInfos'
-      dicebot_infos               = DiceBotInfos.new.getInfos
+      dicebot_infos               = DiceBotInfos.new.infos
       result_data['diceBotInfos'] = dicebot_infos
     end
 
@@ -1574,7 +1574,7 @@ class DodontoFServer
 
   def game_title(game_type)
     require 'diceBotInfos'
-    dicebot_infos = DiceBotInfos.new.getInfos
+    dicebot_infos = DiceBotInfos.new.infos
     game_info     = dicebot_infos.find { |i| i['gameType'] == game_type }
 
     return '--' if game_info.nil?

@@ -1379,7 +1379,7 @@ class DodontoFServer
     result_list = {}
     target_range.each { |i| result_list[i] = 0 }
 
-    @savedir_info.each_with_index(target_range, SaveData::LOGIN_FILE) do |saveFiles, index|
+    SaveData.each_with_index(target_range, SaveData::LOGIN_FILE) do |saveFiles, index|
       next unless (target_range.include?(index))
 
       if saveFiles.size != 1
@@ -1401,7 +1401,7 @@ class DodontoFServer
     login_user_list = {}
     target_range.each { |i| login_user_list[i] = [] }
 
-    @savedir_info.each_with_index(target_range, SaveData::LOGIN_FILE) do |saveFiles, index|
+    SaveData.each_with_index(target_range, SaveData::LOGIN_FILE) do |saveFiles, index|
       next unless (target_range.include?(index))
 
       if saveFiles.size != 1
@@ -1539,7 +1539,7 @@ class DodontoFServer
     password_lock_state = (not play_room_data['playRoomChangedPassword'].nil?)
     can_visit           = play_room_data['canVisit']
     game_type           = play_room_data['gameType']
-    timestamp           = save_data_lastaccess_time(SaveData::FILE_NAME_SET[:chatMessageDataLog], room_no)
+    timestamp           = save_data_lastaccess_time(SaveData::DATA_FILE_NAMES[:chatMessageDataLog], room_no)
 
     time_display = ''
     unless timestamp.nil?
@@ -1610,8 +1610,7 @@ class DodontoFServer
   end
 
   def all_login_count
-    room_number_range     = (0 .. Configure.save_data_max_count)
-    login_user_count_list = login_user_count_list(room_number_range)
+    login_user_count_list = login_user_count_list(0 .. Configure.save_data_max_count)
 
     total     = 0
     user_list = []
@@ -1672,11 +1671,6 @@ class DodontoFServer
     [[params['max_room'], (Configure.save_data_max_count - 1)].min, 0].max
   end
 
-  def create_unique_id
-    # 識別子用の文字列生成。
-    (Time.now.to_f * 1000).to_i.to_s(36)
-  end
-
   def write_all_login_info(all_login_count)
     text = "#{all_login_count}"
 
@@ -1709,38 +1703,15 @@ class DodontoFServer
 
   def login_message
     message = ''
-    message << login_message_header
-    message << login_message_history_part
-
-    message
-  end
-
-  def login_message_header
-    login_message = ''
 
     if File.exist?(Configure.login_message_file)
-      File.readlines(Configure.login_message_file).each do |line|
-        login_message << line.chomp << "\n"
-      end
-      logging(login_message, 'loginMessage')
-    else
-      logging("#{Configure.login_message_file} is NOT found.")
+      File.readlines(Configure.login_message_file).each{|line| message << line }
     end
-
-    login_message
-  end
-
-  def login_message_history_part
-    login_message = ''
     if File.exist?(Configure.login_message_base_file)
-      File.readlines(Configure.login_message_base_file).each do |line|
-        login_message << line.chomp << "\n"
-      end
-    else
-      logging("#{Configure.login_message_file} is NOT found.")
+      File.readlines(Configure.login_message_base_file).each{|line| message << line}
     end
 
-    login_message
+    message
   end
 
   def dicebot_prefix(dicebot_infos, command_info)
@@ -1872,7 +1843,7 @@ class DodontoFServer
       return 'unremovablePlayRoomNumber'
     end
 
-    last_access_times = SaveData::save_data_last_access_times(SaveData::FILE_NAME_SET.values, room_number_range)
+    last_access_times = SaveData::save_data_last_access_times(SaveData::DATA_FILE_NAMES.values, room_number_range)
     last_access_time  = last_access_times[room_number]
     logging(last_access_time, 'lastAccessTime')
 
@@ -1954,7 +1925,7 @@ class DodontoFServer
   end
 
   def savedata_all_for_scenario
-    select_types = SaveData::FILE_NAME_SET.keys
+    select_types = SaveData::DATA_FILE_NAMES.keys
     select_types.delete_if { |i| i == 'chatMessageDataLog' }
 
     get_select_files_data(select_types, true)

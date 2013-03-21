@@ -30,7 +30,7 @@ class SaveData
   # TODO:RESEARCH 元$playRoomInfoTypeNameさん
   PLAY_ROOM_INFO_FILE = "#{PLAY_ROOM_INFO}.json"
   # TODO:RESEARCH 元$saveFilesさん
-  FILE_NAME_SET       = {
+  DATA_FILE_NAMES       = {
       :chatMessageDataLog  => 'chat.json',
       :map                 => 'map.json',
       :characters          => 'characters.json',
@@ -51,7 +51,7 @@ class SaveData
 
     # save_files生成
     files = {}
-    SaveData::FILE_NAME_SET.each do |key_name, file_name|
+    SaveData::DATA_FILE_NAMES.each do |key_name, file_name|
       files[key_name] = File.join(data_dir_path, file_name)
     end
     @save_files = NestedOpenStruct.new(files)
@@ -62,8 +62,8 @@ class SaveData
     File.join(SUB_DIR, 'saveData')
   end
 
-  def each_with_index(target_range, *file_names)
-    dirs = SaveData::exist_data_dirs(target_range)
+  def self.each_with_index(target_range, *file_names)
+    dirs = SaveData.exist_data_dirs(target_range)
 
     dirs.each_with_index do |directory, _|
       next unless (/#{PREFIX_DIR_NAME}(\d+)\Z/ === directory)
@@ -75,13 +75,7 @@ class SaveData
     end
   end
 
-  # file_namesのうち、引数dir内に存在するファイルのファイル名のみをフィルタリングして返す
-  def names_exist_file(dir, file_names)
-    file_names.map {|file_name| File.join(dir, file_name) }
-              .find_all {|file| FileTest.exist? file }
-  end
-
-  # target_range範囲内のindexのうち、ディレクトリが存在するものを返す
+    # target_range範囲内のindexのうち、ディレクトリが存在するものを返す
   def self.exist_data_dirs(target_range)
     dir_names = target_range.map { |i| "data_#{i}" }
 
@@ -108,36 +102,12 @@ class SaveData
     result
   end
 
-  #このインスタンスが表すDataディレクトリまでのアクセスパスを返す
-  def data_dir_path
-    SaveData::data_dir_path(dir_index)
-  end
-
-  # 引数indexに対応するDataディレクトリまでのアクセスパスを返す
-  def self.data_dir_path(index = 0)
-    File.join(SaveData::root_dir_path, "data_#{index}") if index >= 0
-  end
-
-  # 新しいDataディレクトリとファイルセットを作成する
-  def create_dir
-
-    raise 'このプレイルームはすでに作成済みです。' if FileTest.directory?(data_dir_path)
-
-    Dir::mkdir(data_dir_path)
-    File.chmod(0777, data_dir_path)
-
-    src_files  = names_exist_file('saveData_forNewCreation',
-                                  SaveData::all_save_file_names)
-
-    FileUtils.cp_r(src_files, data_dir_path, { :preserve => true })
-  end
-
   # Dataディレクトリ内で管理されるファイル名のリストを返す.
   # リストには各ファイルのロック制御ファイルも含まれる
   def self.all_save_file_names
     file_names = []
 
-    all_files = FILE_NAME_SET.values + [
+    all_files = DATA_FILE_NAMES.values + [
         LOGIN_FILE,
         PLAY_ROOM_INFO_FILE,
         CHAT_LONG_LINE_FILE,
@@ -151,9 +121,9 @@ class SaveData
     file_names
   end
 
-  # インスタンスが表すDataディレクトリとその直下のファイルを物理的に削除する
-  def remove_dir
-    SaveData::remove_dir(dir_index)
+  # 引数indexに対応するDataディレクトリまでのアクセスパスを返す
+  def self.data_dir_path(index = 0)
+    File.join(SaveData::root_dir_path, "data_#{index}") if index >= 0
   end
 
   # 引数indexに対応するDataディレクトリとその直下のファイルを物理的に削除する
@@ -175,14 +145,44 @@ class SaveData
     Dir.delete(dir_name)
   end
 
-  # file_nameが実在する場合、そのアクセスパスを返す
-  def save_file_path(file_name)
-    SaveData::save_file_path(file_name, dir_index)
-  end
-
   def self.save_file_path(file_name, index = 0)
     file_path = File.join(self.data_dir_path(index), file_name)
     return file_path if FileTest.exist?(file_path) && FileTest.file?(file_path)
+  end
+
+  # file_namesのうち、引数dir内に存在するファイルのファイル名のみをフィルタリングして返す
+  def names_exist_file(dir, file_names)
+    file_names.map {|file_name| File.join(dir, file_name) }
+              .find_all {|file| FileTest.exist? file }
+  end
+
+  #このインスタンスが表すDataディレクトリまでのアクセスパスを返す
+  def data_dir_path
+    SaveData::data_dir_path(dir_index)
+  end
+
+  # 新しいDataディレクトリとファイルセットを作成する
+  def create_dir
+
+    raise 'このプレイルームはすでに作成済みです。' if FileTest.directory?(data_dir_path)
+
+    Dir::mkdir(data_dir_path)
+    File.chmod(0777, data_dir_path)
+
+    src_files  = names_exist_file('saveData_forNewCreation',
+                                  SaveData::all_save_file_names)
+
+    FileUtils.cp_r(src_files, data_dir_path, { :preserve => true })
+  end
+
+  # インスタンスが表すDataディレクトリとその直下のファイルを物理的に削除する
+  def remove_dir
+    SaveData::remove_dir(dir_index)
+  end
+
+  # file_nameが実在する場合、そのアクセスパスを返す
+  def save_file_path(file_name)
+    SaveData::save_file_path(file_name, dir_index)
   end
 end
 
@@ -225,7 +225,7 @@ if $0 === __FILE__
   puts "LOGIN_FILE: #{SaveData::LOGIN_FILE}"
   puts "PLAY_ROOM_INFO: #{SaveData::PLAY_ROOM_INFO}"
   puts "PLAY_ROOM_INFO_FILE: #{SaveData::PLAY_ROOM_INFO_FILE}"
-  puts "FILE_NAME_SET: #{SaveData::FILE_NAME_SET}"
+  puts "FILE_NAME_SET: #{SaveData::DATA_FILE_NAMES}"
 
   puts 'field call...'
   puts "save_files: #{save_data.save_files}"

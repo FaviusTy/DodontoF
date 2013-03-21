@@ -1,11 +1,17 @@
 # encoding:utf-8
 
-a = [1,2,3,4,5]
-b = a.dup
+class TestClass
+  include Enumerable
 
-b[3] = 6
+  def self.arr
+    @arr ||= [0,1,2,3]
+  end
 
-puts a
-puts b
+  def self.each
+    arr.each{ |i| yield(i) }
+  end
+end
+
+TestClass.collect{|i| i < 2}.each{|i| puts i }
 
 

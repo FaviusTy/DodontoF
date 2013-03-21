@@ -164,27 +164,24 @@ module ServerCommands
 
   def login_info
 
-    unique_id = params[:uniqueId]
-    unique_id ||= create_unique_id
+    unique_id = action_params[:uniqueId] || (Time.now.to_f * 1000).to_i.to_s(36)
 
-    all_login_count, login_user_count_list = all_login_count
-    write_all_login_info(all_login_count)
+    total_count, login_user_count_list = all_login_count
+    write_all_login_info(total_count)
 
-    card_infos = cards_info.collectCardTypeAndTypeName
-
-    result = {
+    {
         :loginMessage               => login_message,
-        :cardInfos                  => card_infos,
+        :cardInfos                  => cards_info.collectCardTypeAndTypeName,
         :isDiceBotOn                => Configure.is_dicebot,
         :uniqueId                   => unique_id,
         :refreshTimeout             => Configure.refresh_timeout,
         :refreshInterval            => refresh_interval,
         :isCommet                   => Configure.is_comet,
         :version                    => Configure.version,
-        :playRoomMaxNumber          => (Configure.save_data_max_count - 1),
+        :playRoomMaxNumber          => Configure.save_data_max_count - 1,
         :warning                    => login_warning,
         :playRoomGetRangeMax        => Configure.play_room_get_range_max,
-        :allLoginCount              => all_login_count.to_i,
+        :allLoginCount              => total_count.to_i,
         :limitLoginCount            => Configure.limit_login_count,
         :loginUserCountList         => login_user_count_list,
         :maxLoginCount              => Configure.about_max_login_count,
@@ -202,10 +199,6 @@ module ServerCommands
         :isNeedCreatePassword       => (not Configure.create_play_room_password.empty?),
         :defaultUserNames           => Configure.default_user_names,
     }
-
-    logging(result, 'result')
-    logging('getLoginInfo end')
-    result
   end
 
   def play_room_states
@@ -324,7 +317,7 @@ module ServerCommands
   def save
     is_add_playroom_info = true
     extension            = request_data('extension')
-    save_select_files(SaveData::FILE_NAME_SET.keys, extension, is_add_playroom_info)
+    save_select_files(SaveData::DATA_FILE_NAMES.keys, extension, is_add_playroom_info)
   end
 
   def save_map
@@ -811,7 +804,7 @@ module ServerCommands
 
   def remove_old_play_room
     all_range    = (0 .. Configure.save_data_max_count)
-    access_times = SaveData::save_data_last_access_times(SaveData::FILE_NAME_SET.values, all_range)
+    access_times = SaveData::save_data_last_access_times(SaveData::DATA_FILE_NAMES.values, all_range)
     remove_old_room_for_access_times(access_times)
   end
 

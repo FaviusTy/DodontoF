@@ -1646,7 +1646,7 @@ class DodontoFServer
       # next if( index >= 3 )
 
       count, game_type = info
-      famous_games << { :gameType => game_type, :count => count }
+      famous_games << { :game_type => game_type, :count => count }
     end
 
     logging('famousGames', famous_games)
@@ -1734,23 +1734,11 @@ class DodontoFServer
   end
 
   def game_command_infos
-    logging('getGameCommandInfos Begin')
-
-    if @savedir_info.dir_index == -1
-      logging('getGameCommandInfos room is -1, so END')
-
-      return []
-    end
+    return [] if @savedir_info.dir_index == -1
 
     require 'cgiDiceBot.rb'
-    bot = CgiDiceBot.new
-    dir = dicebot_extra_table_dir_name
-    logging(dir, 'dir')
-
-    command_infos = bot.getGameCommandInfos(dir, DodontoFServer::DICEBOT_TABLE_PREFIX)
-    logging(command_infos, 'getGameCommandInfos End commandInfos')
-
-    command_infos
+    bot = DiceBot.new
+    bot.getGameCommandInfos(dicebot_extra_table_dir_name, DICEBOT_TABLE_PREFIX)
   end
 
   def check_create_play_room_password(password)
@@ -3051,7 +3039,7 @@ class DodontoFServer
     logging(game_type, 'rollDice gameType')
 
     require 'cgiDiceBot.rb'
-    bot                  = CgiDiceBot.new
+    bot                  = DiceBot.new
     dir                  = dicebot_extra_table_dir_name
     result, rand_results = bot.roll(message, game_type, dir, DodontoFServer::DICEBOT_TABLE_PREFIX, is_need_result)
 
@@ -3060,7 +3048,7 @@ class DodontoFServer
 
     logging(result, 'rollDice result')
 
-    return result, bot.isSecret, rand_results
+    return result, bot.secret, rand_results
   end
 
   def dicebot_extra_table_dir_name

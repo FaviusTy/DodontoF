@@ -1,6 +1,6 @@
 #--*-coding:utf-8-*--
 
-class _Template < DiceBot
+class Template < DiceBot
   
   def initialize
     super
@@ -25,22 +25,22 @@ class _Template < DiceBot
     []
   end
   
-  def gameName
+  def game_title
     'ゲーム名'
   end
   
-  def gameType
-    "gameType"
+  def game_type
+    'gameType'
   end
   
-  def getHelpMessage
-    return <<MESSAGETEXT
+  def help_message
+    <<MESSAGETEXT
 ヘルプメッセージ
 MESSAGETEXT
   end
   
-  def changeText(string)
-    string
+  def changeText(text)
+    text
   end
   
   def dice_command(string, nick_e)

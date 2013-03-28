@@ -2,11 +2,11 @@
 
 $LOAD_PATH << File.dirname(__FILE__) + "/../src_bcdice/"
 
-require 'diceBot/DiceBot'
+require 'diceBot/diceBot'
 
 infos = []
 
-ignoreBotNames = ['DiceBot', 'DiceBotLoader', '_Template', 'test']
+ignoreBotNames = ['diceBot', 'DiceBotLoader', '_Template', 'test']
 
 botFiles = Dir.glob("./../src_bcdice/diceBot/*.rb")
 
@@ -27,7 +27,7 @@ def getInfo(info_and_fileName)
   return <<INFO_TEXT
   {
     'name' => '#{info[:name]}',
-    'gameType' => '#{info[:gameType]}',
+    'gameType' => '#{info[:game_type]}',
     'fileName' => '#{botName}',
     'prefixs' => [#{getPrefixsText(info)}],
     'info' => <<INFO_MESSAGE_TEXT
@@ -45,7 +45,7 @@ def getPrefixsText(info)
   return "'" + prefixs.join("','") + "'"
 end
 
-infos = infos.sort_by{|i| i.first[:gameType]}
+infos = infos.sort_by{|i| i.first[:game_type]}
 infoText = infos.collect{|i| getInfo(i)}
 
 targetFileName = 'diceBotInfos.rb'

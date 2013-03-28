@@ -412,28 +412,21 @@ module ServerCommands
   end
 
   def dicebot_infos
-    logging('getDiceBotInfos Begin')
-
     require 'diceBotInfos'
     dicebot_infos = DiceBotInfos.new.infos
 
     command_infos = game_command_infos
 
-    command_infos.each do |commandInfo|
-      logging(commandInfo, 'commandInfos.each commandInfos')
-      dicebot_prefix(dicebot_infos, commandInfo)
+    command_infos.each do |info|
+      dicebot_prefix(dicebot_infos, info)
     end
-
-    logging(dicebot_infos, 'getDiceBotInfos diceBotInfos')
 
     dicebot_infos
   end
 
   def bot_table_infos
     logging('getBotTableInfos Begin')
-    result = {
-        :resultText => 'OK',
-    }
+    result = { :resultText => 'OK',}
 
     dir                 = dicebot_extra_table_dir_name
     result[:tableInfos] = get_bot_table_infos_from_dir(dir)

@@ -7,8 +7,8 @@ class DiceBotInfos
 
     none_dicebot = {
     'name' => 'ダイスボット(指定無し)',
-    'gameType' => 'DiceBot',
-    'fileName' => 'DiceBot',
+    'gameType' => 'diceBot',
+    'fileName' => 'diceBot',
     'prefixs' => [
       '\d+D\d*', #加算ロール　(xDn)
       '\d+B\d+', #バラバラロール　(xBn)
@@ -919,14 +919,14 @@ INFO_MESSAGE_TEXT
 
   def infos
 
-    ignore_names = %w(DiceBot DiceBotLoader baseBot _Template test)
+    ignore_names = %w(diceBot DiceBotLoader baseBot _Template test)
     ignore_names += @infos.collect {|i| i['fileName']}
 
     @orders = Configure.dicebot_order.split("\n")
     exclude!
     sort!
 
-    require 'diceBot/DiceBot'
+    require 'diceBot/diceBot'
 
     src_files = Dir.glob('src_bcdice/diceBot/*.rb')
     bot_names = src_files.collect{|i| File.basename(i, '.rb').untaint}

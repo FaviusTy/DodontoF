@@ -22,6 +22,8 @@
 * Rack互換アプリケーションとして改修(SinatraないしはGrapeをコアフレームワークに採用することも検討に含める)
 
 # 履歴
+* 2013/03/22 dicebot機能のRack対応化
+    + DodontoF.rbにてSinatraアプリケーション化した関係上、src_bcdice以下のDiceBot機能をRack対応化する必要がある(正直、やるつもり全然無かったのでソース解析から始める...)
 * 2013/03/07 DodontoFServerのRack互換改修着手
     * ServerApplication本体を単体テスト駆動可能なようにここらでRack互換改修を行う
 * 2013/03/07 n_ostruct,configureを追加

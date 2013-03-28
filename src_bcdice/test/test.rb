@@ -57,7 +57,7 @@ class TestDiceBot
     message, gameType = getMessageAndGameTape
     
     require 'cgiDiceBot'
-    bot = CgiDiceBot.new
+    bot = DiceBot.new
     bot.setRandomValues(@rands)
     bot.setTest()
     result, randResults = bot.roll(message, gameType)

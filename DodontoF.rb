@@ -9,14 +9,15 @@ require 'logger'
 require 'rack-rewrite'
 require 'msgpack'
 require 'json'
+require 'diceBotInfos'
 require 'configure'
 require 'msgpack_params_parser'
 require 'server_commands'
 
+LOGGER = Logger.new('./log.txt')
+
 class DodontoF < Sinatra::Base
   include ServerCommands
-
-  LOG = Logger.new('./log.txt')
 
   TEST_RESPONSE = '「どどんとふ」の動作環境は正常に起動しています。'
 
@@ -34,7 +35,7 @@ class DodontoF < Sinatra::Base
 
   def execute_command
     current_command = COMMAND_REFERENCE[:"#{params[:cmd]}"] || ''
-    LOG.debug "execute: #{current_command}"
+    LOGGER.debug "execute: #{current_command}"
     return TEST_RESPONSE if current_command.empty?
 
     #TODO 最終的にはmethod_missing内部でThrowするように修正した方が良い
@@ -44,8 +45,12 @@ class DodontoF < Sinatra::Base
   end
 
   post '/cmd' do
-    LOG.info "request_params: #{params}"
+    LOGGER.info "request_params: #{params}"
     "#D@EM>##{execute_command.to_json}#<D@EM#"
+  end
+
+  post '/webif' do
+
   end
 end
 

@@ -967,7 +967,7 @@ package {
         
         public function getDiceBotName(gameType:String):String {
             if( gameType == "diceBot" ) {
-                gameType = "DiceBot";
+                gameType = "diceBot";
             }
             
             for each(var info:Object in diceBotInfos) {
